@@ -168,21 +168,36 @@ check_claude_code() {
 # Detect existing CARL installation
 check_existing_installation() {
     local carl_marker="$TARGET_DIR/.carl"
-    local claude_marker="$TARGET_DIR/.claude"
+    local carl_config="$TARGET_DIR/.carl/config/carl-settings.json"
+    local carl_hooks="$TARGET_DIR/.claude/hooks"
     
-    if [ -d "$carl_marker" ] || [ -d "$claude_marker" ]; then
+    # Only consider it a CARL installation if .carl directory exists OR Claude hooks directory with CARL hooks exists
+    local is_carl_installation=false
+    
+    if [ -d "$carl_marker" ]; then
+        is_carl_installation=true
+    elif [ -d "$carl_hooks" ] && ([ -f "$carl_hooks/session-start.sh" ] || [ -f "$carl_hooks/user-prompt-submit.sh" ]); then
+        is_carl_installation=true
+    fi
+    
+    if [ "$is_carl_installation" = true ]; then
         if [ "$FORCE_INSTALL" = false ]; then
             echo -e "${YELLOW}⚠️  CARL installation detected in target directory${NC}"
             echo "   Target: $TARGET_DIR"
             echo ""
             echo "Options:"
-            echo "  1. Use --force to reinstall"
+            echo "  1. Use --force to reinstall CARL"
             echo "  2. Choose a different directory"
-            echo "  3. Remove existing installation manually"
+            echo "  3. Remove existing CARL installation manually"
             exit 1
         else
             echo -e "${YELLOW}🔄 Force install requested - removing existing CARL files${NC}"
-            rm -rf "$carl_marker" "$claude_marker" 2>/dev/null || true
+            rm -rf "$carl_marker" 2>/dev/null || true
+            # Only remove CARL hooks, not the entire .claude directory
+            if [ -d "$carl_hooks" ]; then
+                rm -f "$carl_hooks/session-start.sh" "$carl_hooks/user-prompt-submit.sh" \
+                      "$carl_hooks/tool-call.sh" "$carl_hooks/session-end.sh" 2>/dev/null || true
+            fi
         fi
     fi
 }
@@ -252,28 +267,175 @@ configure_claude_hooks() {
         cat > "$settings_file" << 'EOF'
 {
   "hooks": {
-    "session-start": {
-      "command": ".claude/hooks/session-start.sh",
-      "description": "Load CARL context and initialize session tracking"
-    },
-    "user-prompt-submit": {
-      "command": ".claude/hooks/user-prompt-submit.sh",
-      "description": "Inject relevant CARL context into AI prompts"
-    },
-    "tool-call": {
-      "command": ".claude/hooks/tool-call.sh",
-      "description": "Track progress and update CARL files automatically"
-    },
-    "session-end": {
-      "command": ".claude/hooks/session-end.sh", 
-      "description": "Save session state and generate development summaries"
-    }
+    "Notification": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/session-start.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/session-end.sh"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/user-prompt-submit.sh"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/tool-call.sh pre"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/tool-call.sh post"
+          }
+        ]
+      }
+    ]
   }
 }
 EOF
         echo "   ✅ Created Claude Code settings.json"
     else
-        echo "   ℹ️  settings.json already exists - manual hook configuration may be needed"
+        echo "   🔧 Merging CARL hooks with existing settings.json..."
+        merge_carl_hooks_to_settings "$settings_file"
+    fi
+}
+
+# Merge CARL hooks into existing settings.json
+merge_carl_hooks_to_settings() {
+    local settings_file="$1"
+    local temp_file="$(mktemp)"
+    local backup_file="${settings_file}.backup.$(date +%Y%m%d_%H%M%S)"
+    
+    # Create backup of existing settings
+    cp "$settings_file" "$backup_file"
+    echo "   📋 Backup created: $(basename "$backup_file")"
+    
+    # Use Python to merge JSON (more reliable than jq for complex merging)
+    python3 << EOF > "$temp_file"
+import json
+import sys
+
+# CARL hooks to add/update
+carl_hooks = {
+    "Notification": [{
+        "matcher": ".*",
+        "hooks": [{
+            "type": "command",
+            "command": "bash .claude/hooks/session-start.sh"
+        }]
+    }],
+    "Stop": [{
+        "matcher": ".*",
+        "hooks": [{
+            "type": "command",
+            "command": "bash .claude/hooks/session-end.sh"
+        }]
+    }],
+    "UserPromptSubmit": [{
+        "matcher": ".*",
+        "hooks": [{
+            "type": "command",
+            "command": "bash .claude/hooks/user-prompt-submit.sh"
+        }]
+    }],
+    "PreToolUse": [{
+        "matcher": ".*",
+        "hooks": [{
+            "type": "command",
+            "command": "bash .claude/hooks/tool-call.sh pre"
+        }]
+    }],
+    "PostToolUse": [{
+        "matcher": ".*",
+        "hooks": [{
+            "type": "command",
+            "command": "bash .claude/hooks/tool-call.sh post"
+        }]
+    }]
+}
+
+try:
+    # Load existing settings
+    with open('$settings_file', 'r') as f:
+        settings = json.load(f)
+    
+    # Ensure hooks section exists
+    if 'hooks' not in settings:
+        settings['hooks'] = {}
+    
+    # Merge CARL hooks, preserving existing non-CARL hooks
+    for hook_type, hook_config in carl_hooks.items():
+        # Check if this hook type already has CARL hooks
+        existing_hooks = settings['hooks'].get(hook_type, [])
+        
+        # Remove any existing CARL hooks to avoid duplicates
+        filtered_hooks = []
+        for hook_entry in existing_hooks:
+            if isinstance(hook_entry, dict) and 'hooks' in hook_entry:
+                non_carl_hooks = []
+                for hook in hook_entry['hooks']:
+                    if isinstance(hook, dict) and 'command' in hook:
+                        if not hook['command'].startswith('bash .claude/hooks/'):
+                            non_carl_hooks.append(hook)
+                if non_carl_hooks:
+                    hook_entry['hooks'] = non_carl_hooks
+                    filtered_hooks.append(hook_entry)
+            else:
+                filtered_hooks.append(hook_entry)
+        
+        # Add CARL hooks
+        settings['hooks'][hook_type] = filtered_hooks + hook_config
+    
+    # Output merged settings
+    print(json.dumps(settings, indent=2))
+    
+except Exception as e:
+    print(f'Error merging settings: {e}', file=sys.stderr)
+    sys.exit(1)
+EOF
+    
+    # Check if Python merge was successful
+    if [ $? -eq 0 ] && [ -s "$temp_file" ]; then
+        mv "$temp_file" "$settings_file"
+        echo "   ✅ CARL hooks merged successfully"
+        echo "   📝 Original settings preserved with backup"
+    else
+        echo "   ⚠️  Merge failed - using Python fallback is not available"
+        echo "   📝 Please manually add CARL hooks to your settings.json"
+        echo "   💡 See installation guide for hook configuration"
+        rm -f "$temp_file"
     fi
 }
 
@@ -285,7 +447,7 @@ initialize_carl_config() {
     
     cat > "$config_file" << EOF
 {
-  "carl_version": "1.0.0",
+  "carl_version": "1.0.1",
   "installation_date": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
   "project_path": "$TARGET_DIR",
   "global_install": $GLOBAL_INSTALL,
