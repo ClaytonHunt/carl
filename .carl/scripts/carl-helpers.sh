@@ -100,6 +100,83 @@ carl_get_targeted_context() {
     echo -e "$context"
 }
 
+# Strategic context extraction functions
+carl_extract_mission_essence() {
+    local mission_file="$1"
+    
+    if [ ! -f "$mission_file" ]; then
+        return 0
+    fi
+    
+    # Extract only the core mission elements (not full template)
+    {
+        grep -A 2 "elevator_pitch:" "$mission_file" 2>/dev/null | grep -v "^--$"
+        grep -A 3 "current_priorities:" "$mission_file" 2>/dev/null | grep -v "^--$"
+        grep -A 2 "target_users:" "$mission_file" 2>/dev/null | grep -v "^--$"
+    } | head -15
+}
+
+carl_extract_roadmap_current_context() {
+    local roadmap_file="$1"
+    
+    if [ ! -f "$roadmap_file" ]; then
+        return 0
+    fi
+    
+    # Extract only current phase + immediate next steps
+    {
+        grep -A 10 "current_focus:" "$roadmap_file" 2>/dev/null | grep -v "^--$"
+        grep -A 5 "active_phase:" "$roadmap_file" 2>/dev/null | grep -v "^--$"
+        grep -A 3 "immediate_actions:" "$roadmap_file" 2>/dev/null | grep -v "^--$"
+    } | head -20
+}
+
+carl_extract_recent_strategic_decisions() {
+    local decisions_file="$1"
+    local count="${2:-3}"
+    
+    if [ ! -f "$decisions_file" ]; then
+        return 0
+    fi
+    
+    # Get only recent accepted decisions (not entire history)
+    grep -B 1 -A 8 "status: accepted" "$decisions_file" 2>/dev/null | grep -v "^--$" | tail -n $((count * 10))
+}
+
+carl_get_strategic_context() {
+    local prompt="$1"
+    local carl_root="$(carl_get_root)"
+    local context=""
+    
+    # Determine context depth needed based on prompt content
+    if echo "$prompt" | grep -qE "/plan|/analyze|major|strategic|roadmap|mission|decision"; then
+        # DEEP CONTEXT - for planning and analysis commands
+        context+="## Mission Context\n"
+        context+="$(carl_extract_mission_essence "$carl_root/.carl/mission.carl")\n\n"
+        
+        context+="## Current Roadmap Phase\n" 
+        context+="$(carl_extract_roadmap_current_context "$carl_root/.carl/roadmap.carl")\n\n"
+        
+        context+="## Recent Strategic Decisions\n"
+        context+="$(carl_extract_recent_strategic_decisions "$carl_root/.carl/decisions.carl" 5)\n\n"
+        
+    elif echo "$prompt" | grep -qE "feature|requirement|priority|epic|story"; then
+        # MEDIUM CONTEXT - for feature work
+        context+="## Current Focus\n"
+        context+="$(carl_extract_roadmap_current_context "$carl_root/.carl/roadmap.carl")\n\n"
+        
+        context+="## Mission Goals\n"
+        context+="$(grep -A 3 'success_criteria:' "$carl_root/.carl/mission.carl" 2>/dev/null)\n\n"
+        
+    else
+        # LIGHT CONTEXT - for general development
+        context+="## Current Priority\n"
+        context+="$(grep -A 5 'current_focus:' "$carl_root/.carl/roadmap.carl" 2>/dev/null)\n\n"
+    fi
+    
+    echo -e "$context"
+}
+
 # State management functions
 carl_update_state_from_changes() {
     local carl_root="$(carl_get_root)"

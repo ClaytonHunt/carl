@@ -30,13 +30,18 @@ fi
 
 # Determine if prompt needs CARL context
 CARL_CONTEXT=""
+STRATEGIC_CONTEXT=""
 
 # Always inject basic CARL context for commands and implementation tasks
 if echo "$PROMPT" | grep -qE "/task|/plan|/status|/analyze|implement|build|create|fix|refactor|optimize|test"; then
     CARL_CONTEXT=$(carl_get_active_context)
+    # Add strategic context for planning and analysis
+    STRATEGIC_CONTEXT=$(carl_get_strategic_context "$PROMPT")
 elif echo "$PROMPT" | grep -qiE "feature|user story|requirement|bug|issue|component|service|api|database"; then
     # Inject context for feature/technical discussions
     CARL_CONTEXT=$(carl_get_targeted_context "$PROMPT")
+    # Add strategic context for feature-related discussions
+    STRATEGIC_CONTEXT=$(carl_get_strategic_context "$PROMPT")
 fi
 
 # Check if Carl persona is enabled
@@ -65,7 +70,7 @@ You are currently in Carl Wheezer persona mode! Please respond as Carl Wheezer f
 fi
 
 # Inject CARL context if relevant
-if [ -n "$CARL_CONTEXT" ]; then
+if [ -n "$CARL_CONTEXT" ] || [ -n "$STRATEGIC_CONTEXT" ]; then
     cat << EOF
 $FINAL_PROMPT
 
@@ -73,6 +78,8 @@ $FINAL_PROMPT
 The following CARL (Context-Aware Requirements Language) context is automatically provided to help you understand the current project state, requirements, and implementation details:
 
 $CARL_CONTEXT
+
+$STRATEGIC_CONTEXT
 </carl-context>
 EOF
 else

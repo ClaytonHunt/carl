@@ -287,7 +287,7 @@ your-project/
 
 ```json
 {
-  "carl_version": "1.0.1",
+  "carl_version": "1.1.0",
   "audio_settings": {
     "audio_enabled": true,
     "quiet_mode": false,
@@ -315,22 +315,61 @@ your-project/
 ```json
 {
   "hooks": {
-    "session-start": {
-      "command": ".claude/hooks/session-start.sh",
-      "description": "Load CARL context and initialize session tracking"
-    },
-    "user-prompt-submit": {
-      "command": ".claude/hooks/user-prompt-submit.sh", 
-      "description": "Inject relevant CARL context into AI prompts"
-    },
-    "tool-call": {
-      "command": ".claude/hooks/tool-call.sh",
-      "description": "Track progress and update CARL files automatically"
-    },
-    "session-end": {
-      "command": ".claude/hooks/session-end.sh",
-      "description": "Save session state and generate development summaries"
-    }
+    "Notification": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/session-start.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/session-end.sh"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/user-prompt-submit.sh"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/tool-call.sh pre"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/tool-call.sh post"
+          }
+        ]
+      }
+    ]
   }
 }
 ```

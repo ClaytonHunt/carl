@@ -1,0 +1,89 @@
+# CARL Mission File Template
+# This template provides AI context about the overall product mission and goals
+
+project_id: {project_id}
+created_date: "{created_date}"
+last_updated: "{last_updated}"
+version: "1.0.0"
+
+# Core mission statement - the "why" of the project
+mission:
+  what: "{product_description}"
+  why: "{problem_solved}"
+  for_whom: [{target_users}]
+
+# Product positioning and unique value
+positioning:
+  elevator_pitch: "{one_sentence_value_proposition}"
+  key_differentiators:
+    - "{unique_differentiator_1}"
+    - "{unique_differentiator_2}"
+    - "{unique_differentiator_3}"
+  target_market: "{specific_market_segment}"
+
+# User categories for AI decision-making
+users:
+  primary:
+    - type: "{primary_user_type}"
+      description: "{user_description}"
+      pain_points: ["{pain_point_1}", "{pain_point_2}", "{pain_point_3}"]
+      success_criteria: ["{success_measure_1}", "{success_measure_2}"]
+    
+    - type: "{secondary_user_type}"
+      description: "{secondary_user_description}"
+      pain_points: ["{secondary_pain_1}", "{secondary_pain_2}"]
+      success_criteria: ["{secondary_success_1}", "{secondary_success_2}"]
+
+# Business goals for prioritization decisions
+goals:
+  business_objectives:
+    - objective: "{measurable_business_goal_1}"
+      metric: "{success_measurement_1}"
+      priority: "{high|medium|low}"
+    
+    - objective: "{measurable_business_goal_2}"
+      metric: "{success_measurement_2}"
+      priority: "{high|medium|low}"
+  
+  user_outcomes:
+    - outcome: "{desired_user_outcome_1}"
+      measurement: "{outcome_validation_method_1}"
+      timeline: "{achievement_timeframe_1}"
+    
+    - outcome: "{desired_user_outcome_2}"
+      measurement: "{outcome_validation_method_2}"
+      timeline: "{achievement_timeframe_2}"
+
+# Success metrics for AI to evaluate progress
+success_metrics:
+  quantitative:
+    - metric: "{quantitative_metric_1}"
+      target: "{numeric_target_1}"
+      current: "{current_status_1}"
+    
+    - metric: "{quantitative_metric_2}"
+      target: "{numeric_target_2}"
+      current: "{current_status_2}"
+  
+  qualitative:
+    - metric: "{qualitative_metric_1}"
+      target: "{desired_quality_outcome_1}"
+      validation: "{quality_assessment_method_1}"
+    
+    - metric: "{qualitative_metric_2}"
+      target: "{desired_quality_outcome_2}"
+      validation: "{quality_assessment_method_2}"
+
+# Context for AI decision-making
+ai_context:
+  decision_priorities: 
+    - "{priority_guideline_1}"
+    - "{priority_guideline_2}"
+    - "{priority_guideline_3}"
+  
+  trade_off_preferences: 
+    - "{trade_off_preference_1}"
+    - "{trade_off_preference_2}"
+    - "{trade_off_preference_3}"
+  
+  risk_tolerance: "{conservative|moderate|aggressive}"

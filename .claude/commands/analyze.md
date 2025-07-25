@@ -282,6 +282,155 @@ recommendations:
 3. Real-time data updates
 ```
 
+### 7. Strategic Context Generation
+
+#### Generate Mission File (mission.carl)
+Use the `mission.template` to create comprehensive product context:
+
+```yaml
+# Example: mission.carl
+project_id: "user_management_system"
+created_date: "2024-01-15"
+last_updated: "2024-01-15"
+
+mission:
+  what: "Streamline user onboarding and account management for SaaS applications"
+  why: "Reduce support tickets and improve user retention through self-service capabilities"
+  for_whom: ["saas_administrators", "end_users", "support_teams"]
+
+positioning:
+  elevator_pitch: "Self-service user management platform that reduces admin overhead by 70%"
+  key_differentiators:
+    - "Zero-configuration SSO integration"
+    - "Advanced role-based permissions"
+    - "Automated user lifecycle management"
+
+users:
+  primary:
+    - type: "saas_admin"
+      pain_points: ["manual_user_setup", "permission_management", "audit_compliance"]
+      success_criteria: ["reduced_setup_time", "automated_workflows"]
+
+goals:
+  business_objectives:
+    - objective: "Reduce user setup time by 70%"
+      metric: "average_onboarding_minutes"
+      priority: "high"
+```
+
+**Mission Generation Process:**
+1. **Extract Product Vision**: Analyze README files, documentation, and marketing content
+2. **Identify User Types**: Parse user roles from authentication systems and UI components
+3. **Map Business Goals**: Infer objectives from feature implementations and metrics tracking
+4. **Document Value Proposition**: Synthesize unique differentiators from competitive analysis
+
+#### Generate Roadmap File (roadmap.carl)
+Create strategic development phases based on current implementation state:
+
+```yaml
+# Example: roadmap.carl
+project_id: "user_management_system"
+created_date: "2024-01-15"
+
+strategy:
+  vision: "Complete user lifecycle management platform"
+  timeline: "18 months to full feature parity"
+  methodology: "Agile with bi-weekly releases"
+
+phases:
+  phase_0:
+    name: "Foundation Complete"
+    status: "completed"
+    completion_percentage: 100
+    deliverables:
+      - name: "User Authentication"
+        status: "completed"
+        business_value: "Secure access control established"
+      - name: "Basic Profile Management"
+        status: "completed"
+        business_value: "Self-service user updates"
+
+  phase_1:
+    name: "Advanced Features"
+    status: "in_progress"
+    completion_percentage: 60
+    deliverables:
+      - name: "Role-Based Permissions"
+        status: "in_progress"
+        priority: "critical"
+        business_value: "Granular access control"
+
+current_focus:
+  active_phase: "phase_1"
+  current_priorities:
+    - priority: "Complete permission system"
+      rationale: "Blocking enterprise customer requirements"
+      success_measure: "All user roles properly enforced"
+    - priority: "Mobile-responsive interface"
+      rationale: "60% of users access from mobile devices"
+```
+
+**Roadmap Generation Process:**
+1. **Phase Detection**: Analyze git history and completed features to identify natural development phases
+2. **Current State Mapping**: Assess in-progress work and recent commit patterns
+3. **Priority Inference**: Extract next priorities from TODO comments, issue trackers, and incomplete features
+4. **Business Value Assessment**: Connect technical features to user value based on usage patterns
+
+#### Generate Decisions File (decisions.carl)
+Document architectural and strategic decisions discovered in the codebase:
+
+```yaml
+# Example: decisions.carl
+project_id: "user_management_system"
+created_date: "2024-01-15"
+
+decisions:
+  dec_001:
+    id: "DEC-001"
+    date: "2024-01-10"
+    status: "accepted"
+    category: "technical"
+    title: "Chose JWT for session management"
+    
+    context:
+      situation: "Need secure, scalable authentication for API-first architecture"
+      constraints: ["stateless_requirement", "mobile_compatibility", "microservices_ready"]
+      
+    decision:
+      chosen_option: "JWT with refresh token rotation"
+      rationale: "Balances security with performance for distributed system"
+      
+    consequences:
+      positive_impacts:
+        - "Stateless authentication enables horizontal scaling"
+        - "Mobile apps can cache tokens for offline capability"
+        - "Microservices can validate tokens independently"
+      negative_impacts:
+        - "Token revocation requires additional complexity"
+        - "Larger payload size compared to session IDs"
+
+  dec_002:
+    id: "DEC-002"
+    date: "2024-01-12"
+    status: "accepted"
+    category: "technical"
+    title: "Selected PostgreSQL over NoSQL for user data"
+    
+    context:
+      situation: "User data requires ACID compliance and complex relationships"
+      constraints: ["data_consistency", "reporting_requirements", "team_expertise"]
+      
+    decision:
+      chosen_option: "PostgreSQL with JSON columns for flexible attributes"
+      rationale: "Strong consistency with flexibility for evolving user schemas"
+```
+
+**Decisions Generation Process:**
+1. **Technology Analysis**: Extract technology choices from package.json, dependencies, and configuration files
+2. **Architecture Pattern Detection**: Identify design patterns from code structure and organization
+3. **Historical Context**: Use git history to understand when major technical decisions were made
+4. **Trade-off Documentation**: Infer decision rationale from code comments and commit messages
+
 ## Success Criteria
 
 - [ ] Complete codebase feature inventory generated
@@ -290,7 +439,11 @@ recommendations:
 - [ ] Current implementation state captured
 - [ ] Technical debt and gaps identified
 - [ ] Next development priorities recommended
-- [ ] CARL index updated for AI consumption
+- [ ] **Strategic context files generated (mission.carl, roadmap.carl, decisions.carl)**
+- [ ] **Product vision and business goals documented**
+- [ ] **Development phases and priorities mapped**
+- [ ] **Architectural decisions captured and rationalized**
+- [ ] CARL index updated with strategic file references
 - [ ] Team synchronization gaps resolved
 
 ## Integration Points
