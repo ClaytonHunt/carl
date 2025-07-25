@@ -1,0 +1,249 @@
+# CARL Context File Template
+# This template is used to generate consistent .context files for system relationships and dependencies
+
+feature_id: {feature_id}
+context_type: {context_type}  # component, service, feature, system, integration
+last_updated: {update_timestamp}
+
+# Component relationships and dependencies
+relationships:
+  parent_components:
+    - component: "{parent_component_name}"
+      relationship: "{relationship_type}"  # contains, uses, extends, implements
+      file_path: "{component_file_path}"
+      coupling_strength: "{loose|medium|tight}"
+      data_flow: "{data_flow_description}"
+  
+  child_components:
+    - component: "{child_component_name}"
+      relationship: "{relationship_type}"
+      file_path: "{component_file_path}"
+      coupling_strength: "{loose|medium|tight}"
+      data_flow: "{data_flow_description}"
+  
+  peer_components:
+    - component: "{peer_component_name}"
+      relationship: "{relationship_type}"  # collaborates, communicates, shares_data
+      file_path: "{component_file_path}"
+      interaction_pattern: "{interaction_description}"
+      communication_method: "{method_or_protocol}"
+
+# Codebase integration points
+codebase_links:
+  source_files:
+    - file: "{source_file_path}"
+      type: "{file_type}"  # controller, model, view, service, utility
+      responsibility: "{file_responsibility}"
+      complexity: "{low|medium|high}"
+      last_modified: "{modification_date}"
+  
+  configuration_files:
+    - file: "{config_file_path}"
+      type: "{config_type}"  # database, api, environment, build
+      impact_scope: "{scope_description}"
+      modification_risk: "{low|medium|high}"
+  
+  test_files:
+    - file: "{test_file_path}"
+      test_type: "{unit|integration|e2e}"
+      coverage_scope: "{covered_functionality}"
+      test_quality: "{quality_assessment}"
+
+# System dependencies
+dependencies:
+  internal_dependencies:
+    - name: "{dependency_name}"
+      type: "{dependency_type}"  # module, service, library, component
+      location: "{dependency_path}"
+      version: "{dependency_version}"
+      relationship: "{relationship_description}"
+      criticality: "{critical|important|optional}"
+      failure_impact: "{impact_description}"
+  
+  external_dependencies:
+    - name: "{external_dependency_name}"
+      type: "{dependency_type}"  # api, service, database, library, tool
+      provider: "{provider_name}"
+      version: "{dependency_version}"
+      endpoint: "{connection_endpoint}"
+      authentication: "{auth_method}"
+      sla: "{service_level_agreement}"
+      fallback_strategy: "{fallback_approach}"
+
+# API and interface contracts
+api_contracts:
+  endpoints:
+    - path: "{api_endpoint_path}"
+      method: "{http_method}"
+      purpose: "{endpoint_purpose}"
+      request_schema: "{request_format}"
+      response_schema: "{response_format}"
+      authentication_required: {true|false}
+      rate_limits: "{rate_limit_specification}"
+      error_responses: [{error_response_list}]
+  
+  internal_interfaces:
+    - interface: "{interface_name}"
+      type: "{interface_type}"  # function, class, module, protocol
+      contract: "{interface_contract}"
+      implementation_files: [{implementing_files}]
+      stability: "{stable|evolving|deprecated}"
+
+# Data relationships
+data_contracts:
+  database_schema:
+    - table: "{table_name}"
+      purpose: "{table_purpose}"
+      relationships: [{table_relationships}]
+      indexes: [{index_definitions}]
+      constraints: [{constraint_definitions}]
+      data_volume: "{estimated_row_count}"
+  
+  data_flows:
+    - flow: "{data_flow_name}"
+      source: "{data_source}"
+      destination: "{data_destination}"
+      transformation: "{transformation_logic}"
+      frequency: "{flow_frequency}"
+      data_volume: "{data_volume_estimate}"
+      validation_rules: [{validation_rules}]
+
+# Integration patterns
+integration_points:
+  inbound_integrations:
+    - name: "{integration_name}"
+      type: "{integration_type}"  # api, webhook, message_queue, file_transfer
+      source: "{integration_source}"
+      protocol: "{communication_protocol}"
+      data_format: "{data_format}"
+      frequency: "{integration_frequency}"
+      error_handling: "{error_handling_strategy}"
+  
+  outbound_integrations:
+    - name: "{integration_name}"
+      type: "{integration_type}"
+      destination: "{integration_destination}"
+      protocol: "{communication_protocol}"
+      data_format: "{data_format}"
+      frequency: "{integration_frequency}"
+      retry_strategy: "{retry_logic}"
+
+# Security and compliance context
+security_context:
+  authentication_requirements:
+    - requirement: "{authentication_requirement}"
+      implementation: "{auth_implementation}"
+      scope: "{auth_scope}"
+      strength: "{auth_strength}"
+  
+  authorization_model:
+    - resource: "{protected_resource}"
+      access_control: "{access_control_method}"
+      roles: [{authorized_roles}]
+      permissions: [{required_permissions}]
+  
+  data_protection:
+    - data_type: "{sensitive_data_type}"
+      protection_method: "{protection_approach}"
+      encryption: "{encryption_details}"
+      access_logging: {true|false}
+      retention_policy: "{retention_requirements}"
+
+# Performance characteristics
+performance_context:
+  response_time_requirements:
+    - operation: "{operation_name}"
+      target_response_time: "{time_requirement}"
+      current_performance: "{actual_performance}"
+      bottlenecks: [{performance_bottlenecks}]
+  
+  scalability_requirements:
+    - dimension: "{scalability_dimension}"  # users, data, requests, resources
+      current_capacity: "{current_limit}"
+      target_capacity: "{target_limit}"
+      scaling_strategy: "{scaling_approach}"
+  
+  resource_requirements:
+    - resource: "{resource_type}"  # cpu, memory, disk, network
+      current_usage: "{current_consumption}"
+      peak_usage: "{peak_consumption}"
+      optimization_opportunities: [{optimization_ideas}]
+
+# Cross-cutting concerns
+cross_cutting_concerns:
+  logging:
+    - component: "{component_name}"
+      log_level: "{log_level}"
+      log_destination: "{log_destination}"
+      structured_logging: {true|false}
+      sensitive_data_handling: "{handling_approach}"
+  
+  monitoring:
+    - metric: "{metric_name}"
+      metric_type: "{metric_type}"  # counter, gauge, histogram, timer
+      collection_method: "{collection_approach}"
+      alerting_thresholds: [{threshold_definitions}]
+  
+  error_handling:
+    - error_type: "{error_category}"
+      handling_strategy: "{error_handling_approach}"
+      recovery_method: "{recovery_strategy}"
+      user_impact: "{impact_description}"
+
+# Development workflow context
+development_context:
+  build_dependencies:
+    - dependency: "{build_dependency}"
+      version: "{dependency_version}"
+      purpose: "{build_purpose}"
+      installation_method: "{install_approach}"
+  
+  deployment_requirements:
+    - requirement: "{deployment_requirement}"
+      environment: "{target_environment}"
+      configuration: "{config_requirements}"
+      verification: "{verification_method}"
+  
+  testing_dependencies:
+    - dependency: "{test_dependency}"
+      scope: "{test_scope}"
+      setup_requirements: "{setup_needs}"
+      teardown_requirements: "{cleanup_needs}"
+
+# Documentation and knowledge
+documentation_links:
+  technical_documentation:
+    - document: "{document_name}"
+      location: "{document_path}"
+      purpose: "{documentation_purpose}"
+      maintenance_status: "{current|outdated|deprecated}"
+  
+  architectural_decisions:
+    - decision: "{decision_topic}"
+      rationale: "{decision_rationale}"
+      alternatives_considered: [{alternative_options}]
+      impact: "{decision_impact}"
+      decision_date: "{decision_timestamp}"
+
+# Change impact analysis
+change_impact:
+  upstream_dependencies:
+    - component: "{upstream_component}"
+      impact_type: "{impact_category}"
+      risk_level: "{high|medium|low}"
+      mitigation: "{mitigation_strategy}"
+  
+  downstream_dependencies:
+    - component: "{downstream_component}"
+      impact_type: "{impact_category}"
+      risk_level: "{high|medium|low}"
+      testing_requirements: "{test_requirements}"
+
+# Metadata and versioning
+metadata:
+  context_version: {context_file_version}
+  schema_version: {template_schema_version}
+  generated_by: "{analysis_source}"
+  validation_status: "{validated|needs_review|outdated}"
+  next_review_date: "{review_date}"
+  responsible_team: "{owning_team}"
