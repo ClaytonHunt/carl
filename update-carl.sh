@@ -333,6 +333,7 @@ main() {
     local target_dir
     target_dir=$(carl_resolve_target_directory "$target") || exit 1
     
+    log_info "Running CARL update from local directory..."
     log_info "Updating CARL installation at: $target_dir"
     
     # Check if update is needed
@@ -353,13 +354,38 @@ main() {
     
     # Run install script to temp directory to get latest files
     if [ -f "$script_dir/install.sh" ]; then
-        bash "$script_dir/install.sh" "$temp_source" >/dev/null 2>&1 || {
-            log_error "Failed to prepare update source"
+        # Clear any existing environment variables that might interfere
+        unset TARGET_DIR GLOBAL_INSTALL FORCE_INSTALL SKIP_AUDIO_TEST UPDATE_MODE
+        
+        # Run install with explicit arguments and capture detailed error output
+        local install_error_log=$(mktemp)
+        if ! bash "$script_dir/install.sh" --skip-audio-test --force "$temp_source" 2>"$install_error_log"; then
+            log_error "Failed to prepare update source. Install script error:"
+            
+            # Show the actual error for debugging
+            if [ -s "$install_error_log" ]; then
+                while IFS= read -r line; do
+                    log_error "  $line"
+                done < "$install_error_log"
+            fi
+            
+            rm -rf "$temp_source" "$install_error_log"
+            exit 1
+        fi
+        rm -f "$install_error_log"
+        
+        # Verify that the installation succeeded and has expected structure
+        if [ ! -d "$temp_source/.carl" ] || [ ! -f "$temp_source/.carl/config/carl-settings.json" ]; then
+            log_error "Update source preparation incomplete - missing CARL structure"
+            log_info "Expected: $temp_source/.carl/config/carl-settings.json"
             rm -rf "$temp_source"
             exit 1
-        }
+        fi
+        
+        log_success "Update source prepared successfully"
     else
         log_error "install.sh not found. This script must be run from a CARL repository"
+        log_info "Expected location: $script_dir/install.sh"
         rm -rf "$temp_source"
         exit 1
     fi
