@@ -49,6 +49,9 @@ parse_arguments() {
     GLOBAL_INSTALL=false
     FORCE_INSTALL=false
     SKIP_AUDIO_TEST=false
+    UPDATE_MODE=false
+    BACKUP_ENABLED=true
+    MAX_BACKUPS=2
     
     while [[ $# -gt 0 ]]; do
         case $1 in
@@ -64,6 +67,18 @@ parse_arguments() {
             --skip-audio-test)
                 SKIP_AUDIO_TEST=true
                 shift
+                ;;
+            --update)
+                UPDATE_MODE=true
+                shift
+                ;;
+            --no-backup)
+                BACKUP_ENABLED=false
+                shift
+                ;;
+            --target)
+                TARGET_DIR="$2"
+                shift 2
                 ;;
             --help|-h)
                 show_help
@@ -199,6 +214,171 @@ check_existing_installation() {
                       "$carl_hooks/tool-call.sh" "$carl_hooks/session-end.sh" 2>/dev/null || true
             fi
         fi
+    fi
+}
+
+# FIFO Backup Management Functions
+manage_backup_retention() {
+    local target_dir="$1"
+    local max_backups="${2:-2}"
+    
+    cd "$target_dir" || return 1
+    
+    # Get all backup directories sorted by date (oldest first)
+    local backups=($(ls -1dt .carl-backup-* 2>/dev/null | tac))
+    local backup_count=${#backups[@]}
+    
+    if [ $backup_count -gt 0 ]; then
+        echo "📊 Found $backup_count existing backups (limit: $max_backups)"
+    fi
+    
+    # If we have max or more backups, remove oldest to make room for new one
+    if [ $backup_count -ge $max_backups ]; then
+        local excess=$((backup_count - max_backups + 1))
+        
+        for ((i=0; i<excess; i++)); do
+            if [ -d "${backups[i]}" ]; then
+                local size=$(du -sh "${backups[i]}" 2>/dev/null | cut -f1 || echo "unknown")
+                echo "🗑️ Removing old backup: ${backups[i]} ($size)"
+                rm -rf "${backups[i]}"
+            fi
+        done
+    fi
+}
+
+create_update_backup() {
+    local target_dir="$1"
+    local max_backups="${2:-2}"
+    
+    if [ "$BACKUP_ENABLED" != "true" ]; then
+        echo "⚠️ Backup creation disabled"
+        return 0
+    fi
+    
+    cd "$target_dir" || return 1
+    
+    # Clean up old backups first
+    manage_backup_retention "$target_dir" "$max_backups"
+    
+    # Create new backup
+    local backup_dir=".carl-backup-$(date +%Y%m%d-%H%M%S)"
+    echo "📦 Creating backup: $backup_dir"
+    
+    mkdir -p "$backup_dir"
+    
+    # Copy CARL and Claude directories if they exist
+    if [ -d ".carl" ]; then
+        cp -r ".carl" "$backup_dir/"
+    fi
+    if [ -d ".claude" ]; then
+        cp -r ".claude" "$backup_dir/"
+    fi
+    
+    # Get current version for metadata
+    local current_version="unknown"
+    if [ -f ".carl/config/carl-settings.json" ]; then
+        current_version=$(grep '"carl_version"' ".carl/config/carl-settings.json" | cut -d'"' -f4 2>/dev/null || echo "unknown")
+    fi
+    
+    # Save backup metadata
+    local backup_size=$(du -sm "$backup_dir" 2>/dev/null | cut -f1 || echo "0")
+    
+    cat > "$backup_dir/backup-info.json" << EOF
+{
+  "created": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+  "target_directory": "$target_dir",
+  "from_version": "$current_version",
+  "size_mb": $backup_size,
+  "backup_type": "pre_update"
+}
+EOF
+    
+    echo "✅ Backup created: $backup_dir (${backup_size}MB)"
+}
+
+# Version detection and migration logic
+detect_current_version() {
+    local target_dir="$1"
+    
+    if [ -f "$target_dir/.carl/config/carl-settings.json" ]; then
+        grep '"carl_version"' "$target_dir/.carl/config/carl-settings.json" | cut -d'"' -f4 2>/dev/null || echo "unknown"
+    else
+        echo "unknown"
+    fi
+}
+
+apply_version_migrations() {
+    local target_dir="$1"
+    local current_version="$2"
+    local target_version="$3"
+    
+    echo "🔧 Applying version migrations: $current_version → $target_version"
+    
+    case "$current_version" in
+        "1.0.0")
+            echo "   ⬆️ Migrating from v1.0.0 to v1.0.1..."
+            migrate_settings_json_format "$target_dir"
+            echo "   ⬆️ Migrating from v1.0.1 to v1.1.0..."
+            migrate_strategic_context_integration "$target_dir"
+            ;;
+        "1.0.1")
+            echo "   ⬆️ Migrating from v1.0.1 to v1.1.0..."
+            migrate_strategic_context_integration "$target_dir"
+            ;;
+        "unknown")
+            echo "   ⬆️ Unknown version - applying full migration..."
+            migrate_settings_json_format "$target_dir"
+            migrate_strategic_context_integration "$target_dir"
+            ;;
+        *)
+            echo "   ✅ Version $current_version - standard file updates"
+            ;;
+    esac
+}
+
+migrate_settings_json_format() {
+    local target_dir="$1"
+    local settings_file="$target_dir/.claude/settings.json"
+    
+    if [ -f "$settings_file" ]; then
+        echo "      🔄 Updating Claude Code hooks format..."
+        # The merge function will handle format conversion
+        # This is handled by the existing configure_claude_hooks function
+    fi
+}
+
+migrate_strategic_context_integration() {
+    local target_dir="$1"
+    
+    echo "      📝 Adding strategic context templates..."
+    
+    # Add strategic templates if missing
+    local templates=("mission.template" "roadmap.template" "decisions.template")
+    for template in "${templates[@]}"; do
+        if [ ! -f "$target_dir/.carl/templates/$template" ]; then
+            if [ -f "$SCRIPT_DIR/.carl/templates/$template" ]; then
+                cp "$SCRIPT_DIR/.carl/templates/$template" "$target_dir/.carl/templates/"
+                echo "         ✅ Added $template"
+            fi
+        fi
+    done
+    
+    # Update carl-helpers.sh with strategic context functions if missing
+    if [ -f "$target_dir/.carl/scripts/carl-helpers.sh" ] && ! grep -q "carl_get_strategic_context" "$target_dir/.carl/scripts/carl-helpers.sh"; then
+        echo "      🔧 Adding strategic context functions to carl-helpers.sh..."
+        # Copy the enhanced version
+        if [ -f "$SCRIPT_DIR/.carl/scripts/carl-helpers.sh" ]; then
+            cp "$SCRIPT_DIR/.carl/scripts/carl-helpers.sh" "$target_dir/.carl/scripts/carl-helpers.sh"
+            echo "         ✅ Updated carl-helpers.sh with strategic context support"
+        fi
+    fi
+    
+    # Update index.carl to reference strategic files if missing
+    if [ -f "$target_dir/.carl/index.carl" ] && ! grep -q "strategic_files:" "$target_dir/.carl/index.carl"; then
+        echo "      📋 Updating index.carl with strategic file references..."
+        # Insert strategic files section after project_status line
+        sed -i '/^project_status:/a\\n# Strategic context files (generated by /analyze)\nstrategic_files:\n  mission: .carl/mission.carl\n  roadmap: .carl/roadmap.carl\n  decisions: .carl/decisions.carl\n' "$target_dir/.carl/index.carl"
+        echo "         ✅ Updated index.carl with strategic file references"
     fi
 }
 
@@ -456,7 +636,7 @@ initialize_carl_config() {
     
     cat > "$config_file" << EOF
 {
-  "carl_version": "1.1.0",
+  "carl_version": "1.2.0",
   "installation_date": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
   "project_path": "$TARGET_DIR",
   "global_install": $GLOBAL_INSTALL,
@@ -706,30 +886,69 @@ handle_error() {
 
 # Main installation function
 main() {
-    # Show banner
-    show_carl_banner
-    
-    # Parse arguments
+    # Parse arguments first
     parse_arguments "$@"
     
-    echo -e "${CYAN}🎯 Installing CARL to: ${NC}$TARGET_DIR"
-    echo -e "${CYAN}🌍 Global install: ${NC}$GLOBAL_INSTALL"
-    echo ""
-    
-    # Installation steps with error handling
-    check_requirements || handle_error "requirements check"
-    check_claude_code || true  # Non-fatal
-    check_existing_installation || handle_error "existing installation check"
-    create_directory_structure || handle_error "directory creation"
-    copy_carl_files || handle_error "file copying"
-    configure_claude_hooks || handle_error "Claude Code hook configuration"
-    initialize_carl_config || handle_error "CARL configuration"
-    create_example_files || handle_error "example file creation"
-    test_audio_system || true  # Non-fatal
-    post_installation_setup || handle_error "post-installation setup"
-    
-    # Show success summary
-    show_installation_summary
+    if [ "$UPDATE_MODE" = true ]; then
+        # Update mode - different workflow
+        echo -e "${CYAN}🔄 CARL Update Mode${NC}"
+        echo -e "${CYAN}🎯 Target directory: ${NC}$TARGET_DIR"
+        echo ""
+        
+        # Update workflow
+        check_requirements || handle_error "requirements check"
+        
+        # Detect current version
+        local current_version=$(detect_current_version "$TARGET_DIR")
+        local target_version="1.2.0"  # Current version in this script
+        
+        echo "📊 Current CARL version: $current_version"
+        echo "📊 Target CARL version: $target_version"
+        echo ""
+        
+        if [ "$current_version" = "$target_version" ] && [ "$FORCE_INSTALL" != true ]; then
+            echo -e "${GREEN}✅ CARL is already up to date ($current_version)${NC}"
+            exit 0
+        fi
+        
+        # Create backup before update
+        create_update_backup "$TARGET_DIR" "$MAX_BACKUPS" || handle_error "backup creation"
+        
+        # Apply migrations based on version difference
+        apply_version_migrations "$TARGET_DIR" "$current_version" "$target_version"
+        
+        # Update files (same as install but preserve user data)
+        copy_carl_files || handle_error "file updating"
+        configure_claude_hooks || handle_error "Claude Code hook configuration"
+        initialize_carl_config || handle_error "CARL configuration update"
+        
+        echo ""
+        echo -e "${GREEN}✅ CARL updated successfully from $current_version to $target_version${NC}"
+        echo -e "${CYAN}📦 Backup available at: ${NC}$(ls -1dt "$TARGET_DIR"/.carl-backup-* 2>/dev/null | head -1 || echo "none")"
+        
+    else
+        # Normal installation mode
+        show_carl_banner
+        
+        echo -e "${CYAN}🎯 Installing CARL to: ${NC}$TARGET_DIR"
+        echo -e "${CYAN}🌍 Global install: ${NC}$GLOBAL_INSTALL"
+        echo ""
+        
+        # Installation steps with error handling
+        check_requirements || handle_error "requirements check"
+        check_claude_code || true  # Non-fatal
+        check_existing_installation || handle_error "existing installation check"
+        create_directory_structure || handle_error "directory creation"
+        copy_carl_files || handle_error "file copying"
+        configure_claude_hooks || handle_error "Claude Code hook configuration"
+        initialize_carl_config || handle_error "CARL configuration"
+        create_example_files || handle_error "example file creation"
+        test_audio_system || true  # Non-fatal
+        post_installation_setup || handle_error "post-installation setup"
+        
+        # Show success summary
+        show_installation_summary
+    fi
 }
 
 # Run main installation

@@ -287,7 +287,7 @@ your-project/
 
 ```json
 {
-  "carl_version": "1.1.0",
+  "carl_version": "1.2.0",
   "audio_settings": {
     "audio_enabled": true,
     "quiet_mode": false,
