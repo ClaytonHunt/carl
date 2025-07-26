@@ -145,74 +145,245 @@ task_context:
 
 ### 4. TDD Implementation with CARL Guidance
 
-**CARL-Enhanced Test-Driven Development:**
-```javascript
-// CARL provides test requirements from intent files and quality standards
-describe('Password Reset Implementation (CARL-guided)', () => {
-  // CARL context: Requirements from password-reset.intent
-  describe('Security Requirements (from CARL intent)', () => {
-    it('should generate secure reset tokens with 15-minute expiration', async () => {
-      // CARL provides: Token expiration requirement from intent file
-      const resetRequest = await requestPasswordReset('user@example.com');
-      
-      expect(resetRequest.token).toBeDefined();
-      expect(resetRequest.expiresAt).toBeCloseTo(Date.now() + (15 * 60 * 1000), 1000);
-    });
+**CARL-Enhanced Test-Driven Development follows the Red-Green-Refactor cycle with intelligent context injection:**
 
-    it('should enforce rate limiting per CARL constraints', async () => {
-      // CARL provides: Rate limiting requirement (3 attempts per hour)
-      const email = 'test@example.com';
-      
-      // First 3 requests should succeed
-      for (let i = 0; i < 3; i++) {
-        const result = await requestPasswordReset(email);
-        expect(result.success).toBe(true);
-      }
-      
-      // Fourth request should be rate limited
-      const rateLimitedResult = await requestPasswordReset(email);
-      expect(rateLimitedResult.success).toBe(false);
-      expect(rateLimitedResult.error).toBe('Rate limit exceeded');
-    });
-  });
+#### TDD Cycle with CARL Context
+```pseudocode
+FUNCTION carl_enhanced_tdd_cycle(feature_requirements, carl_context):
+    // CARL loads requirements, constraints, and patterns automatically
+    test_requirements = extract_test_requirements_from_carl(carl_context)
+    quality_standards = load_quality_standards_from_carl(carl_context)
+    integration_patterns = load_integration_patterns_from_carl(carl_context)
+    
+    FOR EACH requirement IN feature_requirements DO
+        // RED PHASE: Write failing test informed by CARL context
+        failing_test = write_failing_test_with_carl_guidance(
+            requirement, 
+            test_requirements,
+            quality_standards,
+            integration_patterns
+        )
+        
+        ASSERT test_fails(failing_test) == TRUE
+        log_tdd_phase("RED", failing_test.description)
+        
+        // GREEN PHASE: Write minimal code to pass test
+        minimal_implementation = write_minimal_passing_code(
+            failing_test,
+            carl_context.existing_patterns,
+            carl_context.integration_points
+        )
+        
+        ASSERT test_passes(failing_test) == TRUE  
+        log_tdd_phase("GREEN", minimal_implementation.description)
+        
+        // REFACTOR PHASE: Improve code quality using CARL standards
+        refactored_code = refactor_with_carl_standards(
+            minimal_implementation,
+            carl_context.quality_standards,
+            carl_context.architectural_patterns,
+            carl_context.technical_debt_guidelines
+        )
+        
+        ASSERT all_tests_still_pass() == TRUE
+        log_tdd_phase("REFACTOR", refactored_code.improvements)
+        
+        // Update CARL state with implementation progress
+        update_carl_state_with_tdd_progress(requirement, refactored_code)
+    END FOR
+    
+    RETURN completed_feature_with_full_test_coverage
+END FUNCTION
+```
 
-  // CARL context: Integration requirements from context files
-  describe('Email Integration (from CARL context)', () => {
-    it('should send password reset email using existing EmailService', async () => {
-      // CARL provides: EmailService integration pattern
-      const mockEmailService = createMockEmailService();
-      const passwordResetService = new PasswordResetService(mockEmailService);
-      
-      await passwordResetService.sendResetEmail('user@example.com');
-      
-      expect(mockEmailService.sendTransactionalEmail).toHaveBeenCalledWith({
-        template: 'password_reset_email',
-        to: 'user@example.com',
-        variables: expect.objectContaining({
-          resetToken: expect.any(String),
-          expirationTime: expect.any(String)
-        })
-      });
-    });
-  });
+#### Red-Green-Refactor Implementation Example
 
-  // CARL context: Performance requirements from intent files
-  describe('Performance Requirements (from CARL intent)', () => {
-    it('should complete password reset within 30 seconds', async () => {
-      // CARL provides: Performance requirement from success criteria
-      const startTime = Date.now();
-      
-      const result = await completePasswordReset({
-        token: 'valid-reset-token',
-        newPassword: 'SecureNewPassword123!'
-      });
-      
-      const duration = Date.now() - startTime;
-      expect(duration).toBeLessThan(30000);
-      expect(result.success).toBe(true);
-    });
-  });
-});
+**RED Phase: Write Failing Test with CARL Context**
+```pseudocode
+FUNCTION write_failing_test_with_carl_guidance(requirement, carl_context):
+    // CARL provides test structure based on intent files and quality standards
+    test_spec = {
+        description: requirement.user_story_description,
+        
+        // CARL injects security constraints from intent files
+        security_requirements: carl_context.security_constraints,
+        
+        // CARL provides performance criteria from success criteria
+        performance_requirements: carl_context.performance_criteria,
+        
+        // CARL supplies integration requirements from context files  
+        integration_requirements: carl_context.integration_points,
+        
+        // CARL defines expected behavior from business rules
+        expected_behavior: carl_context.business_logic_requirements
+    }
+    
+    // Generate failing test that covers all CARL requirements
+    failing_test = generate_comprehensive_test(test_spec)
+    
+    // Test should fail because implementation doesn't exist yet
+    ASSERT run_test(failing_test).status == "FAILED"
+    
+    RETURN failing_test
+END FUNCTION
+
+// Example RED phase output:
+test_password_reset_token_generation() {
+    // CARL context: Security requirement from password-reset.intent
+    // "Password reset tokens must expire after 15 minutes"
+    
+    // This test will FAIL because resetPasswordToken() doesn't exist yet
+    token = resetPasswordToken("user@example.com")
+    
+    ASSERT token.value != null                    // Basic functionality
+    ASSERT token.expiresAt == now() + 15_minutes  // CARL security requirement
+    ASSERT token.isSecurelyGenerated == true      // CARL security standard
+    ASSERT token.isOneTimeUse == true             // CARL business rule
+}
+```
+
+**GREEN Phase: Write Minimal Passing Code**
+```pseudocode
+FUNCTION write_minimal_passing_code(failing_test, carl_context):
+    // CARL provides integration patterns and existing component references
+    existing_components = carl_context.existing_components
+    integration_patterns = carl_context.integration_patterns
+    
+    // Write minimal implementation that makes test pass
+    minimal_code = {
+        // Use existing components identified by CARL
+        dependencies: existing_components.required_services,
+        
+        // Follow integration patterns from CARL context
+        integration_approach: integration_patterns.recommended,
+        
+        // Implement just enough to satisfy the failing test
+        core_logic: implement_minimal_logic_for_test(failing_test)
+    }
+    
+    // Verify test now passes
+    ASSERT run_test(failing_test).status == "PASSED"
+    
+    RETURN minimal_code
+END FUNCTION
+
+// Example GREEN phase implementation:
+FUNCTION resetPasswordToken(email) {
+    // Minimal implementation to make RED test pass
+    token = {
+        value: generateRandomString(32),           // Basic token generation
+        expiresAt: currentTime() + (15 * 60000),  // 15 minutes from now
+        isSecurelyGenerated: true,                // Placeholder - meets test
+        isOneTimeUse: true                        // Placeholder - meets test
+    }
+    
+    RETURN token  // Test passes, but code needs improvement
+}
+```
+
+**REFACTOR Phase: Improve with CARL Standards**
+```pseudocode
+FUNCTION refactor_with_carl_standards(minimal_code, carl_context):
+    quality_standards = carl_context.quality_standards
+    architectural_patterns = carl_context.architectural_patterns
+    security_patterns = carl_context.security_patterns
+    
+    refactored_code = minimal_code
+    
+    // Apply CARL quality standards
+    refactored_code = apply_security_patterns(refactored_code, security_patterns)
+    refactored_code = apply_architectural_patterns(refactored_code, architectural_patterns)
+    refactored_code = improve_error_handling(refactored_code, quality_standards)
+    refactored_code = add_logging_and_monitoring(refactored_code, quality_standards)
+    refactored_code = optimize_performance(refactored_code, quality_standards)
+    
+    // Verify all tests still pass after refactoring
+    ASSERT run_all_tests().status == "ALL_PASSED"
+    
+    // Verify code meets CARL quality gates
+    ASSERT meets_carl_quality_standards(refactored_code) == TRUE
+    
+    RETURN refactored_code
+END FUNCTION
+
+// Example REFACTOR phase improvements:
+FUNCTION resetPasswordToken(email) {
+    // Refactored implementation with CARL quality standards
+    
+    // CARL security pattern: Use cryptographically secure random generation
+    tokenValue = cryptoSecureRandom(32)  // Improved from basic random
+    
+    // CARL architectural pattern: Use dependency injection for services
+    tokenStorage = inject(TokenStorageService)
+    emailValidator = inject(EmailValidationService)
+    auditLogger = inject(AuditLoggingService)
+    
+    // CARL quality standard: Input validation and error handling
+    IF NOT emailValidator.isValid(email) THEN
+        auditLogger.logInvalidEmailAttempt(email)
+        THROW InvalidEmailException("Invalid email format")
+    END IF
+    
+    // CARL business rule: Check rate limiting before token generation
+    IF rateLimiter.isExceeded(email) THEN
+        auditLogger.logRateLimitExceeded(email)
+        THROW RateLimitException("Too many reset attempts")
+    END IF
+    
+    // Create token with proper security and business logic
+    token = {
+        value: tokenValue,
+        email: email,
+        expiresAt: currentTime() + (15 * 60000),
+        isUsed: false,
+        createdAt: currentTime()
+    }
+    
+    // CARL integration pattern: Store token using existing storage service
+    tokenStorage.store(token)
+    
+    // CARL monitoring standard: Log security events
+    auditLogger.logPasswordResetTokenGenerated(email, token.value)
+    
+    RETURN token
+}
+```
+
+#### CARL TDD Quality Gates
+```pseudocode
+FUNCTION validate_tdd_implementation_against_carl(implementation):
+    validation_results = {}
+    
+    // Verify Red-Green-Refactor cycle was followed
+    validation_results.tdd_cycle_complete = verify_red_green_refactor_cycle()
+    
+    // Validate test coverage meets CARL quality standards
+    coverage = calculate_test_coverage(implementation)
+    validation_results.coverage_meets_standards = coverage >= carl_context.minimum_coverage
+    
+    // Ensure integration tests validate CARL context requirements
+    integration_tests = extract_integration_tests(implementation)
+    validation_results.integration_requirements_tested = validate_integration_coverage(
+        integration_tests, 
+        carl_context.integration_points
+    )
+    
+    // Verify security requirements from CARL intent files are tested
+    security_tests = extract_security_tests(implementation)
+    validation_results.security_requirements_tested = validate_security_coverage(
+        security_tests,
+        carl_context.security_constraints
+    )
+    
+    // Confirm performance requirements from CARL success criteria are validated
+    performance_tests = extract_performance_tests(implementation)
+    validation_results.performance_requirements_tested = validate_performance_coverage(
+        performance_tests,
+        carl_context.performance_criteria
+    )
+    
+    RETURN validation_results
+END FUNCTION
 ```
 
 ### 5. Continuous CARL State Updates
