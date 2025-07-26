@@ -204,26 +204,26 @@ EOF
 }
 ```
 
-### 4. GitHub-Aware Update Download
+### 4. Intelligent Update with Data Preservation
 ```bash
-carl_download_and_apply_update() {
+carl_intelligent_update() {
     local target_dir="$1"
     local temp_dir=$(mktemp -d)
     
     echo "🔄 Downloading latest CARL from GitHub..."
     
-    # Download latest install script
-    local install_url="https://raw.githubusercontent.com/ClaytonHunt/carl/main/install.sh"
+    # Download latest update script  
+    local update_url="https://raw.githubusercontent.com/ClaytonHunt/carl/main/update-carl.sh"
     
     if command -v curl >/dev/null 2>&1; then
-        curl -s --max-time 30 "$install_url" > "$temp_dir/install.sh" || {
-            echo "❌ Failed to download update from GitHub"
+        curl -s --max-time 30 "$update_url" > "$temp_dir/update-carl.sh" || {
+            echo "❌ Failed to download update script from GitHub"
             rm -rf "$temp_dir"
             return 1
         }
     elif command -v wget >/dev/null 2>&1; then
-        wget -qO "$temp_dir/install.sh" --timeout=30 "$install_url" || {
-            echo "❌ Failed to download update from GitHub"
+        wget -qO "$temp_dir/update-carl.sh" --timeout=30 "$update_url" || {
+            echo "❌ Failed to download update script from GitHub"
             rm -rf "$temp_dir"
             return 1
         }
@@ -233,19 +233,37 @@ carl_download_and_apply_update() {
         return 1
     fi
     
-    # Make install script executable
+    # Download install script (needed by update script)
+    local install_url="https://raw.githubusercontent.com/ClaytonHunt/carl/main/install.sh"
+    
+    if command -v curl >/dev/null 2>&1; then
+        curl -s --max-time 30 "$install_url" > "$temp_dir/install.sh" || {
+            echo "❌ Failed to download install script from GitHub"
+            rm -rf "$temp_dir"
+            return 1
+        }
+    elif command -v wget >/dev/null 2>&1; then
+        wget -qO "$temp_dir/install.sh" --timeout=30 "$install_url" || {
+            echo "❌ Failed to download install script from GitHub"
+            rm -rf "$temp_dir"
+            return 1
+        }
+    fi
+    
+    # Make scripts executable
+    chmod +x "$temp_dir/update-carl.sh"
     chmod +x "$temp_dir/install.sh"
     
-    # Run install script in update mode
-    echo "🔧 Applying update to $target_dir..."
-    bash "$temp_dir/install.sh" --update --force --target "$target_dir" || {
+    # Run intelligent update
+    echo "🔧 Applying intelligent update to $target_dir..."
+    cd "$temp_dir" && ./update-carl.sh "$target_dir" || {
         echo "❌ Update failed"
         rm -rf "$temp_dir"
         return 1
     }
     
     rm -rf "$temp_dir"
-    echo "✅ Update completed successfully"
+    echo "✅ Update completed successfully with data preservation"
 }
 ```
 
