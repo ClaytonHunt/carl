@@ -478,7 +478,7 @@ configure_claude_hooks() {
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/session-start.sh"
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.sh"
           }
         ]
       }
@@ -489,7 +489,7 @@ configure_claude_hooks() {
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/session-end.sh"
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/session-end.sh"
           }
         ]
       }
@@ -500,7 +500,7 @@ configure_claude_hooks() {
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/user-prompt-submit.sh"
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/user-prompt-submit.sh"
           }
         ]
       }
@@ -511,7 +511,7 @@ configure_claude_hooks() {
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/tool-call.sh pre"
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/tool-call.sh pre"
           }
         ]
       }
@@ -522,7 +522,7 @@ configure_claude_hooks() {
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/tool-call.sh post"
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/tool-call.sh post"
           }
         ]
       }
@@ -567,35 +567,35 @@ carl_hooks = {
         "matcher": ".*",
         "hooks": [{
             "type": "command",
-            "command": "bash .claude/hooks/session-start.sh"
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.sh"
         }]
     }],
     "Stop": [{
         "matcher": ".*",
         "hooks": [{
             "type": "command",
-            "command": "bash .claude/hooks/session-end.sh"
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/session-end.sh"
         }]
     }],
     "UserPromptSubmit": [{
         "matcher": ".*",
         "hooks": [{
             "type": "command",
-            "command": "bash .claude/hooks/user-prompt-submit.sh"
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/user-prompt-submit.sh"
         }]
     }],
     "PreToolUse": [{
         "matcher": ".*",
         "hooks": [{
             "type": "command",
-            "command": "bash .claude/hooks/tool-call.sh pre"
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/tool-call.sh pre"
         }]
     }],
     "PostToolUse": [{
         "matcher": ".*",
         "hooks": [{
             "type": "command",
-            "command": "bash .claude/hooks/tool-call.sh post"
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/tool-call.sh post"
         }]
     }]
 }
