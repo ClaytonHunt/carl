@@ -43,6 +43,31 @@ CARL_REPO_URL="https://github.com/claytonhunt/carl.git"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 GLOBAL_INSTALL_DIR="$HOME/.carl-global"
 
+# Get current CARL version dynamically
+get_carl_version() {
+    local version="1.3.0"  # fallback version
+    
+    # Try to get version from git tag if we're in a git repo
+    if [ -d "$SCRIPT_DIR/.git" ]; then
+        local git_version=$(cd "$SCRIPT_DIR" && git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//')
+        if [ -n "$git_version" ]; then
+            version="$git_version"
+        fi
+    fi
+    
+    # Try to get version from GitHub API as fallback
+    if [ "$version" = "1.3.0" ]; then
+        if command -v curl >/dev/null 2>&1; then
+            local api_version=$(curl -s --max-time 5 "https://api.github.com/repos/ClaytonHunt/carl/releases/latest" 2>/dev/null | grep '"tag_name"' | cut -d'"' -f4 | sed 's/^v//')
+            if [ -n "$api_version" ] && [ "$api_version" != "null" ]; then
+                version="$api_version"
+            fi
+        fi
+    fi
+    
+    echo "$version"
+}
+
 # Parse command line arguments
 parse_arguments() {
     TARGET_DIR=""
@@ -636,13 +661,13 @@ initialize_carl_config() {
     
     cat > "$config_file" << EOF
 {
-  "carl_version": "1.2.0",
+  "carl_version": "$(get_carl_version)",
   "installation_date": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
   "project_path": "$TARGET_DIR",
   "global_install": $GLOBAL_INSTALL,
   "audio_settings": {
-    "audio_enabled": true,
-    "quiet_mode": false,
+    "audio_enabled": false,
+    "quiet_mode": true,
     "quiet_hours_enabled": false,
     "quiet_hours_start": "22:00",
     "quiet_hours_end": "08:00",
@@ -900,7 +925,7 @@ main() {
         
         # Detect current version
         local current_version=$(detect_current_version "$TARGET_DIR")
-        local target_version="1.2.0"  # Current version in this script
+        local target_version="$(get_carl_version)"  # Current version from git/API
         
         echo "📊 Current CARL version: $current_version"
         echo "📊 Target CARL version: $target_version"

@@ -10,29 +10,110 @@ carl_get_root() {
 }
 
 # Configuration management
+carl_get_json_value() {
+    local json_file="$1"
+    local key_path="$2"
+    local default_value="$3"
+    
+    if [ ! -f "$json_file" ]; then
+        echo "$default_value"
+        return
+    fi
+    
+    # Use python if available for reliable JSON parsing
+    if command -v python3 >/dev/null 2>&1; then
+        python3 -c "
+import json, sys
+try:
+    with open('$json_file') as f:
+        data = json.load(f)
+    keys = '$key_path'.split('.')
+    value = data
+    for key in keys:
+        value = value.get(key, {})
+    if value == {} or value is None:
+        print('$default_value')
+    else:
+        print(value)
+except:
+    print('$default_value')
+" 2>/dev/null
+    else
+        # Fallback to grep/sed for basic JSON parsing
+        local value=$(grep -A 10 "\"$(echo "$key_path" | cut -d'.' -f1)\"" "$json_file" 2>/dev/null | 
+                     grep "\"$(echo "$key_path" | cut -d'.' -f2)\"" | 
+                     sed 's/.*".*":[[:space:]]*\(.*\)/\1/' | 
+                     sed 's/[,}]$//' | 
+                     sed 's/^[[:space:]]*"//' | 
+                     sed 's/"[[:space:]]*$//')
+        if [ -n "$value" ]; then
+            echo "$value"
+        else
+            echo "$default_value"
+        fi
+    fi
+}
+
 carl_get_setting() {
     local setting="$1"
     local carl_root="$(carl_get_root)"
-    local config_file="$carl_root/.carl/config/user.conf"
+    local config_file="$carl_root/.carl/config/carl-settings.json"
     
-    # Default settings
+    # Map old setting names to new JSON structure
     case "$setting" in
-        "quiet_mode") echo "false" ;;
-        "audio_enabled") echo "true" ;;
-        "auto_update") echo "true" ;;
-        "context_injection") echo "true" ;;
-        "analysis_depth") echo "balanced" ;;
-        "carl_persona") echo "true" ;;
-        *) echo "false" ;;
+        "quiet_mode")
+            carl_get_json_value "$config_file" "audio_settings.quiet_mode" "true"
+            ;;
+        "audio_enabled")
+            carl_get_json_value "$config_file" "audio_settings.audio_enabled" "false"
+            ;;
+        "auto_update")
+            carl_get_json_value "$config_file" "analysis_settings.auto_update_on_git_pull" "true"
+            ;;
+        "context_injection")
+            carl_get_json_value "$config_file" "development_settings.auto_context_injection" "true"
+            ;;
+        "analysis_depth")
+            # Map to comprehensive_scanning boolean as closest equivalent
+            local comprehensive=$(carl_get_json_value "$config_file" "analysis_settings.comprehensive_scanning" "true")
+            if [ "$comprehensive" = "true" ]; then
+                echo "comprehensive"
+            else
+                echo "balanced"
+            fi
+            ;;
+        "carl_persona")
+            # This was related to audio/TTS, map to audio_enabled
+            carl_get_json_value "$config_file" "audio_settings.audio_enabled" "false"
+            ;;
+        "volume_level")
+            carl_get_json_value "$config_file" "audio_settings.volume_level" "75"
+            ;;
+        "quiet_hours_enabled")
+            carl_get_json_value "$config_file" "audio_settings.quiet_hours_enabled" "false"
+            ;;
+        "quiet_hours_start")
+            carl_get_json_value "$config_file" "audio_settings.quiet_hours_start" "22:00"
+            ;;
+        "quiet_hours_end")
+            carl_get_json_value "$config_file" "audio_settings.quiet_hours_end" "08:00"
+            ;;
+        "session_tracking")
+            carl_get_json_value "$config_file" "development_settings.session_tracking" "true"
+            ;;
+        "progress_monitoring")
+            carl_get_json_value "$config_file" "development_settings.progress_monitoring" "true"
+            ;;
+        "parallel_analysis")
+            carl_get_json_value "$config_file" "analysis_settings.parallel_analysis" "true"
+            ;;
+        "specialist_agents_enabled")
+            carl_get_json_value "$config_file" "development_settings.specialist_agents_enabled" "true"
+            ;;
+        *) 
+            echo "false"
+            ;;
     esac
-    
-    # Override with user settings if available
-    if [ -f "$config_file" ]; then
-        local value=$(grep "^$setting=" "$config_file" 2>/dev/null | cut -d'=' -f2)
-        if [ -n "$value" ]; then
-            echo "$value"
-        fi
-    fi
 }
 
 # Context management functions
