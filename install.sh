@@ -45,7 +45,7 @@ GLOBAL_INSTALL_DIR="$HOME/.carl-global"
 
 # Get current CARL version dynamically
 get_carl_version() {
-    local version="1.4.0"  # fallback version
+    local version="1.4.1"  # fallback version
     
     # Try to get version from git tag if we're in a git repo
     if [ -d "$SCRIPT_DIR/.git" ]; then

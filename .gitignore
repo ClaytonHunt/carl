@@ -1,0 +1,46 @@
+# CARL Project Artifacts
+# These are excluded in the CARL template repository only
+# Normal CARL projects should track these files
+
+# Project-specific CARL artifacts
+.carl/index.carl
+.carl/vision.carl
+.carl/roadmap.carl
+.carl/objectives.carl
+.carl/process.carl
+.carl/decisions.carl
+.carl/*.intent.carl
+.carl/*.state.carl
+.carl/*.context.carl
+
+# Active development artifacts
+.carl/sessions/
+.carl/active/
+.carl/completed/
+
+# User-specific configurations
+.carl/config/carl-settings.json
+
+# Local personalities (keep template only)
+# .carl/personalities.config.carl is tracked as template
+
+# Temporary and backup files
+.carl/backups/
+*.bak
+*.tmp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Debug and log files
+*.log
+debug/
+logs/
