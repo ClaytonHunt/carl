@@ -9,7 +9,45 @@ carl_audio_get_root() {
     echo "$(cd "$script_dir/../.." && pwd)"
 }
 
-# Main audio playback function
+# Jimmy Neutron character selection and color coding
+carl_select_character() {
+    local category="$1"
+    local characters
+    local character_colors
+    
+    # Define character pool based on context category
+    case "$category" in
+        "start"|"session")
+            characters=("Jimmy" "Carl" "Sheen" "Ms. Fowl" "Sam")
+            character_colors=("\033[1;34m" "\033[1;33m" "\033[1;35m" "\033[1;95m" "\033[1;92m")  # Blue, Yellow, Magenta, Light Magenta, Light Green
+            ;;
+        "work"|"progress")
+            characters=("Jimmy" "Carl" "Cindy" "Libby" "Ms. Fowl" "Principal Willoughby")
+            character_colors=("\033[1;34m" "\033[1;33m" "\033[1;32m" "\033[1;36m" "\033[1;95m" "\033[1;90m")  # Blue, Yellow, Green, Cyan, Light Magenta, Bright Black
+            ;;
+        "success"|"celebration")
+            characters=("Carl" "Sheen" "Jimmy" "Hugh" "Judy" "Sam")
+            character_colors=("\033[1;33m" "\033[1;35m" "\033[1;34m" "\033[1;31m" "\033[1;91m" "\033[1;92m")  # Yellow, Magenta, Blue, Red, Light Red, Light Green
+            ;;
+        "error"|"problem")
+            characters=("Jimmy" "Cindy" "Carl" "Ms. Fowl" "Principal Willoughby")
+            character_colors=("\033[1;34m" "\033[1;32m" "\033[1;33m" "\033[1;95m" "\033[1;90m")  # Blue, Green, Yellow, Light Magenta, Bright Black
+            ;;
+        *)
+            characters=("Jimmy" "Carl" "Sheen" "Cindy" "Libby" "Hugh" "Judy" "Ms. Fowl" "Sam" "Principal Willoughby")
+            character_colors=("\033[1;34m" "\033[1;33m" "\033[1;35m" "\033[1;32m" "\033[1;36m" "\033[1;31m" "\033[1;91m" "\033[1;95m" "\033[1;92m" "\033[1;90m")
+            ;;
+    esac
+    
+    # Select random character and corresponding color
+    local index=$((RANDOM % ${#characters[@]}))
+    local character="${characters[$index]}"
+    local color="${character_colors[$index]}"
+    
+    echo "$character|$color"
+}
+
+# Main audio playback function with Jimmy Neutron cast
 carl_play_audio() {
     local category="$1"
     local message="$2"
@@ -22,15 +60,24 @@ carl_play_audio() {
     local audio_enabled=$(carl_get_setting 'audio_enabled' 2>/dev/null || echo "true")
     local quiet_mode=$(carl_get_setting 'quiet_mode' 2>/dev/null || echo "false")
     
+    # Select character for this message
+    local char_info=$(carl_select_character "$category")
+    local character=$(echo "$char_info" | cut -d'|' -f1)
+    local color=$(echo "$char_info" | cut -d'|' -f2)
+    local reset_color="\033[0m"
+    
+    # Personalize message for Clayton
+    local personalized_message=$(echo "$message" | sed 's/\buser\b/Clayton/gi' | sed 's/\bdeveloper\b/Clayton/gi')
+    
     if [ "$audio_enabled" = "false" ] || [ "$quiet_mode" = "true" ]; then
-        # Always show text feedback even in quiet mode
-        echo "🎵 Carl: $message"
+        # Always show text feedback even in quiet mode with character format
+        echo -e "🎵 ${color}${character}:${reset_color} $personalized_message"
         return 0
     fi
     
     # Check for quiet hours
     if carl_is_quiet_hours; then
-        echo "🔇 Carl (quiet hours): $message"
+        echo -e "🔇 ${color}${character} (quiet hours):${reset_color} $personalized_message"
         return 0
     fi
     
@@ -44,11 +91,11 @@ carl_play_audio() {
     
     # Fall back to text-to-speech if no audio file played
     if [ "$audio_played" = "false" ]; then
-        carl_speak_message "$message"
+        carl_speak_message "$personalized_message" "$character"
     fi
     
-    # Always provide text fallback
-    echo "🎵 Carl: $message"
+    # Always provide text fallback with character format
+    echo -e "🎵 ${color}${character}:${reset_color} $personalized_message"
 }
 
 # Play pre-recorded audio files
@@ -105,45 +152,262 @@ carl_play_audio_file() {
 # Text-to-speech fallback with Carl-like voice
 carl_speak_message() {
     local message="$1"
+    local character="${2:-Carl}"  # Default to Carl if no character specified
     
     # Clean message for TTS (remove emojis and special characters)
     local clean_message=$(echo "$message" | sed 's/[^a-zA-Z0-9 .,!?-]//g')
     
     case "$(uname -s)" in
         Darwin*)
-            # macOS - use built-in say command with character voice
+            # macOS - use built-in say command with character-appropriate voice
             if command -v say >/dev/null 2>&1; then
-                # Try different voices that might sound more character-like
-                local voices=("Albert" "Bad News" "Bahh" "Bells" "Boing" "Bubbles" "Cellos" "Deranged" "Good News")
-                local voice=$(printf '%s\n' "${voices[@]}" | shuf -n 1)
-                say -v "$voice" -r 200 "$clean_message" 2>/dev/null &
+                local voice
+                local rate
+                case "$character" in
+                    "Jimmy")
+                        # Jimmy: confident, smart
+                        voice="Alex"
+                        rate=210
+                        ;;
+                    "Carl")
+                        # Carl: wheezy, enthusiastic  
+                        voice="Bubbles"
+                        rate=190
+                        ;;
+                    "Sheen")
+                        # Sheen: hyper, excitable
+                        voice="Boing"
+                        rate=250
+                        ;;
+                    "Cindy")
+                        # Cindy: confident, smart female
+                        voice="Samantha"
+                        rate=200
+                        ;;
+                    "Libby")
+                        # Libby: cool, supportive female
+                        voice="Karen"
+                        rate=180
+                        ;;
+                    "Hugh")
+                        # Hugh: quirky dad
+                        voice="Bruce"
+                        rate=170
+                        ;;
+                    "Judy")
+                        # Judy: caring mom
+                        voice="Allison"
+                        rate=185
+                        ;;
+                    "Ms. Fowl")
+                        # Ms. Fowl: bird-like teacher
+                        voice="Zarvox"
+                        rate=160
+                        ;;
+                    "Sam")
+                        # Sam: candy shop owner
+                        voice="Fred"
+                        rate=175
+                        ;;
+                    "Principal Willoughby")
+                        # Principal Willoughby: authority figure
+                        voice="Ralph"
+                        rate=165
+                        ;;
+                    *)
+                        voice="Bubbles"
+                        rate=200
+                        ;;
+                esac
+                say -v "$voice" -r "$rate" "$clean_message" 2>/dev/null &
             fi
             ;;
         Linux*)
             # Check if running in WSL
             if grep -qi microsoft /proc/version 2>/dev/null; then
-                # WSL - use Windows TTS via PowerShell with Carl Wheezer-like voice
+                # WSL - use Windows TTS via PowerShell with character-specific settings
                 if command -v powershell.exe >/dev/null 2>&1; then
-                    # Carl Wheezer voice settings without SSML
-                    powershell.exe -c "Add-Type -AssemblyName System.Speech; \$speak = New-Object System.Speech.Synthesis.SpeechSynthesizer; \$speak.SelectVoice('Microsoft Zira Desktop'); \$speak.Rate = 0; \$speak.Volume = 100; \$speak.Speak('$clean_message')" 2>/dev/null &
+                    local voice_name
+                    local rate
+                    case "$character" in
+                        "Jimmy")
+                            voice_name="Microsoft David Desktop"
+                            rate=1
+                            ;;
+                        "Carl")
+                            voice_name="Microsoft Zira Desktop"
+                            rate=0
+                            ;;
+                        "Sheen")
+                            voice_name="Microsoft David Desktop"
+                            rate=3
+                            ;;
+                        "Cindy"|"Libby")
+                            voice_name="Microsoft Zira Desktop"
+                            rate=1
+                            ;;
+                        "Hugh")
+                            voice_name="Microsoft David Desktop"
+                            rate=-1
+                            ;;
+                        "Judy")
+                            voice_name="Microsoft Zira Desktop"
+                            rate=0
+                            ;;
+                        "Ms. Fowl")
+                            voice_name="Microsoft Zira Desktop"
+                            rate=-2
+                            ;;
+                        "Sam")
+                            voice_name="Microsoft David Desktop"
+                            rate=0
+                            ;;
+                        "Principal Willoughby")
+                            voice_name="Microsoft David Desktop"
+                            rate=-1
+                            ;;
+                        *)
+                            voice_name="Microsoft Zira Desktop"
+                            rate=0
+                            ;;
+                    esac
+                    powershell.exe -c "Add-Type -AssemblyName System.Speech; \$speak = New-Object System.Speech.Synthesis.SpeechSynthesizer; try { \$speak.SelectVoice('$voice_name') } catch { }; \$speak.Rate = $rate; \$speak.Volume = 100; \$speak.Speak('$clean_message')" 2>/dev/null &
                 fi
             else
-                # Native Linux - use espeak or festival with character-like settings
+                # Native Linux - use espeak or festival with character-specific settings
                 if command -v espeak >/dev/null 2>&1; then
-                    # Use espeak with higher pitch and faster speed for character effect
-                    espeak -v en+f3 -s 180 -p 60 "$clean_message" 2>/dev/null &
+                    local variant
+                    local speed
+                    local pitch
+                    case "$character" in
+                        "Jimmy")
+                            variant="en+m3"
+                            speed=200
+                            pitch=50
+                            ;;
+                        "Carl")
+                            variant="en+f3"
+                            speed=180
+                            pitch=60
+                            ;;
+                        "Sheen")
+                            variant="en+m2"
+                            speed=220
+                            pitch=70
+                            ;;
+                        "Cindy")
+                            variant="en+f2"
+                            speed=190
+                            pitch=55
+                            ;;
+                        "Libby")
+                            variant="en+f1"
+                            speed=180
+                            pitch=45
+                            ;;
+                        "Hugh")
+                            variant="en+m7"
+                            speed=160
+                            pitch=40
+                            ;;
+                        "Judy")
+                            variant="en+f4"
+                            speed=175
+                            pitch=50
+                            ;;
+                        "Ms. Fowl")
+                            variant="en+f5"
+                            speed=150
+                            pitch=75
+                            ;;
+                        "Sam")
+                            variant="en+m4"
+                            speed=170
+                            pitch=45
+                            ;;
+                        "Principal Willoughby")
+                            variant="en+m5"
+                            speed=165
+                            pitch=35
+                            ;;
+                        *)
+                            variant="en+f3"
+                            speed=180
+                            pitch=60
+                            ;;
+                    esac
+                    espeak -v "$variant" -s "$speed" -p "$pitch" "$clean_message" 2>/dev/null &
                 elif command -v festival >/dev/null 2>&1; then
                     echo "$clean_message" | festival --tts 2>/dev/null &
                 elif command -v spd-say >/dev/null 2>&1; then
-                    spd-say -r 20 -p 80 "$clean_message" 2>/dev/null &
+                    # Use character-specific settings for spd-say
+                    local rate
+                    local pitch
+                    case "$character" in
+                        "Jimmy") rate=10; pitch=50 ;;
+                        "Carl") rate=0; pitch=80 ;;
+                        "Sheen") rate=30; pitch=90 ;;
+                        "Cindy") rate=10; pitch=60 ;;
+                        "Libby") rate=0; pitch=40 ;;
+                        "Hugh") rate=-10; pitch=30 ;;
+                        "Judy") rate=5; pitch=55 ;;
+                        "Ms. Fowl") rate=-5; pitch=85 ;;
+                        "Sam") rate=0; pitch=45 ;;
+                        "Principal Willoughby") rate=-10; pitch=25 ;;
+                        *) rate=20; pitch=80 ;;
+                    esac
+                    spd-say -r "$rate" -p "$pitch" "$clean_message" 2>/dev/null &
                 fi
             fi
             ;;
         CYGWIN*|MINGW*|MSYS*)
-            # Windows - use SAPI TTS with Carl Wheezer-like voice
+            # Windows - use SAPI TTS with character-specific settings
             if command -v powershell >/dev/null 2>&1; then
-                # Carl Wheezer voice settings without SSML
-                powershell -c "Add-Type -AssemblyName System.Speech; \$speak = New-Object System.Speech.Synthesis.SpeechSynthesizer; \$speak.SelectVoice('Microsoft Zira Desktop'); \$speak.Rate = 0; \$speak.Volume = 100; \$speak.Speak('$clean_message')" 2>/dev/null &
+                local voice_name
+                local rate
+                case "$character" in
+                    "Jimmy")
+                        voice_name="Microsoft David Desktop"
+                        rate=1
+                        ;;
+                    "Carl")
+                        voice_name="Microsoft Zira Desktop"
+                        rate=0
+                        ;;
+                    "Sheen")
+                        voice_name="Microsoft David Desktop"
+                        rate=3
+                        ;;
+                    "Cindy"|"Libby")
+                        voice_name="Microsoft Zira Desktop"
+                        rate=1
+                        ;;
+                    "Hugh")
+                        voice_name="Microsoft David Desktop"
+                        rate=-1
+                        ;;
+                    "Judy")
+                        voice_name="Microsoft Zira Desktop"
+                        rate=0
+                        ;;
+                    "Ms. Fowl")
+                        voice_name="Microsoft Zira Desktop"
+                        rate=-2
+                        ;;
+                    "Sam")
+                        voice_name="Microsoft David Desktop"
+                        rate=0
+                        ;;
+                    "Principal Willoughby")
+                        voice_name="Microsoft David Desktop"
+                        rate=-1
+                        ;;
+                    *)
+                        voice_name="Microsoft Zira Desktop"
+                        rate=0
+                        ;;
+                esac
+                powershell -c "Add-Type -AssemblyName System.Speech; \$speak = New-Object System.Speech.Synthesis.SpeechSynthesizer; try { \$speak.SelectVoice('$voice_name') } catch { }; \$speak.Rate = $rate; \$speak.Volume = 100; \$speak.Speak('$clean_message')" 2>/dev/null &
             fi
             ;;
     esac
