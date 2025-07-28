@@ -45,7 +45,7 @@ GLOBAL_INSTALL_DIR="$HOME/.carl-global"
 
 # Get current CARL version dynamically
 get_carl_version() {
-    local version="1.4.2"  # fallback version
+    local version="1.4.3"  # fallback version
     
     # Try to get version from git tag if we're in a git repo
     if [ -d "$SCRIPT_DIR/.git" ]; then
@@ -157,13 +157,13 @@ show_help() {
     echo "  ./install.sh --force            # Force reinstall"
     echo ""
     echo "Remote Installation/Update (via curl):"
-    echo "  # New installation"
-    echo "  curl -fsSL https://raw.githubusercontent.com/ClaytonHunt/carl/main/install.sh | bash"
-    echo "  curl -fsSL https://raw.githubusercontent.com/ClaytonHunt/carl/main/install.sh | bash -s -- /path/to/project"
+    echo "  # Latest release (recommended - always uses latest stable version)"
+    echo "  curl -fsSL \$(curl -s https://api.github.com/repos/ClaytonHunt/carl/releases/latest | grep 'browser_download_url.*install.sh' | cut -d'\"' -f4) | bash"
+    echo "  curl -fsSL \$(curl -s https://api.github.com/repos/ClaytonHunt/carl/releases/latest | grep 'browser_download_url.*install.sh' | cut -d'\"' -f4) | bash -s -- --update"
     echo ""
-    echo "  # Update existing installation"  
+    echo "  # Direct from main branch (development version)"
+    echo "  curl -fsSL https://raw.githubusercontent.com/ClaytonHunt/carl/main/install.sh | bash"
     echo "  curl -fsSL https://raw.githubusercontent.com/ClaytonHunt/carl/main/install.sh | bash -s -- --update"
-    echo "  curl -fsSL https://raw.githubusercontent.com/ClaytonHunt/carl/main/install.sh | bash -s -- --update /path/to/project"
 }
 
 # Check system requirements
@@ -724,7 +724,7 @@ configure_claude_hooks() {
         "hooks": [
           {
             "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.sh"
+            "command": "\$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.sh"
           }
         ]
       }
@@ -735,7 +735,7 @@ configure_claude_hooks() {
         "hooks": [
           {
             "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/session-end.sh"
+            "command": "\$CLAUDE_PROJECT_DIR/.claude/hooks/session-end.sh"
           }
         ]
       }
@@ -746,7 +746,7 @@ configure_claude_hooks() {
         "hooks": [
           {
             "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/user-prompt-submit.sh"
+            "command": "\$CLAUDE_PROJECT_DIR/.claude/hooks/user-prompt-submit.sh"
           }
         ]
       }
@@ -757,7 +757,7 @@ configure_claude_hooks() {
         "hooks": [
           {
             "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/tool-call.sh pre"
+            "command": "\$CLAUDE_PROJECT_DIR/.claude/hooks/tool-call.sh pre"
           }
         ]
       }
@@ -768,7 +768,7 @@ configure_claude_hooks() {
         "hooks": [
           {
             "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/tool-call.sh post"
+            "command": "\$CLAUDE_PROJECT_DIR/.claude/hooks/tool-call.sh post"
           }
         ]
       }
@@ -813,35 +813,35 @@ carl_hooks = {
         "matcher": ".*",
         "hooks": [{
             "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.sh"
+            "command": "\$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.sh"
         }]
     }],
     "Stop": [{
         "matcher": ".*",
         "hooks": [{
             "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/session-end.sh"
+            "command": "\$CLAUDE_PROJECT_DIR/.claude/hooks/session-end.sh"
         }]
     }],
     "UserPromptSubmit": [{
         "matcher": ".*",
         "hooks": [{
             "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/user-prompt-submit.sh"
+            "command": "\$CLAUDE_PROJECT_DIR/.claude/hooks/user-prompt-submit.sh"
         }]
     }],
     "PreToolUse": [{
         "matcher": ".*",
         "hooks": [{
             "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/tool-call.sh pre"
+            "command": "\$CLAUDE_PROJECT_DIR/.claude/hooks/tool-call.sh pre"
         }]
     }],
     "PostToolUse": [{
         "matcher": ".*",
         "hooks": [{
             "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/tool-call.sh post"
+            "command": "\$CLAUDE_PROJECT_DIR/.claude/hooks/tool-call.sh post"
         }]
     }]
 }
@@ -871,7 +871,7 @@ try:
                         # Check for various CARL hook patterns
                         is_carl_hook = (
                             command.startswith('bash .claude/hooks/') or
-                            command.startswith('$CLAUDE_PROJECT_DIR/.claude/hooks/') or
+                            command.startswith('\$CLAUDE_PROJECT_DIR/.claude/hooks/') or
                             command.startswith('.claude/hooks/') or
                             command.startswith('/.claude/hooks/') or
                             'session-start.sh' in command or
