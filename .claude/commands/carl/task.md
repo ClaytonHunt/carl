@@ -16,23 +16,23 @@ CARL automatically loads relevant project context for every task, ensuring the A
 
 ### 1. Context-Aware Task Execution
 ```bash
-/task "implement user password reset"     # CARL loads authentication context automatically
-/task "optimize analytics dashboard"     # CARL provides performance context and constraints
-/task "fix mobile responsive layout"     # CARL loads UI patterns and design system context
+/carl:task "implement user password reset"     # CARL loads authentication context automatically
+/carl:task "optimize analytics dashboard"     # CARL provides performance context and constraints
+/carl:task "fix mobile responsive layout"     # CARL loads UI patterns and design system context
 ```
 
 ### 2. CARL-Guided Implementation
 ```bash
-/task --from-intent user-auth.intent     # Implement directly from CARL intent file
-/task --continue session-xyz             # Resume previous CARL-tracked work session
-/task --fix-debt auth-service-complexity # Address specific technical debt item
+/carl:task --from-intent user-auth.intent.carl     # Implement directly from CARL intent file
+/carl:task --continue session-xyz                  # Resume previous CARL-tracked work session
+/carl:task --fix-debt auth-service-complexity      # Address specific technical debt item
 ```
 
 ### 3. Collaborative Task Execution
 ```bash
-/task --with-review "payment integration"  # Include code review checkpoints
-/task --pair-program "complex algorithm"   # Enhanced assistance for complex tasks
-/task --team-context "dashboard feature"   # Include team coordination context
+/carl:task --with-review "payment integration"  # Include code review checkpoints
+/carl:task --pair-program "complex algorithm"   # Enhanced assistance for complex tasks
+/carl:task --team-context "dashboard feature"   # Include team coordination context
 ```
 
 ## CARL Task Execution Process
@@ -503,25 +503,25 @@ Task Progress: Implement Password Reset Feature
 
 ### Context-Specific Execution
 ```bash
-/task "implement user dashboard"           # Auto-loads relevant CARL context
-/task --feature user-profile              # Specific feature context loading
-/task --fix-debt authentication-complexity # Technical debt remediation focus
-/task --from-intent analytics.intent      # Direct implementation from CARL intent
+/carl:task "implement user dashboard"           # Auto-loads relevant CARL context
+/carl:task --feature user-profile              # Specific feature context loading
+/carl:task --fix-debt authentication-complexity # Technical debt remediation focus
+/carl:task --from-intent analytics.intent      # Direct implementation from CARL intent
 ```
 
 ### Development Mode Options
 ```bash
-/task --tdd "shopping cart logic"         # Enhanced TDD workflow with CARL context
-/task --review-mode "payment processing"  # Include peer review checkpoints
-/task --pair-program "complex algorithm"  # Collaborative implementation assistance
-/task --refactor authentication-service   # Refactoring with technical debt awareness
+/carl:task --tdd "shopping cart logic"         # Enhanced TDD workflow with CARL context
+/carl:task --review-mode "payment processing"  # Include peer review checkpoints
+/carl:task --pair-program "complex algorithm"  # Collaborative implementation assistance
+/carl:task --refactor authentication-service   # Refactoring with technical debt awareness
 ```
 
 ### Quality and Compliance
 ```bash
-/task --secure "user data handling"       # Enhanced security focus with CARL constraints
-/task --performance "analytics queries"   # Performance optimization with CARL requirements
-/task --accessible "user interface"       # Accessibility compliance with CARL standards
+/carl:task --secure "user data handling"       # Enhanced security focus with CARL constraints
+/carl:task --performance "analytics queries"   # Performance optimization with CARL requirements
+/carl:task --accessible "user interface"       # Accessibility compliance with CARL standards
 ```
 
 ## Success Criteria

@@ -6,27 +6,27 @@ Safely update existing CARL installations to the latest version with automatic m
 
 ### Basic Updates
 ```bash
-/update                           # Update current directory
-/update /path/to/project         # Update specific project directory
-/update ~/projects/my-app        # Update project by path
+/carl:update                           # Update current directory
+/carl:update /path/to/project         # Update specific project directory
+/carl:update ~/projects/my-app        # Update project by path
 ```
 
 ### Update Options
 ```bash
-/update --check                  # Check for available updates
-/update --check /path/to/project # Check specific project version
-/update --force                  # Force update even if versions match
-/update --dry-run               # Show what would be updated
-/update --no-backup             # Skip backup creation (not recommended)
+/carl:update --check                  # Check for available updates
+/carl:update --check /path/to/project # Check specific project version
+/carl:update --force                  # Force update even if versions match
+/carl:update --dry-run               # Show what would be updated
+/carl:update --no-backup             # Skip backup creation (not recommended)
 ```
 
 ### Backup Management
 ```bash
-/update --list-backups           # Show available backups
-/update --list-backups /path     # Show backups for specific project
-/update --restore               # Interactive restore from backup
-/update --restore-from latest   # Restore from latest backup
-/update --set-retention 3       # Keep 3 backups instead of default 2
+/carl:update --list-backups           # Show available backups
+/carl:update --list-backups /path     # Show backups for specific project
+/carl:update --restore               # Interactive restore from backup
+/carl:update --restore-from latest   # Restore from latest backup
+/carl:update --set-retention 3       # Keep 3 backups instead of default 2
 ```
 
 ## Directory Targeting

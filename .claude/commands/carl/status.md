@@ -326,9 +326,12 @@ Based on current trends and CARL data analysis:
 ## CARL-First Status Analysis
 
 ### Primary Data Sources (95% of requests)
-1. **CARL Files**: `.carl/index.carl`, session files, state tracking data
-2. **Hook-Maintained Data**: Real-time session progress from Claude Code hooks
-3. **Git Metadata**: Recent commit history and branch status (lightweight)
+1. **CARL Base Files**: `.carl/index.carl`, `.carl/process.carl`, `.carl/vision.carl`
+2. **CARL State Files**: `.carl/*.state.carl` - Feature and component states
+3. **CARL Context Files**: `.carl/*.context.carl` - System dependencies and relationships
+4. **Session Data**: `.carl/sessions/active/*.session.carl` - Current development tracking
+5. **Strategic Files**: `.carl/roadmap.carl`, `.carl/objectives.carl` - Planning context
+6. **Git Metadata**: Recent commit history and branch status (lightweight)
 
 ### Secondary Data Sources (Only when CARL data insufficient)
 4. **Selective Code Scanning**: Only specific files identified by CARL analysis
@@ -356,9 +359,11 @@ Based on current trends and CARL data analysis:
 ```bash
 # Priority order for file reading:
 1. .carl/index.carl - Project overview and current state
-2. .carl/sessions/*.session - Recent development sessions  
-3. .carl/config/carl-settings.json - Project configuration
-4. Hook-generated session data - Real-time progress tracking
+2. .carl/process.carl - Development workflow and current phase
+3. .carl/sessions/active/*.session.carl - Current session tracking
+4. .carl/*.state.carl - Feature and component state files
+5. .carl/*.context.carl - System context and dependencies
+6. .carl/config/carl-settings.json - Project configuration
 ```
 
 ### Step 2: Assess Data Completeness

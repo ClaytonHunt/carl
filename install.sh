@@ -418,11 +418,11 @@ migrate_strategic_context_integration() {
 
 migrate_personality_system() {
     local target_dir="$1"
-    local personalities_file="$target_dir/.carl/personalities.carl"
+    local personalities_file="$target_dir/.carl/personalities.config.carl"
     
     echo "      🎭 Migrating personality system to v1.4.0+ format..."
     
-    # Check if personalities.carl already exists
+    # Check if personalities.config.carl already exists
     if [ -f "$personalities_file" ]; then
         # File exists - check if it's been customized
         local is_customized=false
@@ -448,7 +448,7 @@ migrate_personality_system() {
                 # Create a temporary file with instructions for Claude Code
                 local temp_instructions=$(mktemp)
                 cat > "$temp_instructions" << 'EOF'
-Please update the personalities.carl file to use the latest v1.4.0+ format while preserving all user customizations.
+Please update the personalities.config.carl file to use the latest v1.4.0+ format while preserving all user customizations.
 
 The new format includes these enhancements:
 1. Improved voice_config structure with SSMLBR support and graceful degradation
@@ -482,25 +482,25 @@ EOF
                 
                 rm -f "$temp_instructions" 2>/dev/null
             else
-                echo "         ⚠️  Claude Code not available - keeping existing personalities.carl unchanged"  
+                echo "         ⚠️  Claude Code not available - keeping existing personalities.config.carl unchanged"  
                 echo "         💡 To update format: install Claude Code and re-run update"
             fi
         else
             echo "         🔄 Default Jimmy Neutron theme detected - updating to latest version"
-            # Replace with latest default personalities.carl
-            if [ -f "$SCRIPT_DIR/.carl/personalities.carl" ]; then
-                cp "$SCRIPT_DIR/.carl/personalities.carl" "$personalities_file"
+            # Replace with latest default personalities.config.carl
+            if [ -f "$SCRIPT_DIR/.carl/personalities.config.carl" ]; then
+                cp "$SCRIPT_DIR/.carl/personalities.config.carl" "$personalities_file"
                 echo "         ✅ Updated to latest Jimmy Neutron personality definitions"
             fi
         fi
     else
-        echo "         📝 Creating default personalities.carl file..."
-        # Copy default personalities.carl from source
-        if [ -f "$SCRIPT_DIR/.carl/personalities.carl" ]; then
-            cp "$SCRIPT_DIR/.carl/personalities.carl" "$personalities_file"
+        echo "         📝 Creating default personalities.config.carl file..."
+        # Copy default personalities.config.carl from source
+        if [ -f "$SCRIPT_DIR/.carl/personalities.config.carl" ]; then
+            cp "$SCRIPT_DIR/.carl/personalities.config.carl" "$personalities_file"
             echo "         ✅ Default Jimmy Neutron personalities installed"
         else
-            echo "         ⚠️  Source personalities.carl not found - will be created during file copy"
+            echo "         ⚠️  Source personalities.config.carl not found - will be created during file copy"
         fi
     fi
 }

@@ -1,0 +1,150 @@
+# CARL Intent Format Specification  
+# Version: 1.0
+# Purpose: Define structure for [name].intent.carl files tracking requirements
+
+format_specification:
+  artifact_type: "intent"
+  file_extension: ".intent.carl"
+  ai_optimized: true
+  scope_levels: ["epic", "feature", "story", "technical"]
+  progress_tracking: true
+
+required_sections:
+  intent_metadata:
+    - id: "unique_identifier"
+    - type: "epic|feature|story|technical_initiative"
+    - parent_id: "reference_to_parent_requirement_if_applicable"
+    - complexity: "low|medium|high|epic"
+    - priority: "P0|P1|P2|P3"
+    - estimated_duration: "time_estimate_with_confidence"
+    - created_date: "iso_timestamp"
+    - status: "draft|active|in_progress|completed|archived"
+
+  intent_definition:
+    - what: "clear_statement_of_what_needs_to_be_built"
+    - why: "business_justification_and_value_proposition"
+    - who: "array_of_stakeholders_and_user_types"
+    - when: "timeline_constraints_and_dependencies"
+    - constraints: "technical_business_and_resource_limitations"
+
+  scope_definition:
+    - in_scope: "array_of_included_functionality"
+    - out_of_scope: "array_of_explicitly_excluded_functionality"
+    - assumptions: "array_of_assumptions_made_during_planning"
+    - dependencies: "array_of_external_dependencies_and_blockers"
+
+scope_specific_sections:
+  epic_level:
+    epic_breakdown:
+      - features: "array_of_child_features_with_priorities"
+      - architectural_requirements: "system_level_requirements"
+      - success_metrics: "business_and_technical_kpis"
+      - rollout_strategy: "deployment_and_adoption_plan"
+
+  feature_level:
+    user_stories:
+      - core_stories: "array_of_essential_user_stories"
+      - edge_case_stories: "array_of_edge_case_scenarios"
+      - acceptance_criteria: "detailed_acceptance_requirements"
+    technical_requirements:
+      - api_endpoints: "required_api_changes"
+      - data_requirements: "database_and_storage_needs"
+      - security_requirements: "security_considerations"
+      - performance_requirements: "speed_and_scalability_needs"
+
+  story_level:
+    implementation_details:
+      - acceptance_criteria: "specific_testable_requirements"
+      - definition_of_done: "completion_checklist"
+      - test_scenarios: "array_of_test_cases_to_verify"
+    technical_approach:
+      - implementation_strategy: "high_level_approach"
+      - affected_components: "list_of_files_and_modules_to_change"
+      - risk_assessment: "potential_issues_and_mitigation"
+
+  technical_initiative:
+    technical_objectives:
+      - debt_reduction: "specific_technical_debt_to_address"
+      - performance_improvements: "measurable_performance_goals"
+      - architectural_improvements: "structural_changes_needed"
+      - maintainability_gains: "code_quality_improvements"
+    refactoring_plan:
+      - current_state_analysis: "assessment_of_existing_implementation"
+      - target_state_definition: "desired_end_state"
+      - migration_strategy: "step_by_step_transformation_plan"
+
+progress_tracking:
+  completion_percentage: "0_to_100_based_on_acceptance_criteria"
+  milestones:
+    - milestone_name: "description_and_completion_status"
+    - completion_date: "when_milestone_was_achieved"
+  blockers:
+    - blocker_description: "what_is_preventing_progress"
+    - severity: "low|medium|high|critical"
+    - owner: "who_is_responsible_for_resolution"
+
+relationships:
+  parent_relationships:
+    - parent_id: "reference_to_parent_epic_or_feature"
+    - relationship_type: "implements|extends|depends_on"
+  child_relationships:
+    - child_id: "reference_to_child_feature_or_story"
+    - dependency_type: "blocks|enables|supports"
+  cross_references:
+    - related_intents: "array_of_related_requirements"
+    - architectural_impact: "reference_to_context_files"
+
+context_optimization:
+  ai_consumption_priority:
+    high: ["intent_definition", "scope_definition", "acceptance_criteria"]
+    medium: ["technical_requirements", "progress_tracking"]
+    low: ["relationships", "detailed_implementation_notes"]
+  
+  loading_strategy:
+    active_development: "load_full_content_for_in_progress_items"
+    planning_phase: "focus_on_intent_and_scope_sections"
+    review_phase: "emphasize_acceptance_criteria_and_progress"
+
+file_lifecycle:
+  creation: "generated_by_carl_plan_command"
+  updates: "modified_during_development_and_review_cycles"
+  completion: "moved_to_completed_directory_when_done"
+  archival: "maintained_for_historical_reference_and_learning"
+
+validation_rules:
+  required_fields: ["id", "type", "what", "why", "status"]
+  id_uniqueness: "must_be_unique_within_project_scope"
+  parent_child_consistency: "parent_references_must_exist"
+  status_progression: "status_changes_must_follow_logical_sequence"
+
+migration_compatibility:
+  from_legacy_carl: "convert_existing_intent_files_to_new_format"
+  from_markdown: "extract_requirements_from_existing_documentation"
+  version_upgrades: "preserve_content_while_updating_structure"
+  data_preservation: "maintain_all_user_content_during_migration"
+
+example_minimal_structure:
+  feature_example: |
+    id: "user_authentication_system"
+    type: "feature"
+    priority: "P0"
+    status: "active"
+    
+    intent_definition:
+      what: "Secure user authentication with JWT tokens"
+      why: "Enable personalized user experiences and data security"
+      who: ["end_users", "administrators"]
+    
+    user_stories:
+      core_stories:
+        - story: "User can register with email/password"
+          acceptance_criteria:
+            - "Valid email format required"
+            - "Password strength validation"
+            - "Email verification sent"
+
+# Implementation Notes:
+# - Intent files represent WHAT needs to be built, not HOW
+# - Link to corresponding .state.carl files for implementation tracking
+# - Use references to .context.carl files for architectural relationships
+# - Keep focused on requirements, delegate technical details to other files

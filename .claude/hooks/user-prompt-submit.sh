@@ -33,7 +33,7 @@ CARL_CONTEXT=""
 STRATEGIC_CONTEXT=""
 
 # Always inject basic CARL context for commands and implementation tasks
-if echo "$PROMPT" | grep -qE "/task|/plan|/status|/analyze|implement|build|create|fix|refactor|optimize|test"; then
+if echo "$PROMPT" | grep -qE "/carl:|/task|/plan|/status|/analyze|implement|build|create|fix|refactor|optimize|test"; then
     CARL_CONTEXT=$(carl_get_active_context)
     # Add strategic context for planning and analysis
     STRATEGIC_CONTEXT=$(carl_get_strategic_context "$PROMPT")
@@ -42,6 +42,13 @@ elif echo "$PROMPT" | grep -qiE "feature|user story|requirement|bug|issue|compon
     CARL_CONTEXT=$(carl_get_targeted_context "$PROMPT")
     # Add strategic context for feature-related discussions
     STRATEGIC_CONTEXT=$(carl_get_strategic_context "$PROMPT")
+fi
+
+# Initialize session tracking if not already active
+SESSION_MANAGER="$CARL_ROOT/.carl/scripts/carl-session-manager.sh"
+if [ -f "$SESSION_MANAGER" ]; then
+    source "$SESSION_MANAGER"
+    carl_get_current_session_file > /dev/null 2>&1  # Ensure session is active
 fi
 
 # Check if Carl persona is enabled

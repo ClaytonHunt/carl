@@ -127,14 +127,24 @@ carl_get_active_context() {
         context+="$(cat "$carl_root/.carl/index.carl")\n\n"
     fi
     
-    # Add current session context
-    if [ -f "$carl_root/.carl/sessions/current.session" ]; then
-        context+="## Current Session Context\n"
-        context+="$(head -20 "$carl_root/.carl/sessions/current.session")\n\n"
+    # Add current process and workflow context
+    if [ -f "$carl_root/.carl/process.carl" ]; then
+        context+="## Current Process Context\n"
+        context+="$(head -15 "$carl_root/.carl/process.carl")\n\n"
     fi
     
-    # Add recent CARL file updates (top 5 most recent)
-    local recent_files=$(find "$carl_root/.carl" -name "*.intent" -o -name "*.state" -o -name "*.context" | xargs ls -t 2>/dev/null | head -5)
+    # Add current session context using new session manager
+    local session_manager="$carl_root/.carl/scripts/carl-session-manager.sh"
+    if [ -f "$session_manager" ]; then
+        source "$session_manager"
+        local session_context="$(carl_get_session_context)"
+        if [ -n "$session_context" ]; then
+            context+="$session_context\n"
+        fi
+    fi
+    
+    # Add recent CARL file updates (top 5 most recent) - updated file extensions
+    local recent_files=$(find "$carl_root/.carl" -name "*.intent.carl" -o -name "*.state.carl" -o -name "*.context.carl" | xargs ls -t 2>/dev/null | head -5)
     if [ -n "$recent_files" ]; then
         context+="## Recently Updated CARL Files\n"
         echo "$recent_files" | while read file; do
@@ -182,18 +192,18 @@ carl_get_targeted_context() {
 }
 
 # Strategic context extraction functions
-carl_extract_mission_essence() {
-    local mission_file="$1"
+carl_extract_vision_essence() {
+    local vision_file="$1"
     
-    if [ ! -f "$mission_file" ]; then
+    if [ ! -f "$vision_file" ]; then
         return 0
     fi
     
-    # Extract only the core mission elements (not full template)
+    # Extract only the core vision elements (not full template)
     {
-        grep -A 2 "elevator_pitch:" "$mission_file" 2>/dev/null | grep -v "^--$"
-        grep -A 3 "current_priorities:" "$mission_file" 2>/dev/null | grep -v "^--$"
-        grep -A 2 "target_users:" "$mission_file" 2>/dev/null | grep -v "^--$"
+        grep -A 2 "mission_statement:" "$vision_file" 2>/dev/null | grep -v "^--$"
+        grep -A 3 "value_proposition:" "$vision_file" 2>/dev/null | grep -v "^--$"
+        grep -A 2 "target_impact:" "$vision_file" 2>/dev/null | grep -v "^--$"
     } | head -15
 }
 
@@ -230,10 +240,10 @@ carl_get_strategic_context() {
     local context=""
     
     # Determine context depth needed based on prompt content
-    if echo "$prompt" | grep -qE "/plan|/analyze|major|strategic|roadmap|mission|decision"; then
+    if echo "$prompt" | grep -qE "/carl:plan|/carl:analyze|major|strategic|roadmap|vision|decision"; then
         # DEEP CONTEXT - for planning and analysis commands
-        context+="## Mission Context\n"
-        context+="$(carl_extract_mission_essence "$carl_root/.carl/mission.carl")\n\n"
+        context+="## Vision Context\n"
+        context+="$(carl_extract_vision_essence "$carl_root/.carl/vision.carl")\n\n"
         
         context+="## Current Roadmap Phase\n" 
         context+="$(carl_extract_roadmap_current_context "$carl_root/.carl/roadmap.carl")\n\n"
@@ -246,8 +256,8 @@ carl_get_strategic_context() {
         context+="## Current Focus\n"
         context+="$(carl_extract_roadmap_current_context "$carl_root/.carl/roadmap.carl")\n\n"
         
-        context+="## Mission Goals\n"
-        context+="$(grep -A 3 'success_criteria:' "$carl_root/.carl/mission.carl" 2>/dev/null)\n\n"
+        context+="## Vision Goals\n"
+        context+="$(grep -A 3 'success_criteria:' "$carl_root/.carl/vision.carl" 2>/dev/null)\n\n"
         
     else
         # LIGHT CONTEXT - for general development
@@ -477,19 +487,20 @@ carl_generate_next_session_recommendations() {
     echo "• Use /analyze --sync to refresh CARL context if needed"
 }
 
-# Index management
+# Index management - DEPRECATED: Session data now handled separately
+# This function is kept for backward compatibility but no longer modifies index.carl
 carl_update_index_with_session_data() {
     local carl_root="$(carl_get_root)"
-    local index_file="$carl_root/.carl/index.carl"
+    local session_manager="$carl_root/.carl/scripts/carl-session-manager.sh"
     
-    # Update index with session information
-    if [ -f "$index_file" ]; then
-        echo "" >> "$index_file"
-        echo "# Last Session: $(date -Iseconds)" >> "$index_file"
-        echo "session_duration: $(carl_calculate_session_duration)" >> "$index_file"
-        echo "activities_completed: $(carl_get_session_activities | wc -l)" >> "$index_file"
-        echo "milestones_achieved: $(carl_get_session_milestones | wc -l)" >> "$index_file"
+    # Use new session manager instead of polluting index.carl
+    if [ -f "$session_manager" ]; then
+        source "$session_manager"
+        carl_update_session_metrics
     fi
+    
+    # Legacy behavior disabled to prevent index.carl pollution
+    # Index.carl should only contain project structure and requirements
 }
 
 # Update session activity tracking

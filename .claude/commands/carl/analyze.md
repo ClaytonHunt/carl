@@ -30,14 +30,13 @@ When team members commit changes without using CARL:
 Launch async CARL-optimized specialist subagents for comprehensive analysis:
 
 ```
-Task: Architecture specialist (carl-architecture-analyst) - analyze system structure for CARL intent mapping, identify major components and their relationships, assess system boundaries for feature extraction
-Task: Backend specialist (carl-backend-analyst) - catalog API endpoints for CARL context files, extract data models and business logic patterns, identify service dependencies
-Task: Frontend specialist (carl-frontend-analyst) - identify UI components and user workflows for CARL intent files, extract user journeys and interaction patterns
-Task: Database specialist (carl-database-analyst) - map database schema to CARL context relationships, identify data flow patterns for dependency analysis
-Task: QA specialist (carl-quality-analyst) - assess existing test coverage for CARL state files, identify testing gaps and quality metrics
-Task: Security specialist (carl-security-analyst) - evaluate security patterns for CARL compliance tracking, identify security constraints and requirements
-Task: Requirements specialist (carl-requirements-analyst) - extract implicit requirements from code patterns, identify missing business rules and constraints
-Task: Technical debt analyst (carl-debt-analyst) - identify technical debt items for CARL state tracking, assess refactoring opportunities and maintenance needs
+Task: Architecture specialist (carl-architecture-analyst) - analyze system structure and generate .context.carl files mapping component relationships, identify major architectural patterns for system.context.carl
+Task: Backend specialist (carl-backend-analyst) - catalog API endpoints and data models for backend.context.carl, extract service dependencies and generate api.state.carl tracking
+Task: Frontend specialist (carl-frontend-analyst) - identify UI components and user workflows for frontend.context.carl, extract user journeys for ui.state.carl tracking  
+Task: Requirements specialist (carl-requirements-analyst) - extract implicit requirements from code patterns, generate feature.intent.carl files for discovered capabilities
+Task: QA specialist (carl-quality-analyst) - assess existing test coverage and generate testing.state.carl, identify quality metrics for quality.context.carl
+Task: Security specialist (carl-security-analyst) - evaluate security patterns and generate security.context.carl, identify compliance requirements for security.state.carl
+Task: Technical debt analyst (carl-debt-analyst) - identify technical debt items and generate debt.state.carl tracking, assess refactoring opportunities for maintenance.context.carl
 ```
 
 ### 2. Feature Extraction

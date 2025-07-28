@@ -1,0 +1,215 @@
+# CARL Context Format Specification
+# Version: 1.0
+# Purpose: Define structure for [name].context.carl files tracking system relationships
+
+format_specification:
+  artifact_type: "context"
+  file_extension: ".context.carl"
+  ai_optimized: true
+  relationship_mapping: true
+  architectural_focus: true
+
+required_sections:
+  context_metadata:
+    - context_id: "unique_identifier_for_this_context"
+    - context_type: "system|service|component|integration|data_flow"
+    - scope: "describes_what_this_context_covers"
+    - related_intents: "array_of_intent_files_this_context_supports"
+    - last_updated: "iso_timestamp_of_most_recent_analysis"
+    - analysis_confidence: "high|medium|low_based_on_code_analysis_depth"
+
+  architectural_overview:
+    - system_purpose: "what_this_system_or_component_does"
+    - architectural_pattern: "MVC|microservices|layered|event_driven|etc"
+    - design_principles: "array_of_guiding_architectural_principles"
+    - quality_attributes: "performance|security|scalability|maintainability_focus"
+
+  component_relationships:
+    parent_components:
+      - component: "name_of_containing_or_parent_system"
+        relationship: "contains|implements|extends|uses"
+        coupling_strength: "tight|loose|decoupled"
+        dependency_direction: "inbound|outbound|bidirectional"
+        
+    child_components:
+      - component: "name_of_contained_or_child_component"
+        relationship: "contains|owns|manages|delegates_to"
+        interface_type: "API|event|database|file_system"
+        criticality: "critical|important|optional"
+
+    peer_relationships:
+      - component: "name_of_sibling_or_peer_component"  
+        interaction_type: "synchronous|asynchronous|batch|event_driven"
+        data_exchange: "description_of_data_shared"
+        failure_impact: "what_happens_when_peer_fails"
+
+  external_dependencies:
+    services:
+      - service_name: "external_service_or_api"
+        dependency_type: "required|optional|fallback"
+        integration_pattern: "REST|GraphQL|message_queue|database"
+        failure_handling: "circuit_breaker|retry|graceful_degradation"
+        sla_requirements: "uptime_and_performance_expectations"
+        
+    data_sources:
+      - source_name: "database_or_data_store"
+        access_pattern: "read_only|read_write|write_only|cache"
+        consistency_requirements: "eventual|strong|session"
+        backup_strategy: "how_data_loss_is_prevented"
+
+    external_libraries:
+      - library_name: "third_party_dependency"
+        version_constraints: "version_requirements_and_compatibility"
+        purpose: "why_this_library_is_used"
+        alternatives: "other_options_considered"
+        security_considerations: "known_vulnerabilities_or_concerns"
+
+  data_flow_mapping:
+    input_flows:
+      - source: "where_data_comes_from"
+        data_type: "description_of_data_structure"
+        volume: "expected_data_volume_and_frequency"
+        validation: "how_input_data_is_validated"
+        
+    output_flows:
+      - destination: "where_data_goes_to"
+        data_type: "description_of_data_structure"
+        transformation: "how_data_is_modified_or_processed"
+        delivery_guarantee: "at_least_once|exactly_once|best_effort"
+
+    internal_flows:
+      - flow_description: "how_data_moves_within_the_system"
+        processing_stages: "array_of_data_transformation_steps"
+        storage_points: "where_data_is_persisted_temporarily_or_permanently"
+
+  integration_points:
+    api_contracts:
+      - endpoint: "API_endpoint_or_interface"
+        contract_type: "REST|GraphQL|gRPC|message_schema"
+        versioning_strategy: "how_API_changes_are_managed"
+        backward_compatibility: "compatibility_guarantees_provided"
+        
+    event_contracts:
+      - event_type: "published_or_consumed_event"
+        schema: "event_data_structure"
+        frequency: "expected_event_volume"
+        ordering_requirements: "whether_event_order_matters"
+
+    database_contracts:
+      - table_or_schema: "database_structure_dependency"
+        access_pattern: "how_data_is_read_and_written"
+        migration_strategy: "how_schema_changes_are_handled"
+        performance_requirements: "query_performance_expectations"
+
+  architectural_constraints:
+    performance_constraints:
+      - constraint_type: "latency|throughput|resource_usage"
+        requirement: "specific_performance_target"
+        measurement_method: "how_performance_is_monitored"
+        
+    security_constraints:
+      - security_requirement: "authentication|authorization|encryption|audit"
+        implementation_approach: "how_security_is_enforced"
+        compliance_standards: "relevant_regulatory_requirements"
+
+    scalability_constraints:
+      - scaling_dimension: "horizontal|vertical|geographic"
+        scaling_triggers: "when_scaling_should_occur"
+        scaling_limits: "maximum_expected_scale"
+
+  technology_decisions:
+    framework_choices:
+      - technology: "chosen_framework_or_platform"
+        rationale: "why_this_technology_was_selected"
+        alternatives_considered: "other_options_evaluated"
+        migration_path: "how_to_change_if_needed"
+        
+    infrastructure_decisions:
+      - infrastructure_component: "hosting|database|messaging|caching"
+        chosen_solution: "specific_technology_selected"
+        cost_considerations: "financial_impact_of_choice"
+        operational_requirements: "maintenance_and_monitoring_needs"
+
+context_analysis:
+  change_impact_assessment:
+    - "identify_components_affected_by_potential_changes"
+    - "assess_ripple_effects_of_architectural_modifications"
+    - "predict_integration_challenges_for_new_requirements"
+    
+  risk_assessment:
+    - "single_points_of_failure_in_current_architecture"
+    - "dependencies_that_could_cause_system_wide_issues"
+    - "areas_where_technical_debt_poses_architectural_risk"
+
+  optimization_opportunities:
+    - "bottlenecks_that_could_be_addressed"
+    - "redundancies_that_could_be_eliminated"
+    - "areas_where_architectural_patterns_could_be_improved"
+
+context_optimization:
+  ai_consumption_priority:
+    high: ["component_relationships", "external_dependencies", "integration_points"]
+    medium: ["data_flow_mapping", "architectural_constraints"]
+    low: ["historical_decisions", "detailed_technical_specifications"]
+    
+  loading_strategy:
+    development_phase: "focus_on_integration_points_and_dependencies"
+    architecture_review: "emphasize_relationships_and_constraints"
+    troubleshooting: "highlight_failure_points_and_dependencies"
+
+automated_analysis:
+  code_analysis_integration:
+    - "extract_relationships_from_import_statements"
+    - "identify_dependencies_from_configuration_files"
+    - "map_api_calls_to_external_services"
+    - "analyze_database_schema_relationships"
+    
+  update_triggers:
+    - "new_dependencies_added_to_project"
+    - "architectural_patterns_changed"
+    - "external_service_integrations_modified"
+    - "performance_characteristics_significantly_changed"
+
+validation_rules:
+  relationship_consistency: "parent_child_relationships_must_be_mutual"
+  dependency_validation: "external_dependencies_must_be_reachable_and_valid"
+  contract_verification: "API_and_event_contracts_must_match_implementations"
+  constraint_feasibility: "architectural_constraints_must_be_technically_achievable"
+
+migration_compatibility:
+  from_documentation: "extract_architectural_information_from_existing_docs"
+  from_code_analysis: "generate_context_from_automated_code_analysis"
+  incremental_building: "allow_context_to_be_built_up_over_time"
+  legacy_integration: "handle_existing_systems_without_complete_documentation"
+
+example_structure:
+  service_context: |
+    context_id: "user_authentication_service"
+    context_type: "service"
+    scope: "User authentication and authorization system"
+    
+    component_relationships:
+      parent_components:
+        - component: "User Management System"
+          relationship: "implements"
+          coupling_strength: "loose"
+          
+      child_components:
+        - component: "JWT Token Manager"
+          relationship: "contains"
+          interface_type: "internal_API"
+          criticality: "critical"
+          
+    external_dependencies:
+      services:
+        - service_name: "Email Service"
+          dependency_type: "required"
+          integration_pattern: "REST"
+          failure_handling: "circuit_breaker"
+
+# Implementation Notes:
+# - Context files map HOW components relate to each other
+# - Should be updated when architectural changes occur
+# - Enable impact analysis for proposed changes
+# - Support both manual documentation and automated analysis
+# - Focus on relationships that affect development and maintenance

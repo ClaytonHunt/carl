@@ -9,32 +9,32 @@ carl_audio_get_root() {
     echo "$(cd "$script_dir/../.." && pwd)"
 }
 
-# Load personalities from personalities.carl file
+# Load personalities from personalities.config.carl file
 load_personalities() {
     local carl_root="$(carl_audio_get_root)"
-    local personalities_file="$carl_root/.carl/personalities.carl"
+    local personalities_file="$carl_root/.carl/personalities.config.carl"
     
     # Check if personalities file exists
     if [ ! -f "$personalities_file" ]; then
-        echo "⚠️  personalities.carl not found, using fallback personalities" >&2
+        echo "⚠️  personalities.config.carl not found, using fallback personalities" >&2
         return 1
     fi
     
     # Validate YAML format (basic check)
     if ! grep -q "personality_system:" "$personalities_file" 2>/dev/null; then
-        echo "⚠️  Invalid personalities.carl format, using fallback personalities" >&2
+        echo "⚠️  Invalid personalities.config.carl format, using fallback personalities" >&2
         return 1
     fi
     
     return 0
 }
 
-# Parse character data from personalities.carl
+# Parse character data from personalities.config.carl
 get_character_data() {
     local character="$1"
     local data_type="$2"  # "catchphrases", "transforms", "voice_config", etc.
     local carl_root="$(carl_audio_get_root)"
-    local personalities_file="$carl_root/.carl/personalities.carl"
+    local personalities_file="$carl_root/.carl/personalities.config.carl"
     
     if [ ! -f "$personalities_file" ]; then
         return 1
@@ -60,14 +60,14 @@ get_character_data() {
     esac
 }
 
-# Apply character-specific personality transforms from personalities.carl
+# Apply character-specific personality transforms from personalities.config.carl
 add_character_personality() {
     local character="$1"
     local message="$2"
     local carl_root="$(carl_audio_get_root)"
-    local personalities_file="$carl_root/.carl/personalities.carl"
+    local personalities_file="$carl_root/.carl/personalities.config.carl"
     
-    # If personalities.carl doesn't exist or is invalid, use fallback
+    # If personalities.config.carl doesn't exist or is invalid, use fallback
     if ! load_personalities; then
         # Fallback to original hardcoded personalities for Jimmy Neutron characters
         case "$character" in
@@ -93,7 +93,7 @@ add_character_personality() {
         return
     fi
     
-    # Parse transforms from personalities.carl file
+    # Parse transforms from personalities.config.carl file
     local transformed_message="$message"
     local char_lower=$(echo "$character" | tr '[:upper:]' '[:lower:]')
     
@@ -183,11 +183,11 @@ add_character_personality() {
     echo "$transformed_message"
 }
 
-# Get characters available for a context from personalities.carl
+# Get characters available for a context from personalities.config.carl
 get_characters_for_context() {
     local category="$1"
     local carl_root="$(carl_audio_get_root)"
-    local personalities_file="$carl_root/.carl/personalities.carl"
+    local personalities_file="$carl_root/.carl/personalities.config.carl"
     local available_characters=()
     
     if [ ! -f "$personalities_file" ]; then
@@ -238,13 +238,13 @@ get_characters_for_context() {
     printf '%s\n' "${available_characters[@]}"
 }
 
-# Character selection with color coding from personalities.carl
+# Character selection with color coding from personalities.config.carl
 carl_select_character() {
     local category="$1"
     local characters
     local character_colors
     
-    # Try to get characters from personalities.carl
+    # Try to get characters from personalities.config.carl
     if load_personalities; then
         local available_chars=($(get_characters_for_context "$category"))
         if [ ${#available_chars[@]} -gt 0 ]; then
@@ -269,7 +269,7 @@ carl_select_character() {
         fi
     fi
     
-    # Fallback to hardcoded Jimmy Neutron characters if personalities.carl fails
+    # Fallback to hardcoded Jimmy Neutron characters if personalities.config.carl fails
     if [ ${#characters[@]} -eq 0 ]; then
         case "$category" in
             "start"|"session")
@@ -418,12 +418,12 @@ carl_play_audio_file() {
     return 1
 }
 
-# Get voice settings for character from personalities.carl
+# Get voice settings for character from personalities.config.carl
 get_character_voice_settings() {
     local character="$1"
     local platform="$2"  # "macos", "linux_espeak", "windows"
     local carl_root="$(carl_audio_get_root)"
-    local personalities_file="$carl_root/.carl/personalities.carl"
+    local personalities_file="$carl_root/.carl/personalities.config.carl"
     
     if [ ! -f "$personalities_file" ]; then
         return 1
@@ -477,7 +477,7 @@ get_character_voice_settings() {
     done < "$personalities_file"
 }
 
-# Text-to-speech with personalities.carl voice settings
+# Text-to-speech with personalities.config.carl voice settings
 carl_speak_message() {
     local message="$1"
     local character="${2:-carl}"  # Default to carl if no character specified
@@ -492,7 +492,7 @@ carl_speak_message() {
                 local voice="Alex"  # default
                 local rate=200      # default
                 
-                # Try to get voice settings from personalities.carl
+                # Try to get voice settings from personalities.config.carl
                 if load_personalities; then
                     local voice_settings=$(get_character_voice_settings "$character" "macos")
                     if [ -n "$voice_settings" ]; then

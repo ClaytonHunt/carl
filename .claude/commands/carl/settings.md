@@ -10,26 +10,26 @@ CARL provides extensive customization options to adapt to different team prefere
 
 ### 1. Quick Settings Management
 ```bash
-/settings                              # Show current CARL configuration
-/settings --audio off                  # Disable Carl Wheezer audio system
-/settings --depth comprehensive        # Set maximum analysis depth
-/settings --team-size 8                # Configure for larger team context
+/carl:settings                              # Show current CARL configuration
+/carl:settings --audio off                  # Disable personality audio system
+/carl:settings --depth comprehensive        # Set maximum analysis depth
+/carl:settings --team-size 8                # Configure for larger team context
 ```
 
 ### 2. Audio System Configuration
 ```bash
-/settings --audio on                   # Enable Carl Wheezer audio
-/settings --audio off                  # Enable quiet mode
-/settings --audio-volume 70            # Set audio volume (0-100)
-/settings --audio-test                 # Test audio system functionality
+/carl:settings --audio on                   # Enable personality audio
+/carl:settings --audio off                  # Enable quiet mode
+/carl:settings --audio-volume 70            # Set audio volume (0-100)
+/carl:settings --audio-test                 # Test audio system functionality
 ```
 
 ### 3. Analysis and Planning Preferences
 ```bash
-/settings --analysis-depth minimal     # Faster, lightweight analysis
-/settings --analysis-depth comprehensive # Deep, thorough analysis
-/settings --planning-style agile       # Agile-focused planning templates
-/settings --planning-style waterfall   # Traditional project planning
+/carl:settings --analysis-depth minimal     # Faster, lightweight analysis
+/carl:settings --analysis-depth comprehensive # Deep, thorough analysis
+/carl:settings --planning-style agile       # Agile-focused planning templates
+/carl:settings --planning-style waterfall   # Traditional project planning
 ```
 
 ## CARL Settings Categories
