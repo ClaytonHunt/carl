@@ -97,11 +97,11 @@ AI Layer: Structured CARL files (.intent, .state, .context, index.carl)
 **Decision**: Reduce from 6+ complex planning commands to 5 adaptive core commands
 
 **Core Commands**:
-1. `/analyze` - Scan and generate CARL files from existing code
-2. `/plan` - Intelligent, context-aware planning (auto-detects epic/feature/story scope)
-3. `/status` - AI-powered progress monitoring and recommendations
-4. `/task` - Context-aware task execution with CARL integration
-5. `/settings` - Configure CARL behavior and preferences
+1. `/carl:analyze` - Scan and generate CARL files from existing code
+2. `/carl:plan` - Intelligent, context-aware planning (auto-detects epic/feature/story scope)
+3. `/carl:status` - AI-powered progress monitoring and recommendations
+4. `/carl:task` - Context-aware task execution with CARL integration
+5. `/carl:settings` - Configure CARL behavior and preferences
 
 **Rationale**:
 - Reduced cognitive load - fewer commands to remember
@@ -110,7 +110,7 @@ AI Layer: Structured CARL files (.intent, .state, .context, index.carl)
 - Self-contained - each command is comprehensive for its purpose
 
 **Eliminated Complexity**:
-- No separate epic/feature/story commands - `/plan` handles all
+- No separate epic/feature/story commands - `/carl:plan` handles all
 - No separate breakdown commands - integrated into planning
 - No separate sync commands - handled automatically
 

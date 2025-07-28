@@ -10,24 +10,24 @@ CARL automatically reads all CARL files and provides comprehensive status insigh
 
 ### 1. Comprehensive Project Status
 ```bash
-/status                          # Complete project health dashboard
-/status --summary               # Executive summary view
-/status --detailed              # Deep dive with all metrics
+/carl:status                          # Complete project health dashboard
+/carl:status --summary               # Executive summary view
+/carl:status --detailed              # Deep dive with all metrics
 ```
 
 ### 2. Filtered Status Views
 ```bash
-/status --features              # Feature-level progress only
-/status --technical-debt        # Technical debt and code quality focus
-/status --dependencies          # Dependency health and blockers
-/status --team frontend-team    # Team-specific progress view
+/carl:status --features              # Feature-level progress only
+/carl:status --technical-debt        # Technical debt and code quality focus
+/carl:status --dependencies          # Dependency health and blockers
+/carl:status --team frontend-team    # Team-specific progress view
 ```
 
 ### 3. Time-Based Analysis
 ```bash
-/status --since "last week"     # Changes since last week
-/status --sprint current        # Current sprint progress
-/status --trend 30d             # 30-day trend analysis
+/carl:status --since "last week"     # Changes since last week
+/carl:status --sprint current        # Current sprint progress
+/carl:status --trend 30d             # 30-day trend analysis
 ```
 
 ## CARL Status Analysis Process
@@ -289,27 +289,27 @@ Based on current trends and CARL data analysis:
 
 ### View-Specific Status
 ```bash
-/status --features                    # Feature progress focus
-/status --technical                   # Technical health focus  
-/status --team                        # Team performance focus
-/status --dependencies                # External dependency status
-/status --security                    # Security and compliance status
+/carl:status --features                    # Feature progress focus
+/carl:status --technical                   # Technical health focus  
+/carl:status --team                        # Team performance focus
+/carl:status --dependencies                # External dependency status
+/carl:status --security                    # Security and compliance status
 ```
 
 ### Time-Based Analysis
 ```bash
-/status --daily                       # Daily standup summary
-/status --sprint                      # Sprint progress detail
-/status --monthly                     # Monthly executive report
-/status --trend 30d                   # 30-day trend analysis
+/carl:status --daily                       # Daily standup summary
+/carl:status --sprint                      # Sprint progress detail
+/carl:status --monthly                     # Monthly executive report
+/carl:status --trend 30d                   # 30-day trend analysis
 ```
 
 ### Export and Integration
 ```bash
-/status --export pdf                  # Generate PDF report
-/status --slack                       # Post summary to Slack
-/status --email stakeholders          # Email status to stakeholders
-/status --dashboard                   # Launch interactive dashboard
+/carl:status --export pdf                  # Generate PDF report
+/carl:status --slack                       # Post summary to Slack
+/carl:status --email stakeholders          # Email status to stakeholders
+/carl:status --dashboard                   # Launch interactive dashboard
 ```
 
 ## Success Criteria
@@ -323,13 +323,58 @@ Based on current trends and CARL data analysis:
 - [ ] Real-time status updates reflect current project state accurately
 - [ ] Integration with team workflows and external tools functions smoothly
 
+## CARL-First Status Analysis
+
+### Primary Data Sources (95% of requests)
+1. **CARL Files**: `.carl/index.carl`, session files, state tracking data
+2. **Hook-Maintained Data**: Real-time session progress from Claude Code hooks
+3. **Git Metadata**: Recent commit history and branch status (lightweight)
+
+### Secondary Data Sources (Only when CARL data insufficient)
+4. **Selective Code Scanning**: Only specific files identified by CARL analysis
+5. **External APIs**: Only when explicitly requested or CARL indicates integration issues
+
+### Performance Optimization
+- **Fast Path**: Read CARL files first, determine if sufficient for request
+- **Selective Scanning**: Only scan additional files when specific gaps identified
+- **Session Priority**: Trust hook-maintained session data as authoritative source
+- **Cached Analysis**: Leverage previously analyzed data from CARL state files
+
 ## Integration Points
 
-- **Input**: All CARL files, git history, external tool APIs, team calendar data
-- **Output**: Comprehensive status dashboard, recommendations, predictive analysis
+- **Primary Input**: CARL files (index.carl, session files, hook data)
+- **Secondary Input**: Selective code scanning only when CARL data has gaps
+- **Output**: Comprehensive status dashboard prioritizing CARL-maintained insights
 - **Next Commands**:
-  - `/plan [recommendation]` to plan recommended improvements
-  - `/task [critical-issue]` to address immediate issues
-  - `/analyze --sync` to refresh CARL data before status analysis
+  - `/carl:plan [recommendation]` to plan recommended improvements
+  - `/carl:task [critical-issue]` to address immediate issues
+  - `/carl:analyze --sync` to refresh CARL data before status analysis
 
-CARL's status system provides unprecedented visibility into project health by combining comprehensive CARL file analysis with AI-powered insights and predictions, enabling proactive project management and informed decision-making.
+## Efficient Status Workflow
+
+### Step 1: Read CARL Files (Always First)
+```bash
+# Priority order for file reading:
+1. .carl/index.carl - Project overview and current state
+2. .carl/sessions/*.session - Recent development sessions  
+3. .carl/config/carl-settings.json - Project configuration
+4. Hook-generated session data - Real-time progress tracking
+```
+
+### Step 2: Assess Data Completeness
+- **If CARL files provide sufficient context**: Generate status report immediately
+- **If specific gaps identified**: Only then read additional targeted files
+- **Never scan entire codebase**: Trust CARL-maintained state as authoritative
+
+### Step 3: Generate Insights
+- **Primary**: Use CARL file data for 95% of status information
+- **Supplementary**: Add targeted file analysis only for identified gaps
+- **Efficient**: Leverage hook-maintained session progress as current state
+
+### Implementation Guidelines
+- **Read CARL files first**: Always start with comprehensive CARL file analysis
+- **Trust the hooks**: Session data from hooks is authoritative for current state
+- **Selective expansion**: Only read additional files when CARL data has specific gaps
+- **Performance target**: 95% of status requests served from CARL files alone
+
+CARL's optimized status system provides comprehensive project health insights by prioritizing CARL-maintained data, ensuring fast response times while maintaining accuracy and completeness.

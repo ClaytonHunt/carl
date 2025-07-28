@@ -9,103 +9,291 @@ carl_audio_get_root() {
     echo "$(cd "$script_dir/../.." && pwd)"
 }
 
-# Add character-specific personality to messages
-add_character_personality() {
-    local character="$1"
-    local message="$2"
+# Load personalities from personalities.carl file
+load_personalities() {
+    local carl_root="$(carl_audio_get_root)"
+    local personalities_file="$carl_root/.carl/personalities.carl"
     
-    case "$character" in
-        "Jimmy")
-            # Jimmy: confident, scientific, leadership
-            echo "$message" | sed -E 's/\b(great|good|nice)\b/brain blast!/gi' | \
-            sed -E 's/\b(let'\''s|we should)\b/according to my calculations, we should/gi' | \
-            sed -E 's/\b(done|finished|complete)\b/scientifically sound!/gi'
+    # Check if personalities file exists
+    if [ ! -f "$personalities_file" ]; then
+        echo "⚠️  personalities.carl not found, using fallback personalities" >&2
+        return 1
+    fi
+    
+    # Validate YAML format (basic check)
+    if ! grep -q "personality_system:" "$personalities_file" 2>/dev/null; then
+        echo "⚠️  Invalid personalities.carl format, using fallback personalities" >&2
+        return 1
+    fi
+    
+    return 0
+}
+
+# Parse character data from personalities.carl
+get_character_data() {
+    local character="$1"
+    local data_type="$2"  # "catchphrases", "transforms", "voice_config", etc.
+    local carl_root="$(carl_audio_get_root)"
+    local personalities_file="$carl_root/.carl/personalities.carl"
+    
+    if [ ! -f "$personalities_file" ]; then
+        return 1
+    fi
+    
+    # Basic YAML parsing for character data
+    # This is a simplified parser - in production, might want to use proper YAML parser
+    case "$data_type" in
+        "catchphrases")
+            # Extract catchphrases array for character
+            sed -n "/characters:/,/^[[:space:]]*[^[:space:]]/p" "$personalities_file" | \
+            sed -n "/${character}:/,/^[[:space:]]*[a-zA-Z]/p" | \
+            sed -n "/catchphrases:/,/^[[:space:]]*[a-zA-Z]/p" | \
+            grep -E '^\s*-\s*".*"' | sed 's/.*"\(.*\)".*/\1/'
             ;;
-        "Carl")
-            # Carl: wheezy, nervous, enthusiastic about odd things
-            local carl_phrases=("Llamas!" "Croissant!" "Are you gonna finish that croissant?")
-            local random_phrase="${carl_phrases[$((RANDOM % ${#carl_phrases[@]}))]}"
-            echo "$random_phrase Oh, um, $message"
-            ;;
-        "Sheen")
-            # Sheen: hyperactive, obsessed with Ultra Lord
-            echo "$message" | sed -E 's/\b(awesome|cool|great)\b/ULTRA LORD!/gi' | \
-            sed -E 's/\b(ready|excited)\b/ultra-mega ready!/gi' | \
-            sed -E 's/$/! This is like an Ultra Lord episode!/'
-            ;;
-        "Cindy")
-            # Cindy: competitive, sarcastic, intelligent
-            echo "$message" | sed -E 's/\b(obviously|clearly)\b/as if that wasn'\''t obvious/gi' | \
-            sed -E 's/^/Well, /gi' | \
-            sed -E 's/$/, unlike some people I know./'
-            ;;
-        "Libby")
-            # Libby: cool, supportive, uses slang
-            echo "$message" | sed -E 's/\b(good|great)\b/totally cool/gi' | \
-            sed -E 's/\b(yes|okay)\b/for sure, girlfriend/gi' | \
-            sed -E 's/^/Girl, /'
-            ;;
-        "Hugh")
-            # Hugh: absent-minded, obsessed with ducks and pies
-            local hugh_topics=("ducks" "pie" "Purple Flurp")
-            local random_topic="${hugh_topics[$((RANDOM % ${#hugh_topics[@]}))]}"
-            echo "You know, this reminds me of $random_topic... Oh! $message"
-            ;;
-        "Judy")
-            # Judy: caring mother, organized, slightly overprotective
-            echo "Now sweetie, $message And don't forget to wear your safety goggles!"
-            ;;
-        "Ms. Fowl")
-            # Ms. Fowl: bird-like speech patterns, strict teacher
-            echo "$message" | sed -E 's/\b(understand|know)\b/comprehend/gi' | \
-            sed -E 's/$/... *squawk*/' | \
-            sed -E 's/^/Class, pay attention! /'
-            ;;
-        "Sam")
-            # Sam: candy shop owner, cheerful, business-focused
-            echo "Welcome to the Candy Bar! $message Have some free samples!"
-            ;;
-        "Principal Willoughby")
-            # Principal Willoughby: authoritative, school-focused
-            echo "$message" | sed -E 's/^/Attention students! /' | \
-            sed -E 's/$/ Remember to follow school policy at all times!/'
-            ;;
-        *)
-            # Default - return message unchanged
-            echo "$message"
+        "voice_macos")
+            # Extract macOS voice settings
+            sed -n "/characters:/,/^[[:space:]]*[^[:space:]]/p" "$personalities_file" | \
+            sed -n "/${character}:/,/^[[:space:]]*[a-zA-Z]/p" | \
+            sed -n "/platform_voices:/,/^[[:space:]]*[a-zA-Z]/p" | \
+            sed -n "/macos:/,/^[[:space:]]*[a-zA-Z]/p"
             ;;
     esac
 }
 
-# Jimmy Neutron character selection and color coding
+# Apply character-specific personality transforms from personalities.carl
+add_character_personality() {
+    local character="$1"
+    local message="$2"
+    local carl_root="$(carl_audio_get_root)"
+    local personalities_file="$carl_root/.carl/personalities.carl"
+    
+    # If personalities.carl doesn't exist or is invalid, use fallback
+    if ! load_personalities; then
+        # Fallback to original hardcoded personalities for Jimmy Neutron characters
+        case "$character" in
+            "Jimmy"|"jimmy")
+                echo "$message" | sed -E 's/\b(great|good|nice)\b/brain blast!/gi' | \
+                sed -E 's/\b(let'\''s|we should)\b/according to my calculations, we should/gi' | \
+                sed -E 's/\b(done|finished|complete)\b/scientifically sound!/gi'
+                ;;
+            "Carl"|"carl")
+                local carl_phrases=("Llamas!" "Croissant!" "Are you gonna finish that croissant?")
+                local random_phrase="${carl_phrases[$((RANDOM % ${#carl_phrases[@]}))]}"
+                echo "$random_phrase Oh, um, $message"
+                ;;
+            "Sheen"|"sheen")
+                echo "$message" | sed -E 's/\b(awesome|cool|great)\b/ULTRA LORD!/gi' | \
+                sed -E 's/\b(ready|excited)\b/ultra-mega ready!/gi' | \
+                sed -E 's/$/! This is like an Ultra Lord episode!/'
+                ;;
+            *)
+                echo "$message"
+                ;;
+        esac
+        return
+    fi
+    
+    # Parse transforms from personalities.carl file
+    local transformed_message="$message"
+    local char_lower=$(echo "$character" | tr '[:upper:]' '[:lower:]')
+    
+    # Extract message transforms for this character
+    local in_character=false
+    local in_transforms=false
+    
+    while IFS= read -r line; do
+        # Check if we're in the right character section
+        if [[ "$line" =~ ^[[:space:]]*${char_lower}:[[:space:]]*$ ]]; then
+            in_character=true
+            continue
+        elif [[ "$line" =~ ^[[:space:]]*[a-zA-Z_]+:[[:space:]]*$ ]] && [ "$in_character" = true ]; then
+            # Entered a new character section
+            in_character=false
+            in_transforms=false
+            continue
+        fi
+        
+        # Check if we're in the message_transforms section
+        if [ "$in_character" = true ] && [[ "$line" =~ ^[[:space:]]*message_transforms:[[:space:]]*$ ]]; then
+            in_transforms=true
+            continue
+        elif [ "$in_character" = true ] && [[ "$line" =~ ^[[:space:]]*[a-zA-Z_]+:[[:space:]]*$ ]]; then
+            in_transforms=false
+            continue
+        fi
+        
+        # Process transform rules
+        if [ "$in_transforms" = true ]; then
+            if [[ "$line" =~ pattern:[[:space:]]*\"(.*)\" ]]; then
+                local pattern="${BASH_REMATCH[1]}"
+                # Store pattern for next replacement line
+                current_pattern="$pattern"
+            elif [[ "$line" =~ replacement:[[:space:]]*\"(.*)\" ]]; then
+                local replacement="${BASH_REMATCH[1]}"
+                # Store replacement for next type line
+                current_replacement="$replacement"
+            elif [[ "$line" =~ type:[[:space:]]*\"(.*)\" ]]; then
+                local transform_type="${BASH_REMATCH[1]}"
+                
+                # Apply the transformation
+                case "$transform_type" in
+                    "replace")
+                        if [ -n "$current_pattern" ] && [ -n "$current_replacement" ]; then
+                            # Handle special replacement tokens
+                            if [[ "$current_replacement" == *"{random_catchphrase}"* ]]; then
+                                # Get random catchphrase for character
+                                local catchphrases=($(get_character_data "$char_lower" "catchphrases"))
+                                if [ ${#catchphrases[@]} -gt 0 ]; then
+                                    local random_catchphrase="${catchphrases[$((RANDOM % ${#catchphrases[@]}))]}"
+                                    current_replacement="${current_replacement//\{random_catchphrase\}/$random_catchphrase}"
+                                fi
+                            fi
+                            transformed_message=$(echo "$transformed_message" | sed -E "s/$current_pattern/$current_replacement/gi")
+                        fi
+                        ;;
+                    "prefix")
+                        transformed_message="$current_replacement$transformed_message"
+                        ;;
+                    "suffix")
+                        transformed_message="$transformed_message$current_replacement"
+                        ;;
+                    "wrap")
+                        if [[ "$current_replacement" == *"{original_message}"* ]]; then
+                            # Handle special replacement tokens for wrap
+                            local final_replacement="$current_replacement"
+                            if [[ "$final_replacement" == *"{random_catchphrase}"* ]]; then
+                                local catchphrases=($(get_character_data "$char_lower" "catchphrases"))
+                                if [ ${#catchphrases[@]} -gt 0 ]; then
+                                    local random_catchphrase="${catchphrases[$((RANDOM % ${#catchphrases[@]}))]}"
+                                    final_replacement="${final_replacement//\{random_catchphrase\}/$random_catchphrase}"
+                                fi
+                            fi
+                            transformed_message="${final_replacement//\{original_message\}/$transformed_message}"
+                        fi
+                        ;;
+                esac
+                
+                # Clear stored values
+                current_pattern=""
+                current_replacement=""
+            fi
+        fi
+    done < "$personalities_file"
+    
+    echo "$transformed_message"
+}
+
+# Get characters available for a context from personalities.carl
+get_characters_for_context() {
+    local category="$1"
+    local carl_root="$(carl_audio_get_root)"
+    local personalities_file="$carl_root/.carl/personalities.carl"
+    local available_characters=()
+    
+    if [ ! -f "$personalities_file" ]; then
+        return 1
+    fi
+    
+    # Simple approach: extract character names and their context_usage
+    # Look for patterns like "  jimmy:" followed by context_usage containing our category
+    local current_character=""
+    local in_characters_section=false
+    
+    while IFS= read -r line; do
+        # Skip empty lines and comments
+        [[ "$line" =~ ^[[:space:]]*$ ]] && continue
+        [[ "$line" =~ ^[[:space:]]*# ]] && continue
+        
+        # Check if we're in the characters section
+        if [[ "$line" =~ ^characters:[[:space:]]*$ ]]; then
+            in_characters_section=true
+            continue
+        fi
+        
+        # If we hit a top-level section that's not characters, exit characters section
+        if [[ "$line" =~ ^[a-zA-Z_]+:[[:space:]]*$ ]] && [ "$in_characters_section" = true ]; then
+            in_characters_section=false
+            continue
+        fi
+        
+        # Look for character definitions (2+ spaces indented under characters)
+        if [ "$in_characters_section" = true ] && [[ "$line" =~ ^[[:space:]]{2}([a-zA-Z_]+):[[:space:]]*$ ]]; then
+            current_character="${BASH_REMATCH[1]}"
+            continue
+        fi
+        
+        # Look for context_usage lines for current character
+        if [ -n "$current_character" ] && [[ "$line" =~ context_usage:[[:space:]]*\[(.*)\] ]]; then
+            local context_list="${BASH_REMATCH[1]}"
+            # Check if our category is in the list
+            if [[ "$context_list" == *"\"$category\""* ]]; then
+                available_characters+=("$current_character")
+            fi
+            current_character=""  # Reset after processing
+        fi
+        
+    done < "$personalities_file"
+    
+    # Output available characters
+    printf '%s\n' "${available_characters[@]}"
+}
+
+# Character selection with color coding from personalities.carl
 carl_select_character() {
     local category="$1"
     local characters
     local character_colors
     
-    # Define character pool based on context category
-    case "$category" in
-        "start"|"session")
-            characters=("Jimmy" "Carl" "Sheen" "Ms. Fowl" "Sam")
-            character_colors=("\033[1;34m" "\033[1;33m" "\033[1;35m" "\033[1;95m" "\033[1;92m")  # Blue, Yellow, Magenta, Light Magenta, Light Green
-            ;;
-        "work"|"progress")
-            characters=("Jimmy" "Carl" "Cindy" "Libby" "Ms. Fowl" "Principal Willoughby")
-            character_colors=("\033[1;34m" "\033[1;33m" "\033[1;32m" "\033[1;36m" "\033[1;95m" "\033[1;90m")  # Blue, Yellow, Green, Cyan, Light Magenta, Bright Black
-            ;;
-        "success"|"celebration")
-            characters=("Carl" "Sheen" "Jimmy" "Hugh" "Judy" "Sam")
-            character_colors=("\033[1;33m" "\033[1;35m" "\033[1;34m" "\033[1;31m" "\033[1;91m" "\033[1;92m")  # Yellow, Magenta, Blue, Red, Light Red, Light Green
-            ;;
-        "error"|"problem")
-            characters=("Jimmy" "Cindy" "Carl" "Ms. Fowl" "Principal Willoughby")
-            character_colors=("\033[1;34m" "\033[1;32m" "\033[1;33m" "\033[1;95m" "\033[1;90m")  # Blue, Green, Yellow, Light Magenta, Bright Black
-            ;;
-        *)
-            characters=("Jimmy" "Carl" "Sheen" "Cindy" "Libby" "Hugh" "Judy" "Ms. Fowl" "Sam" "Principal Willoughby")
-            character_colors=("\033[1;34m" "\033[1;33m" "\033[1;35m" "\033[1;32m" "\033[1;36m" "\033[1;31m" "\033[1;91m" "\033[1;95m" "\033[1;92m" "\033[1;90m")
-            ;;
-    esac
+    # Try to get characters from personalities.carl
+    if load_personalities; then
+        local available_chars=($(get_characters_for_context "$category"))
+        if [ ${#available_chars[@]} -gt 0 ]; then
+            characters=("${available_chars[@]}")
+            # Generate colors for available characters (simple hash-based coloring)
+            character_colors=()
+            for char in "${characters[@]}"; do
+                # Simple hash-based color assignment
+                local hash=$(echo -n "$char" | md5sum | cut -c1-2)
+                local color_index=$((0x$hash % 8))
+                case $color_index in
+                    0) character_colors+=("\033[1;34m") ;;  # Blue
+                    1) character_colors+=("\033[1;33m") ;;  # Yellow  
+                    2) character_colors+=("\033[1;35m") ;;  # Magenta
+                    3) character_colors+=("\033[1;32m") ;;  # Green
+                    4) character_colors+=("\033[1;36m") ;;  # Cyan
+                    5) character_colors+=("\033[1;31m") ;;  # Red
+                    6) character_colors+=("\033[1;91m") ;;  # Light Red
+                    7) character_colors+=("\033[1;95m") ;;  # Light Magenta
+                esac
+            done
+        fi
+    fi
+    
+    # Fallback to hardcoded Jimmy Neutron characters if personalities.carl fails
+    if [ ${#characters[@]} -eq 0 ]; then
+        case "$category" in
+            "start"|"session")
+                characters=("Jimmy" "Carl" "Sheen" "Sam")
+                character_colors=("\033[1;34m" "\033[1;33m" "\033[1;35m" "\033[1;92m")
+                ;;
+            "work"|"progress")
+                characters=("Jimmy" "Carl" "Cindy" "Libby")
+                character_colors=("\033[1;34m" "\033[1;33m" "\033[1;32m" "\033[1;36m")
+                ;;
+            "success"|"celebration")
+                characters=("Carl" "Sheen" "Jimmy" "Hugh")
+                character_colors=("\033[1;33m" "\033[1;35m" "\033[1;34m" "\033[1;31m")
+                ;;
+            "error"|"problem")
+                characters=("Jimmy" "Cindy" "Carl")
+                character_colors=("\033[1;34m" "\033[1;32m" "\033[1;33m")
+                ;;
+            *)
+                characters=("Jimmy" "Carl" "Sheen" "Cindy")
+                character_colors=("\033[1;34m" "\033[1;33m" "\033[1;35m" "\033[1;32m")
+                ;;
+        esac
+    fi
     
     # Select random character and corresponding color
     local index=$((RANDOM % ${#characters[@]}))
@@ -230,10 +418,69 @@ carl_play_audio_file() {
     return 1
 }
 
-# Text-to-speech fallback with Carl-like voice
+# Get voice settings for character from personalities.carl
+get_character_voice_settings() {
+    local character="$1"
+    local platform="$2"  # "macos", "linux_espeak", "windows"
+    local carl_root="$(carl_audio_get_root)"
+    local personalities_file="$carl_root/.carl/personalities.carl"
+    
+    if [ ! -f "$personalities_file" ]; then
+        return 1
+    fi
+    
+    local char_lower=$(echo "$character" | tr '[:upper:]' '[:lower:]')
+    local in_character=false
+    local in_platform_voices=false
+    local in_platform=false
+    
+    while IFS= read -r line; do
+        # Check if we're in the right character section
+        if [[ "$line" =~ ^[[:space:]]*${char_lower}:[[:space:]]*$ ]]; then
+            in_character=true
+            continue
+        elif [[ "$line" =~ ^[[:space:]]*[a-zA-Z_]+:[[:space:]]*$ ]] && [ "$in_character" = true ]; then
+            in_character=false
+            in_platform_voices=false
+            in_platform=false
+            continue
+        fi
+        
+        # Check if we're in platform_voices section
+        if [ "$in_character" = true ] && [[ "$line" =~ ^[[:space:]]*platform_voices:[[:space:]]*$ ]]; then
+            in_platform_voices=true
+            continue
+        fi
+        
+        # Check if we're in the specific platform section
+        if [ "$in_platform_voices" = true ] && [[ "$line" =~ ^[[:space:]]*${platform}:[[:space:]]*$ ]]; then
+            in_platform=true
+            continue
+        elif [ "$in_platform_voices" = true ] && [[ "$line" =~ ^[[:space:]]*[a-zA-Z_]+:[[:space:]]*$ ]]; then
+            in_platform=false
+        fi
+        
+        # Extract platform-specific settings
+        if [ "$in_platform" = true ]; then
+            if [[ "$line" =~ voice:[[:space:]]*\"?([^\"]+)\"? ]] || [[ "$line" =~ voice:[[:space:]]*([^[:space:]]+) ]]; then
+                echo "voice=${BASH_REMATCH[1]}"
+            elif [[ "$line" =~ variant:[[:space:]]*\"?([^\"]+)\"? ]] || [[ "$line" =~ variant:[[:space:]]*([^[:space:]]+) ]]; then
+                echo "variant=${BASH_REMATCH[1]}"
+            elif [[ "$line" =~ rate:[[:space:]]*([0-9-]+) ]]; then
+                echo "rate=${BASH_REMATCH[1]}"
+            elif [[ "$line" =~ speed:[[:space:]]*([0-9]+) ]]; then
+                echo "speed=${BASH_REMATCH[1]}"
+            elif [[ "$line" =~ pitch:[[:space:]]*([0-9]+) ]]; then
+                echo "pitch=${BASH_REMATCH[1]}"
+            fi
+        fi
+    done < "$personalities_file"
+}
+
+# Text-to-speech with personalities.carl voice settings
 carl_speak_message() {
     local message="$1"
-    local character="${2:-Carl}"  # Default to Carl if no character specified
+    local character="${2:-carl}"  # Default to carl if no character specified
     
     # Clean message for TTS (remove emojis and special characters)
     local clean_message=$(echo "$message" | sed 's/[^a-zA-Z0-9 .,!?-]//g')
@@ -242,64 +489,37 @@ carl_speak_message() {
         Darwin*)
             # macOS - use built-in say command with character-appropriate voice
             if command -v say >/dev/null 2>&1; then
-                local voice
-                local rate
-                case "$character" in
-                    "Jimmy")
-                        # Jimmy: confident, smart
-                        voice="Alex"
-                        rate=210
-                        ;;
-                    "Carl")
-                        # Carl: wheezy, enthusiastic  
-                        voice="Bubbles"
-                        rate=190
-                        ;;
-                    "Sheen")
-                        # Sheen: hyper, excitable
-                        voice="Boing"
-                        rate=250
-                        ;;
-                    "Cindy")
-                        # Cindy: confident, smart female
-                        voice="Samantha"
-                        rate=200
-                        ;;
-                    "Libby")
-                        # Libby: cool, supportive female
-                        voice="Karen"
-                        rate=180
-                        ;;
-                    "Hugh")
-                        # Hugh: quirky dad
-                        voice="Bruce"
-                        rate=170
-                        ;;
-                    "Judy")
-                        # Judy: caring mom
-                        voice="Allison"
-                        rate=185
-                        ;;
-                    "Ms. Fowl")
-                        # Ms. Fowl: bird-like teacher
-                        voice="Zarvox"
-                        rate=160
-                        ;;
-                    "Sam")
-                        # Sam: candy shop owner
-                        voice="Fred"
-                        rate=175
-                        ;;
-                    "Principal Willoughby")
-                        # Principal Willoughby: authority figure
-                        voice="Ralph"
-                        rate=165
-                        ;;
-                    *)
-                        voice="Bubbles"
-                        rate=200
-                        ;;
-                esac
+                local voice="Alex"  # default
+                local rate=200      # default
+                
+                # Try to get voice settings from personalities.carl
+                if load_personalities; then
+                    local voice_settings=$(get_character_voice_settings "$character" "macos")
+                    if [ -n "$voice_settings" ]; then
+                        eval "$voice_settings"  # Sets voice= and rate= variables
+                    fi
+                else
+                    # Fallback to hardcoded voice settings
+                    case "$character" in
+                        "Jimmy"|"jimmy")
+                            voice="Alex"
+                            rate=210
+                            ;;
+                        "Carl"|"carl")
+                            voice="Bubbles"
+                            rate=190
+                            ;;
+                        "Sheen"|"sheen")
+                            voice="Boing"
+                            rate=250
+                            ;;
+                        *)
+                            voice="Bubbles"
+                            rate=200
+                            ;;
+                    esac
+                fi
+                
                 say -v "$voice" -r "$rate" "$clean_message" 2>/dev/null &
             fi
             ;;
@@ -748,6 +968,38 @@ carl_test_category() {
             return 1
             ;;
     esac
+}
+
+# Refresh CARL audio system (for updates)
+carl_refresh_audio() {
+    local carl_root="$(carl_audio_get_root)"
+    
+    echo "🔄 Refreshing CARL Audio System..."
+    
+    # Re-source this script to get latest personality changes
+    source "$carl_root/.carl/scripts/carl-audio.sh"
+    
+    # Update directory structure for any new characters
+    local categories=("start" "work" "progress" "success" "end")
+    local characters=("Jimmy" "Carl" "Sheen" "Cindy" "Libby" "Hugh" "Judy" "Ms. Fowl" "Sam" "Principal Willoughby")
+    
+    for category in "${categories[@]}"; do
+        # Create general category directory if missing
+        mkdir -p "$carl_root/.carl/audio/$category/general"
+        
+        # Create character-specific directories if missing
+        for character in "${characters[@]}"; do
+            mkdir -p "$carl_root/.carl/audio/$category/$character"
+        done
+    done
+    
+    echo "✅ CARL Audio System refreshed with latest personality updates!"
+    echo "🎭 All Jimmy Neutron character personalities are now active"
+    
+    # Test the system
+    echo ""
+    echo "🧪 Testing personality system..."
+    carl_play_audio "start" "CARL personality system has been updated!"
 }
 
 # Initialize audio system on first run

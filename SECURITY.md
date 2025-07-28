@@ -159,7 +159,7 @@ The audio system uses local resources:
 
 1. **Disable Audio System**
    ```bash
-   /settings --audio-enabled false
+   /carl:settings --audio-enabled false
    ```
 
 2. **Review All Scripts**

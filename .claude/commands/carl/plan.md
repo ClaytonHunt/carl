@@ -15,25 +15,25 @@ CARL automatically detects the scope and complexity of your request and applies 
 
 ### 1. Intelligent Context Detection
 ```bash
-/plan "user authentication system"        # Auto-detects as feature-scale
-/plan "complete mobile app redesign"      # Auto-detects as epic-scale  
-/plan "fix login button styling"         # Auto-detects as story-scale
-/plan "refactor authentication service"  # Auto-detects as technical initiative
+/carl:plan "user authentication system"        # Auto-detects as feature-scale
+/carl:plan "complete mobile app redesign"      # Auto-detects as epic-scale  
+/carl:plan "fix login button styling"         # Auto-detects as story-scale
+/carl:plan "refactor authentication service"  # Auto-detects as technical initiative
 ```
 
 ### 2. Explicit Scope Control
 ```bash
-/plan --epic "customer analytics platform"
-/plan --feature "user profile management" 
-/plan --story "add password confirmation field"
-/plan --technical "improve database query performance"
+/carl:plan --epic "customer analytics platform"
+/carl:plan --feature "user profile management" 
+/carl:plan --story "add password confirmation field"
+/carl:plan --technical "improve database query performance"
 ```
 
 ### 3. Context-Aware Planning
 ```bash
-/plan --from-existing user-auth.intent    # Plan based on existing CARL intent
-/plan --extend user-profile               # Extend existing feature planning
-/plan --refactor authentication-service   # Technical improvement planning
+/carl:plan --from-existing user-auth.intent    # Plan based on existing CARL intent
+/carl:plan --extend user-profile               # Extend existing feature planning
+/carl:plan --refactor authentication-service   # Technical improvement planning
 ```
 
 ## CARL-Optimized Planning Process
@@ -308,24 +308,24 @@ For large initiatives, CARL creates staged planning:
 
 ### Scope-Specific Planning
 ```bash
-/plan --epic "e-commerce platform"           # Epic-scale comprehensive planning
-/plan --feature "shopping cart"              # Feature-scale detailed planning  
-/plan --story "add quantity selector"        # Story-scale task planning
-/plan --technical "optimize database queries" # Technical improvement planning
+/carl:plan --epic "e-commerce platform"           # Epic-scale comprehensive planning
+/carl:plan --feature "shopping cart"              # Feature-scale detailed planning  
+/carl:plan --story "add quantity selector"        # Story-scale task planning
+/carl:plan --technical "optimize database queries" # Technical improvement planning
 ```
 
 ### Context-Aware Planning
 ```bash
-/plan --extend user-auth                     # Extend existing feature
-/plan --refactor payment-service             # Technical refactoring plan
-/plan --from-gap analysis-report.md          # Plan from gap analysis
+/carl:plan --extend user-auth                     # Extend existing feature
+/carl:plan --refactor payment-service             # Technical refactoring plan
+/carl:plan --from-gap analysis-report.md          # Plan from gap analysis
 ```
 
 ### Planning Modes
 ```bash
-/plan --comprehensive "mobile app"          # Maximum detail and analysis
-/plan --lightweight "button styling fix"    # Minimal overhead planning
-/plan --collaborative "team dashboard"      # Multi-stakeholder planning
+/carl:plan --comprehensive "mobile app"          # Maximum detail and analysis
+/carl:plan --lightweight "button styling fix"    # Minimal overhead planning
+/carl:plan --collaborative "team dashboard"      # Multi-stakeholder planning
 ```
 
 ## Success Criteria
@@ -344,8 +344,8 @@ For large initiatives, CARL creates staged planning:
 - **Input**: User description, existing CARL context, project history
 - **Output**: Complete CARL intent files, context updates, planning session
 - **Next Commands**:
-  - `/task [plan-item]` to start implementing planned items
-  - `/status` to monitor planning and implementation progress
-  - `/analyze --sync` to update CARL files after external changes
+  - `/carl:task [plan-item]` to start implementing planned items
+  - `/carl:status` to monitor planning and implementation progress
+  - `/carl:analyze --sync` to update CARL files after external changes
 
 This adaptive planning system ensures that CARL always generates the right level of detail for any planning request while maintaining perfect integration with existing project context and requirements.

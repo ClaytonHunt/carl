@@ -66,32 +66,32 @@ Just like Carl Wheezer asks clarifying questions in the show, CARL ensures your 
    ```bash
    cd your-project
    claude  # Start Claude Code
-   /analyze  # Your first CARL command!
+   /carl:analyze  # Your first CARL command!
    ```
 
 ### First Steps
 
 1. **Analyze Your Codebase:**
    ```
-   /analyze
+   /carl:analyze
    ```
    CARL scans your project and generates comprehensive context files.
 
 2. **Create Your First Plan:**
    ```
-   /plan "Add user authentication system"
+   /carl:plan "Add user authentication system"
    ```
    CARL automatically determines scope and creates detailed planning documentation.
 
 3. **Check Project Status:**
    ```
-   /status
+   /carl:status
    ```
    Get AI-powered insights into project health and next steps.
 
 ## 📋 Core Commands
 
-### `/analyze` - Codebase Analysis
+### `/carl:analyze` - Codebase Analysis
 Scans existing code and generates CARL files for perfect AI context.
 
 **Use Cases:**
@@ -105,7 +105,7 @@ Scans existing code and generates CARL files for perfect AI context.
 - `.context` files - System relationships and dependencies
 - `index.carl` - Master AI reference file
 
-### `/plan` - Intelligent Planning
+### `/carl:plan` - Intelligent Planning
 Context-aware planning that adapts to your needs.
 
 **Auto-detects scope:**
@@ -116,12 +116,12 @@ Context-aware planning that adapts to your needs.
 
 **Examples:**
 ```
-/plan "Build customer analytics dashboard"    # Epic-level planning
-/plan "Add password reset functionality"     # Feature-level planning  
-/plan "Fix login validation bug"             # Story-level planning
+/carl:plan "Build customer analytics dashboard"    # Epic-level planning
+/carl:plan "Add password reset functionality"     # Feature-level planning  
+/carl:plan "Fix login validation bug"             # Story-level planning
 ```
 
-### `/status` - Project Health
+### `/carl:status` - Project Health
 AI-powered progress monitoring with actionable insights.
 
 **Provides:**
@@ -130,7 +130,7 @@ AI-powered progress monitoring with actionable insights.
 - Technical debt identification
 - Next priority recommendations
 
-### `/task` - Context-Aware Execution
+### `/carl:task` - Context-Aware Execution
 Execute development tasks with full CARL context integration.
 
 **Features:**
@@ -139,20 +139,20 @@ Execute development tasks with full CARL context integration.
 - Automatic progress tracking
 - Specialist AI guidance
 
-### `/settings` - Configuration Management
+### `/carl:settings` - Configuration Management
 Configure CARL behavior and preferences.
 
 **Audio Settings:**
 ```
-/settings --audio-test          # Test audio system
-/settings --quiet-mode on       # Enable quiet mode
-/settings --quiet-hours 22:00-08:00  # Set quiet hours
+/carl:settings --audio-test          # Test audio system
+/carl:settings --quiet-mode on       # Enable quiet mode
+/carl:settings --quiet-hours 22:00-08:00  # Set quiet hours
 ```
 
 **Analysis Settings:**
 ```
-/settings --parallel-analysis off    # Disable parallel specialists
-/settings --auto-context-injection on  # Enable automatic context
+/carl:settings --parallel-analysis off    # Disable parallel specialists
+/carl:settings --auto-context-injection on  # Enable automatic context
 ```
 
 ## 🏗️ CARL Architecture
@@ -160,7 +160,7 @@ Configure CARL behavior and preferences.
 ### Dual-Layer Design
 
 ```
-Human Layer: Simple commands (/plan, /task, /status, /analyze, /settings)
+Human Layer: Simple commands (/carl:plan, /carl:task, /carl:status, /carl:analyze, /carl:settings)
      ↓
 AI Layer: Structured CARL files (.intent, .state, .context, index.carl)
 ```
@@ -223,9 +223,9 @@ AI Layer: Structured CARL files (.intent, .state, .context, index.carl)
 
 3. **Configure Settings:**
    ```
-   /settings --audio-enabled true
-   /settings --quiet-hours 22:00-08:00
-   /settings --volume 75
+   /carl:settings --audio-enabled true
+   /carl:settings --quiet-hours 22:00-08:00
+   /carl:settings --volume 75
    ```
 
 ## 🤝 Team Collaboration
@@ -462,17 +462,17 @@ When analyzing code, focus on:
 
 ```bash
 # Example: Integrate with Jira
-/plan "Implement JIRA-123: Customer dashboard" --external-ref JIRA-123
+/carl:plan "Implement JIRA-123: Customer dashboard" --external-ref JIRA-123
 
 # Example: Integrate with Azure DevOps  
-/task "Complete work item 456" --ado-item 456
+/carl:task "Complete work item 456" --ado-item 456
 ```
 
 ### Automated Workflows
 
 ```bash
 # Git hook integration
-echo "/analyze --sync" > .git/hooks/post-merge
+echo "/carl:analyze --sync" > .git/hooks/post-merge
 chmod +x .git/hooks/post-merge
 
 # CI/CD integration
