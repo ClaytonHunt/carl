@@ -9,6 +9,74 @@ carl_audio_get_root() {
     echo "$(cd "$script_dir/../.." && pwd)"
 }
 
+# Add character-specific personality to messages
+add_character_personality() {
+    local character="$1"
+    local message="$2"
+    
+    case "$character" in
+        "Jimmy")
+            # Jimmy: confident, scientific, leadership
+            echo "$message" | sed -E 's/\b(great|good|nice)\b/brain blast!/gi' | \
+            sed -E 's/\b(let'\''s|we should)\b/according to my calculations, we should/gi' | \
+            sed -E 's/\b(done|finished|complete)\b/scientifically sound!/gi'
+            ;;
+        "Carl")
+            # Carl: wheezy, nervous, enthusiastic about odd things
+            local carl_phrases=("Llamas!" "Croissant!" "Are you gonna finish that croissant?")
+            local random_phrase="${carl_phrases[$((RANDOM % ${#carl_phrases[@]}))]}"
+            echo "$random_phrase Oh, um, $message"
+            ;;
+        "Sheen")
+            # Sheen: hyperactive, obsessed with Ultra Lord
+            echo "$message" | sed -E 's/\b(awesome|cool|great)\b/ULTRA LORD!/gi' | \
+            sed -E 's/\b(ready|excited)\b/ultra-mega ready!/gi' | \
+            sed -E 's/$/! This is like an Ultra Lord episode!/'
+            ;;
+        "Cindy")
+            # Cindy: competitive, sarcastic, intelligent
+            echo "$message" | sed -E 's/\b(obviously|clearly)\b/as if that wasn'\''t obvious/gi' | \
+            sed -E 's/^/Well, /gi' | \
+            sed -E 's/$/, unlike some people I know./'
+            ;;
+        "Libby")
+            # Libby: cool, supportive, uses slang
+            echo "$message" | sed -E 's/\b(good|great)\b/totally cool/gi' | \
+            sed -E 's/\b(yes|okay)\b/for sure, girlfriend/gi' | \
+            sed -E 's/^/Girl, /'
+            ;;
+        "Hugh")
+            # Hugh: absent-minded, obsessed with ducks and pies
+            local hugh_topics=("ducks" "pie" "Purple Flurp")
+            local random_topic="${hugh_topics[$((RANDOM % ${#hugh_topics[@]}))]}"
+            echo "You know, this reminds me of $random_topic... Oh! $message"
+            ;;
+        "Judy")
+            # Judy: caring mother, organized, slightly overprotective
+            echo "Now sweetie, $message And don't forget to wear your safety goggles!"
+            ;;
+        "Ms. Fowl")
+            # Ms. Fowl: bird-like speech patterns, strict teacher
+            echo "$message" | sed -E 's/\b(understand|know)\b/comprehend/gi' | \
+            sed -E 's/$/... *squawk*/' | \
+            sed -E 's/^/Class, pay attention! /'
+            ;;
+        "Sam")
+            # Sam: candy shop owner, cheerful, business-focused
+            echo "Welcome to the Candy Bar! $message Have some free samples!"
+            ;;
+        "Principal Willoughby")
+            # Principal Willoughby: authoritative, school-focused
+            echo "$message" | sed -E 's/^/Attention students! /' | \
+            sed -E 's/$/ Remember to follow school policy at all times!/'
+            ;;
+        *)
+            # Default - return message unchanged
+            echo "$message"
+            ;;
+    esac
+}
+
 # Jimmy Neutron character selection and color coding
 carl_select_character() {
     local category="$1"
@@ -66,8 +134,9 @@ carl_play_audio() {
     local color=$(echo "$char_info" | cut -d'|' -f2)
     local reset_color="\033[0m"
     
-    # Personalize message for Clayton
+    # Personalize message for Clayton and add character personality
     local personalized_message=$(echo "$message" | sed 's/\buser\b/Clayton/gi' | sed 's/\bdeveloper\b/Clayton/gi')
+    personalized_message=$(add_character_personality "$character" "$personalized_message")
     
     if [ "$audio_enabled" = "false" ] || [ "$quiet_mode" = "true" ]; then
         # Always show text feedback even in quiet mode with character format
@@ -85,7 +154,7 @@ carl_play_audio() {
     local audio_played=false
     
     # Attempt to play pre-recorded audio files
-    if carl_play_audio_file "$category"; then
+    if carl_play_audio_file "$category" "$character"; then
         audio_played=true
     fi
     
@@ -101,16 +170,28 @@ carl_play_audio() {
 # Play pre-recorded audio files
 carl_play_audio_file() {
     local category="$1"
+    local character="$2"
     local carl_root="$(carl_audio_get_root)"
-    local audio_dir="$carl_root/.carl/audio/$category"
     
-    # Check if audio directory exists and has files
-    if [ ! -d "$audio_dir" ] || [ -z "$(ls "$audio_dir" 2>/dev/null)" ]; then
-        return 1
-    fi
+    # Try character-specific audio first, then fall back to general category
+    local audio_dirs=(
+        "$carl_root/.carl/audio/$category/$character"
+        "$carl_root/.carl/audio/$category/general"
+        "$carl_root/.carl/audio/$category"
+    )
     
-    # Select random audio file from category
-    local audio_file=$(ls "$audio_dir"/* 2>/dev/null | shuf -n 1)
+    local audio_file=""
+    for audio_dir in "${audio_dirs[@]}"; do
+        if [ -d "$audio_dir" ] && [ -n "$(ls "$audio_dir"/*.{wav,mp3,ogg} 2>/dev/null)" ]; then
+            audio_file=$(ls "$audio_dir"/*.{wav,mp3,ogg} 2>/dev/null | shuf -n 1)
+            if [ -f "$audio_file" ]; then
+                echo "🎵 Playing character-specific audio: $(basename "$audio_file")" >&2
+                break
+            fi
+        fi
+    done
+    
+    # If no audio file found, return failure
     if [ ! -f "$audio_file" ]; then
         return 1
     fi
@@ -675,8 +756,19 @@ carl_init_audio() {
     
     echo "🎵 Initializing CARL Audio System..."
     
-    # Create audio directories
-    mkdir -p "$carl_root/.carl/audio"/{start,work,progress,success,end}
+    # Create audio directories for each category and character
+    local categories=("start" "work" "progress" "success" "end")
+    local characters=("Jimmy" "Carl" "Sheen" "Cindy" "Libby" "Hugh" "Judy" "Ms. Fowl" "Sam" "Principal Willoughby")
+    
+    for category in "${categories[@]}"; do
+        # Create general category directory
+        mkdir -p "$carl_root/.carl/audio/$category/general"
+        
+        # Create character-specific directories
+        for character in "${characters[@]}"; do
+            mkdir -p "$carl_root/.carl/audio/$category/$character"
+        done
+    done
     
     # Install sample phrases
     carl_install_sample_audio
