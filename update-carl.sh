@@ -269,6 +269,12 @@ carl_intelligent_update() {
         log_success "Updated Claude hooks"
     fi
     
+    # Update commands
+    if [ -d "$carl_source_dir/.claude/commands" ]; then
+        cp -r "$carl_source_dir/.claude/commands" "$target_dir/.claude/"
+        log_success "Updated Claude commands"
+    fi
+    
     # Update scripts
     if [ -d "$carl_source_dir/.carl/scripts" ]; then
         cp -r "$carl_source_dir/.carl/scripts" "$target_dir/.carl/"
