@@ -45,26 +45,30 @@ GLOBAL_INSTALL_DIR="$HOME/.carl-global"
 
 # Get current CARL version dynamically
 get_carl_version() {
-    local version="1.4.3"  # fallback version
+    local version=""
     
-    # Try to get version from git tag if we're in a git repo
+    # Try to get version from git tag if we're in a git repo (highest priority)
     if [ -d "$SCRIPT_DIR/.git" ]; then
         local git_version=$(cd "$SCRIPT_DIR" && git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//')
         if [ -n "$git_version" ]; then
             version="$git_version"
+            echo "$version"
+            return 0
         fi
     fi
     
-    # Try to get version from GitHub API for remote installations
-    if [ ! -f "$SCRIPT_DIR/.carl/scripts/carl-helpers.sh" ]; then
-        if command -v curl >/dev/null 2>&1; then
-            local api_version=$(curl -s --max-time 5 "https://api.github.com/repos/ClaytonHunt/carl/releases/latest" 2>/dev/null | grep '"tag_name"' | cut -d'"' -f4 | sed 's/^v//')
-            if [ -n "$api_version" ] && [ "$api_version" != "null" ]; then
-                version="$api_version"
-            fi
+    # Try to get version from GitHub API (works for both local and remote)
+    if command -v curl >/dev/null 2>&1; then
+        local api_version=$(curl -s --max-time 5 "https://api.github.com/repos/ClaytonHunt/carl/releases/latest" 2>/dev/null | grep '"tag_name"' | cut -d'"' -f4 | sed 's/^v//')
+        if [ -n "$api_version" ] && [ "$api_version" != "null" ]; then
+            version="$api_version"
+            echo "$version"
+            return 0
         fi
     fi
     
+    # Fallback version (only used if both git and API fail)
+    version="1.4.4"
     echo "$version"
 }
 
@@ -356,6 +360,9 @@ apply_version_migrations() {
     local target_version="$3"
     
     echo "🔧 Applying version migrations: $current_version → $target_version"
+    echo "   📍 Target directory: $target_dir"
+    echo "   📍 Current version detected as: '$current_version'"
+    echo "   📍 Target version: '$target_version'"
     
     case "$current_version" in
         "1.0.0")
@@ -386,6 +393,11 @@ apply_version_migrations() {
             echo "   ⬆️ Migrating to v1.4.2+ (architecture stable)..."
             # No major changes from 1.4.1 to 1.4.2, just remote install support
             ;;
+        "1.4.2"|"1.4.3"|"1.4.4")
+            echo "   ⬆️ Version $current_version detected - ensuring architecture is complete..."
+            # These versions should have architecture, but ensure it's complete
+            migrate_architecture_overhaul "$target_dir"
+            ;;
         "unknown")
             echo "   ⬆️ Unknown version - applying full migration..."
             migrate_settings_json_format "$target_dir"
@@ -394,7 +406,8 @@ apply_version_migrations() {
             migrate_architecture_overhaul "$target_dir"
             ;;
         *)
-            echo "   ✅ Version $current_version - standard file updates"
+            echo "   ⬆️ Unrecognized version $current_version - applying architecture migration to be safe..."
+            migrate_architecture_overhaul "$target_dir"
             ;;
     esac
 }
@@ -450,6 +463,13 @@ migrate_architecture_overhaul() {
     local target_dir="$1"
     
     echo "      🏗️ Migrating to new CARL architecture..."
+    echo "         📍 Migration target: $target_dir"
+    echo "         📍 Checking for existing directories..."
+    
+    # Debug directory status
+    [ -d "$target_dir/.claude/agents" ] && echo "         📂 .claude/agents exists" || echo "         📂 .claude/agents missing"
+    [ -d "$target_dir/.carl/specs" ] && echo "         📂 .carl/specs exists" || echo "         📂 .carl/specs missing"
+    [ -d "$target_dir/.carl/sessions" ] && echo "         📂 .carl/sessions exists" || echo "         📂 .carl/sessions missing"
     
     # Ensure new directory structures exist
     mkdir -p "$target_dir/.carl/sessions/active"
@@ -494,7 +514,17 @@ migrate_architecture_overhaul() {
     done
     
     # New CARL agents should now be in place from copy_carl_files
-    # Just verify they exist and report status
+    # Debug: Show what's actually in the agents directory
+    echo "         🔍 Checking agents directory contents:"
+    if [ -d "$target_dir/.claude/agents" ]; then
+        local agent_count=$(find "$target_dir/.claude/agents" -name "*.md" | wc -l)
+        echo "         📊 Found $agent_count agent files in .claude/agents/"
+        find "$target_dir/.claude/agents" -name "*.md" -exec basename {} \; | sed 's/^/           - /'
+    else
+        echo "         ❌ .claude/agents directory doesn't exist!"
+    fi
+    
+    # Check for specific new agents
     local new_agents=("carl-quality-analyst.md" "carl-security-analyst.md" "carl-performance-analyst.md" "carl-ux-designer.md" "carl-devops-analyst.md" "carl-api-designer.md")
     for agent in "${new_agents[@]}"; do
         local target_agent="$target_dir/.claude/agents/$agent"
