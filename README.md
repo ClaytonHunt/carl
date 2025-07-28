@@ -14,9 +14,9 @@
 
 CARL (Context-Aware Requirements Language) is a revolutionary AI-optimized planning system designed specifically for Claude Code. Named after Carl Wheezer from Jimmy Neutron, CARL asks the right questions and provides perfect context to AI assistants, making development faster, smarter, and more enjoyable.
 
-### 🎭 Meet Carl Wheezer - Your Development Mascot
+### 🎭 Meet the Jimmy Neutron Cast - Your Development Team
 
-Just like Carl Wheezer asks clarifying questions in the show, CARL ensures your AI assistant always has the perfect context for every development task. Complete with Carl's encouraging voice feedback system!
+Just like Carl Wheezer asks clarifying questions in the show, CARL ensures your AI assistant always has the perfect context for every development task. Features the full Jimmy Neutron character cast including Carl, Jimmy, Sheen, Cindy, Libby, Ms. Fowl, Judy, Sam, and Principal Willoughby - each with their own personality-driven audio feedback system!
 
 ## ✨ Key Features
 
@@ -27,7 +27,7 @@ Just like Carl Wheezer asks clarifying questions in the show, CARL ensures your 
 
 ### 🎯 **Intelligent Planning**
 - **Adaptive Scope Detection**: Automatically determines epic/feature/story level
-- **Parallel Specialist Analysis**: 8 CARL-optimized AI agents analyze concurrently
+- **Parallel Specialist Analysis**: 10 CARL-optimized AI agents analyze concurrently
 - **Progressive Planning**: Right level of detail for each situation
 
 ### 🔄 **Seamless Integration**
@@ -35,39 +35,48 @@ Just like Carl Wheezer asks clarifying questions in the show, CARL ensures your 
 - **Cross-Platform**: Works on macOS, Linux, and Windows
 - **Language Agnostic**: Supports any programming language or framework
 
-### 🎵 **Carl Wheezer Audio System**
-- **Character Voice Feedback**: Encouraging audio during development
-- **TTS Fallback**: Works without audio files using character-like TTS
-- **Configurable**: Quiet mode, quiet hours, volume control
+### 🎵 **Jimmy Neutron Character Audio System**
+- **Full Cast Voice Feedback**: 9+ characters with unique personalities for development encouragement
+- **Character-Specific Responses**: Each character responds with their signature style and catchphrases
+- **TTS Fallback**: Works without audio files using character-like TTS voices
+- **Configurable**: Quiet mode, quiet hours, volume control, character selection
 
 ## 🚀 Quick Start
 
 ### Installation
 
-1. **Clone CARL repository:**
-   ```bash
-   git clone https://github.com/claytonhunt/carl.git
-   cd carl
-   ```
+**Option 1: Remote Installation (Recommended)**
+```bash
+# Install in current directory
+curl -fsSL https://github.com/ClaytonHunt/carl/releases/latest/download/install.sh | bash
 
-2. **Install in your project:**
-   ```bash
-   # Install in current directory
-   ./install.sh
-   
-   # Install in specific project
-   ./install.sh /path/to/your/project
-   
-   # Install globally for all projects
-   ./install.sh --global
-   ```
+# Install in specific project
+curl -fsSL https://github.com/ClaytonHunt/carl/releases/latest/download/install.sh | bash -s -- /path/to/project
 
-3. **Start using CARL:**
-   ```bash
-   cd your-project
-   claude  # Start Claude Code
-   /carl:analyze  # Your first CARL command!
-   ```
+# Install globally for all projects
+curl -fsSL https://github.com/ClaytonHunt/carl/releases/latest/download/install.sh | bash -s -- --global
+```
+
+**Option 2: Local Installation**
+```bash
+# Clone and install locally
+git clone https://github.com/claytonhunt/carl.git
+cd carl
+./install.sh /path/to/your/project
+```
+
+### Updates
+```bash
+# Update existing installation to latest version
+curl -fsSL https://github.com/ClaytonHunt/carl/releases/latest/download/install.sh | bash -s -- --update
+```
+
+### Start Using CARL
+```bash
+cd your-project
+claude  # Start Claude Code
+/carl:analyze  # Your first CARL command!
+```
 
 ### First Steps
 
@@ -91,6 +100,8 @@ Just like Carl Wheezer asks clarifying questions in the show, CARL ensures your 
 
 ## 📋 Core Commands
 
+All CARL commands use the `/carl:` namespace to prevent conflicts with Claude Code defaults.
+
 ### `/carl:analyze` - Codebase Analysis
 Scans existing code and generates CARL files for perfect AI context.
 
@@ -100,10 +111,13 @@ Scans existing code and generates CARL files for perfect AI context.
 - Periodic project health checks
 
 **What it creates:**
-- `.intent` files - Requirements and specifications
-- `.state` files - Implementation progress tracking  
-- `.context` files - System relationships and dependencies
+- `[name].intent.carl` files - Requirements and specifications
+- `[name].state.carl` files - Implementation progress tracking  
+- `[name].context.carl` files - System relationships and dependencies
 - `index.carl` - Master AI reference file
+- Strategic artifacts: `vision.carl`, `roadmap.carl`, `objectives.carl`
+- Process documentation: `process.carl`, `decisions.carl`
+- `.carl/sessions/` directory - Development session tracking
 
 ### `/carl:plan` - Intelligent Planning
 Context-aware planning that adapts to your needs.
@@ -142,11 +156,22 @@ Execute development tasks with full CARL context integration.
 ### `/carl:settings` - Configuration Management
 Configure CARL behavior and preferences.
 
+### `/carl:personalities` - Character Management
+Manage the Jimmy Neutron character cast, configure personality responses, and customize the audio feedback system.
+
 **Audio Settings:**
 ```
 /carl:settings --audio-test          # Test audio system
 /carl:settings --quiet-mode on       # Enable quiet mode
 /carl:settings --quiet-hours 22:00-08:00  # Set quiet hours
+```
+
+**Character Management:**
+```
+/carl:personalities                  # View active characters
+/carl:personalities --enable carl jimmy  # Enable specific characters
+/carl:personalities --set-primary carl   # Set primary character
+/carl:personalities --test-all       # Test all character voices
 ```
 
 **Analysis Settings:**
@@ -162,7 +187,7 @@ Configure CARL behavior and preferences.
 ```
 Human Layer: Simple commands (/carl:plan, /carl:task, /carl:status, /carl:analyze, /carl:settings)
      ↓
-AI Layer: Structured CARL files (.intent, .state, .context, index.carl)
+AI Layer: Structured CARL files (.intent.carl, .state.carl, .context.carl, index.carl)
 ```
 
 **Benefits:**
@@ -170,30 +195,44 @@ AI Layer: Structured CARL files (.intent, .state, .context, index.carl)
 - **Rich for AI**: Comprehensive, structured context
 - **Best of both worlds**: Cognitive simplicity + AI precision
 
-### Three-File System
+### CARL File Architecture
 
-1. **Intent Files (`.intent`)**
+#### Core Three-File System
+1. **Intent Files (`[name].intent.carl`)**
    - What needs to be built
    - Requirements, constraints, success criteria
    - User stories and acceptance criteria
 
-2. **State Files (`.state`)**
+2. **State Files (`[name].state.carl`)**
    - What's been built
    - Implementation progress, quality metrics
    - Technical debt and performance data
 
-3. **Context Files (`.context`)**
+3. **Context Files (`[name].context.carl`)**
    - How code relates
    - Dependencies, integration points
    - API contracts and data relationships
 
+#### Strategic Artifacts
+- **`vision.carl`** - Long-term product vision and goals
+- **`roadmap.carl`** - Development roadmap and milestones
+- **`objectives.carl`** - Current objectives and key results
+- **`process.carl`** - Team processes and workflows
+- **`decisions.carl`** - Architectural and strategic decisions
+
 ### Claude Code Integration
 
 **Automatic Hooks:**
-- **Session Start**: Load CARL context, play welcome audio
+- **Session Start**: Load CARL context, play welcome audio, initialize session tracking
 - **User Prompt Submit**: Inject relevant context into AI requests
 - **Tool Call**: Track progress, update CARL files
-- **Session End**: Save state, generate summaries
+- **Session End**: Save state, generate summaries, complete session tracking
+
+**Session Management:**
+- **Isolated Tracking**: Sessions tracked separately from index.carl to prevent pollution
+- **Activity Logging**: Comprehensive logging of development activities
+- **State Preservation**: Session state maintained across interruptions
+- **Migration Support**: Automatic migration system for architecture updates
 
 ## 🎵 Carl Wheezer Audio System
 
@@ -244,19 +283,24 @@ CARL works seamlessly even when not everyone on the team uses it:
 
 ## 🔧 CARL-Optimized Specialist Agents
 
-CARL includes 8 specialized AI agents for comprehensive analysis:
+CARL includes **10 specialized AI agents** for comprehensive analysis:
 
-### Core Specialists
+### Core Analysis Specialists
 - **`carl-architecture-analyst`** - System structure analysis for intent mapping
 - **`carl-backend-analyst`** - API and server-side analysis for context files
 - **`carl-frontend-analyst`** - UI/UX analysis for intent generation
 - **`carl-requirements-analyst`** - Extract requirements from code patterns
 
-### Quality & Security Specialists  
-- **`carl-debt-analyst`** - Technical debt identification for state tracking
+### Quality & Performance Specialists  
 - **`carl-quality-analyst`** - Testing and quality assurance analysis
 - **`carl-security-analyst`** - Security patterns and compliance analysis
 - **`carl-performance-analyst`** - Performance optimization opportunities
+- **`carl-debt-analyst`** - Technical debt identification for state tracking
+
+### Specialized Domain Experts
+- **`carl-ux-designer`** - UI/UX design and user experience analysis
+- **`carl-devops-analyst`** - Infrastructure and deployment analysis
+- **`carl-api-designer`** - API design and integration analysis
 
 ### Parallel Execution
 All specialists run **concurrently** for maximum efficiency, providing comprehensive project analysis in seconds rather than sequential minutes.
@@ -276,7 +320,15 @@ your-project/
 │   ├── config/            # CARL configuration
 │   ├── templates/         # CARL file templates
 │   ├── sessions/          # Session tracking data
-│   └── index.carl         # Master AI reference file
+│   ├── active/            # Currently active work
+│   ├── completed/         # Completed work artifacts
+│   ├── index.carl         # Master AI reference file
+│   ├── vision.carl        # Product vision and goals
+│   ├── roadmap.carl       # Development roadmap
+│   ├── objectives.carl    # Current objectives
+│   ├── process.carl       # Team processes
+│   ├── decisions.carl     # Strategic decisions
+│   └── [name].[type].carl # Project-specific CARL files
 └── [your project files]
 ```
 
@@ -287,7 +339,7 @@ your-project/
 
 ```json
 {
-  "carl_version": "1.3.0",
+  "carl_version": "1.4.5",
   "audio_settings": {
     "audio_enabled": true,
     "quiet_mode": false,
@@ -321,7 +373,7 @@ your-project/
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/session-start.sh"
+            "command": "bash \$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.sh"
           }
         ]
       }
@@ -332,7 +384,7 @@ your-project/
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/session-end.sh"
+            "command": "bash \$CLAUDE_PROJECT_DIR/.claude/hooks/session-end.sh"
           }
         ]
       }
@@ -343,7 +395,7 @@ your-project/
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/user-prompt-submit.sh"
+            "command": "bash \$CLAUDE_PROJECT_DIR/.claude/hooks/user-prompt-submit.sh"
           }
         ]
       }
@@ -354,7 +406,7 @@ your-project/
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/tool-call.sh pre"
+            "command": "bash \$CLAUDE_PROJECT_DIR/.claude/hooks/tool-call.sh pre"
           }
         ]
       }
@@ -365,7 +417,7 @@ your-project/
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/tool-call.sh post"
+            "command": "bash \$CLAUDE_PROJECT_DIR/.claude/hooks/tool-call.sh post"
           }
         ]
       }
@@ -378,7 +430,7 @@ your-project/
 
 ### Intent File Example
 ```yaml
-# user-authentication.intent
+# user-authentication.intent.carl
 id: user-auth-system
 type: feature_development
 complexity: medium
@@ -402,7 +454,7 @@ user_stories:
 
 ### State File Example  
 ```yaml
-# user-authentication.state
+# user-authentication.state.carl
 feature_id: user-auth-system
 phase: development
 completion_percentage: 65
@@ -423,7 +475,7 @@ implementation:
 
 ### Context File Example
 ```yaml
-# user-authentication.context
+# user-authentication.context.carl
 feature_id: user-auth-system
 context_type: service
 
@@ -545,17 +597,25 @@ Share CARL templates for specific project types:
 
 ## 📈 Roadmap
 
-### Version 1.1 (Q2 2025)
-- [ ] IDE Integration (VS Code, JetBrains)
-- [ ] Template Marketplace
-- [ ] Advanced Analytics Dashboard
-- [ ] Machine Learning Context Prediction
+### Version 1.4.5 (Current) ✅
+- [x] Complete architecture overhaul with `[name].[type].carl` naming
+- [x] Strategic artifacts (vision.carl, roadmap.carl, objectives.carl)
+- [x] Session management isolation and tracking
+- [x] Dynamic version detection and intelligent migration
+- [x] 10 specialized AI agents with expanded capabilities
+- [x] Comprehensive backup and restore system
 
-### Version 1.2 (Q3 2025)
+### Version 1.5 (Q2 2025)
+- [ ] IDE Integration (VS Code, JetBrains)
+- [ ] Template Marketplace and Community Sharing
+- [ ] Advanced Analytics Dashboard
+- [ ] Performance Optimization Engine
+
+### Version 1.6 (Q3 2025)
 - [ ] Enterprise Features (SSO, Audit Trails)
 - [ ] External Tool APIs (Jira, Azure DevOps, Slack)
 - [ ] Multi-language Documentation Generation
-- [ ] Performance Optimization Engine
+- [ ] Machine Learning Context Prediction
 
 ### Version 2.0 (Q4 2025)
 - [ ] Plugin System for Custom Specialists

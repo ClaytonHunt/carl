@@ -117,12 +117,28 @@ carl_update_session_metrics() {
     local session_file="$(carl_get_current_session_file)"
     
     if [ -f "$session_file" ]; then
-        # Calculate current metrics
-        local files_modified=$(git diff --name-only HEAD~1 2>/dev/null | wc -l || echo "0")
-        local lines_added=$(git diff --stat HEAD~1 2>/dev/null | tail -1 | grep -oE '[0-9]+ insertions?' | cut -d' ' -f1 || echo "0")
-        local lines_removed=$(git diff --stat HEAD~1 2>/dev/null | tail -1 | grep -oE '[0-9]+ deletions?' | cut -d' ' -f1 || echo "0")
-        local activities_count=$(grep -c "type:" "$session_file" 2>/dev/null || echo "0")
-        local milestones_count=$(grep -c "milestone" "$session_file" 2>/dev/null || echo "0")
+        # Calculate current metrics - use safer patterns to avoid multiline output
+        local files_modified=$(git diff --name-only HEAD~1 2>/dev/null | wc -l 2>/dev/null)
+        if [ -z "$files_modified" ]; then files_modified="0"; fi
+        
+        local lines_added=$(git diff --stat HEAD~1 2>/dev/null | tail -1 | grep -oE '[0-9]+ insertions?' | cut -d' ' -f1 2>/dev/null)
+        if [ -z "$lines_added" ]; then lines_added="0"; fi
+        
+        local lines_removed=$(git diff --stat HEAD~1 2>/dev/null | tail -1 | grep -oE '[0-9]+ deletions?' | cut -d' ' -f1 2>/dev/null)
+        if [ -z "$lines_removed" ]; then lines_removed="0"; fi
+        
+        local activities_count=$(grep -c "type:" "$session_file" 2>/dev/null)
+        if [ -z "$activities_count" ]; then activities_count="0"; fi
+        
+        local milestones_count=$(grep -c "milestone" "$session_file" 2>/dev/null)
+        if [ -z "$milestones_count" ]; then milestones_count="0"; fi
+        
+        # Sanitize variables to prevent multiline strings that break sed
+        files_modified=$(echo "$files_modified" | head -1 | tr -d '\n\r' | grep -oE '[0-9]+' || echo "0")
+        lines_added=$(echo "$lines_added" | head -1 | tr -d '\n\r' | grep -oE '[0-9]+' || echo "0")
+        lines_removed=$(echo "$lines_removed" | head -1 | tr -d '\n\r' | grep -oE '[0-9]+' || echo "0")
+        activities_count=$(echo "$activities_count" | head -1 | tr -d '\n\r' | grep -oE '[0-9]+' || echo "0")
+        milestones_count=$(echo "$milestones_count" | head -1 | tr -d '\n\r' | grep -oE '[0-9]+' || echo "0")
         
         # Update metrics section using sed to replace existing values
         sed -i.bak "s/files_modified: [0-9]*/files_modified: $files_modified/" "$session_file"

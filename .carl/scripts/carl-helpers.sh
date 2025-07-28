@@ -98,6 +98,9 @@ carl_get_setting() {
         "quiet_hours_end")
             carl_get_json_value "$config_file" "audio_settings.quiet_hours_end" "08:00"
             ;;
+        "personality_theme")
+            carl_get_json_value "$config_file" "audio_settings.personality_theme" "jimmy_neutron"
+            ;;
         "session_tracking")
             carl_get_json_value "$config_file" "development_settings.session_tracking" "true"
             ;;
@@ -399,15 +402,24 @@ carl_get_session_progress() {
 
 # Code change analysis functions
 carl_count_modified_files() {
-    git diff --name-only HEAD~1 2>/dev/null | wc -l || echo "0"
+    local count=$(git diff --name-only HEAD~1 2>/dev/null | wc -l 2>/dev/null)
+    if [ -z "$count" ]; then count="0"; fi
+    # Sanitize to prevent multiline strings that break sed
+    echo "$count" | head -1 | tr -d '\n\r' | grep -oE '[0-9]+' || echo "0"
 }
 
 carl_count_added_lines() {
-    git diff --stat HEAD~1 2>/dev/null | tail -1 | grep -oE '[0-9]+ insertions?' | cut -d' ' -f1 || echo "0"
+    local lines=$(git diff --stat HEAD~1 2>/dev/null | tail -1 | grep -oE '[0-9]+ insertions?' | cut -d' ' -f1 2>/dev/null)
+    if [ -z "$lines" ]; then lines="0"; fi
+    # Sanitize to prevent multiline strings that break sed
+    echo "$lines" | head -1 | tr -d '\n\r' | grep -oE '[0-9]+' || echo "0"
 }
 
 carl_count_removed_lines() {
-    git diff --stat HEAD~1 2>/dev/null | tail -1 | grep -oE '[0-9]+ deletions?' | cut -d' ' -f1 || echo "0"
+    local lines=$(git diff --stat HEAD~1 2>/dev/null | tail -1 | grep -oE '[0-9]+ deletions?' | cut -d' ' -f1 2>/dev/null)
+    if [ -z "$lines" ]; then lines="0"; fi
+    # Sanitize to prevent multiline strings that break sed
+    echo "$lines" | head -1 | tr -d '\n\r' | grep -oE '[0-9]+' || echo "0"
 }
 
 # Session duration calculation

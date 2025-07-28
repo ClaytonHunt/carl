@@ -9,34 +9,50 @@ carl_audio_get_root() {
     echo "$(cd "$script_dir/../.." && pwd)"
 }
 
-# Load personalities from personalities.config.carl file
+# Load personalities from active theme file
 load_personalities() {
     local carl_root="$(carl_audio_get_root)"
-    local personalities_file="$carl_root/.carl/personalities.config.carl"
     
-    # Check if personalities file exists
-    if [ ! -f "$personalities_file" ]; then
-        echo "⚠️  personalities.config.carl not found, using fallback personalities" >&2
+    # Source helper functions to get settings
+    source "$carl_root/.carl/scripts/carl-helpers.sh" 2>/dev/null || true
+    
+    # Get active personality theme from settings
+    local active_theme=$(carl_get_setting 'personality_theme' 2>/dev/null || echo "jimmy_neutron")
+    
+    # Try theme-specific file first, then fall back to default
+    local theme_file="$carl_root/.carl/${active_theme}.personalities.config.carl"
+    local default_file="$carl_root/.carl/personalities.config.carl"
+    local personalities_file=""
+    
+    if [ -f "$theme_file" ]; then
+        personalities_file="$theme_file"
+    elif [ -f "$default_file" ]; then
+        personalities_file="$default_file"
+    else
+        echo "⚠️  No personality config found for theme '$active_theme', using fallback personalities" >&2
         return 1
     fi
     
     # Validate YAML format (basic check)
     if ! grep -q "personality_system:" "$personalities_file" 2>/dev/null; then
-        echo "⚠️  Invalid personalities.config.carl format, using fallback personalities" >&2
+        echo "⚠️  Invalid personality config format in $personalities_file, using fallback personalities" >&2
         return 1
     fi
     
+    # Export the file path for other functions to use
+    export PERSONALITIES_CONFIG_FILE="$personalities_file"
     return 0
 }
 
-# Parse character data from personalities.config.carl
+# Parse character data from active personality config
 get_character_data() {
     local character="$1"
     local data_type="$2"  # "catchphrases", "transforms", "voice_config", etc.
-    local carl_root="$(carl_audio_get_root)"
-    local personalities_file="$carl_root/.carl/personalities.config.carl"
     
-    if [ ! -f "$personalities_file" ]; then
+    # Use the personalities file determined by load_personalities
+    local personalities_file="${PERSONALITIES_CONFIG_FILE:-}"
+    
+    if [ -z "$personalities_file" ] || [ ! -f "$personalities_file" ]; then
         return 1
     fi
     
