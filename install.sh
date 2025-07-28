@@ -145,14 +145,25 @@ show_help() {
     echo "Options:"
     echo "  --global              Install CARL globally for user (~/.carl-global)"
     echo "  --force               Force installation even if CARL already exists"
+    echo "  --update              Update existing CARL installation"
     echo "  --skip-audio-test     Skip audio system testing during installation"
+    echo "  --no-backup           Skip backup creation during updates (not recommended)"
     echo "  --help, -h            Show this help message"
     echo ""
-    echo "Examples:"
+    echo "Local Installation Examples:"
     echo "  ./install.sh                    # Install in current directory"
     echo "  ./install.sh /path/to/project   # Install in specific project"
     echo "  ./install.sh --global           # Install globally for user"
     echo "  ./install.sh --force            # Force reinstall"
+    echo ""
+    echo "Remote Installation/Update (via curl):"
+    echo "  # New installation"
+    echo "  curl -fsSL https://raw.githubusercontent.com/ClaytonHunt/carl/main/install.sh | bash"
+    echo "  curl -fsSL https://raw.githubusercontent.com/ClaytonHunt/carl/main/install.sh | bash -s -- /path/to/project"
+    echo ""
+    echo "  # Update existing installation"  
+    echo "  curl -fsSL https://raw.githubusercontent.com/ClaytonHunt/carl/main/install.sh | bash -s -- --update"
+    echo "  curl -fsSL https://raw.githubusercontent.com/ClaytonHunt/carl/main/install.sh | bash -s -- --update /path/to/project"
 }
 
 # Check system requirements
@@ -169,6 +180,13 @@ check_requirements() {
     # Check for git
     if ! command -v git >/dev/null 2>&1; then
         missing_requirements+=("git")
+    fi
+    
+    # Check for curl if running remotely (no .carl directory means remote execution)
+    if [ ! -f "$SCRIPT_DIR/.carl/scripts/carl-helpers.sh" ]; then
+        if ! command -v curl >/dev/null 2>&1; then
+            missing_requirements+=("curl")
+        fi
     fi
     
     # Check for basic utilities
@@ -530,7 +548,47 @@ create_directory_structure() {
     done
 }
 
-# Copy CARL files from source
+# Download CARL files from GitHub when running via curl
+download_carl_files() {
+    echo -e "${BLUE}📋 Downloading CARL system files from GitHub...${NC}"
+    
+    # Get the latest version for download URL
+    local version=$(get_carl_version)
+    local download_url="https://github.com/ClaytonHunt/carl/archive/refs/tags/v${version}.tar.gz"
+    local temp_dir="/tmp/carl-install-$(date +%s)"
+    
+    # Create temporary directory
+    mkdir -p "$temp_dir"
+    
+    echo "   🌐 Downloading CARL v${version}..."
+    if ! curl -L --progress-bar "$download_url" | tar xz -C "$temp_dir" --strip-components=1; then
+        echo -e "${RED}❌ Failed to download CARL files${NC}"
+        rm -rf "$temp_dir"
+        exit 1
+    fi
+    
+    # Copy files from temp directory
+    echo "   📂 Installing .claude directory..."
+    if [ -d "$temp_dir/.claude" ]; then
+        cp -r "$temp_dir/.claude/"* "$TARGET_DIR/.claude/" 2>/dev/null || true
+    fi
+    
+    echo "   📂 Installing .carl directory..."
+    if [ -d "$temp_dir/.carl" ]; then
+        cp -r "$temp_dir/.carl/"* "$TARGET_DIR/.carl/" 2>/dev/null || true
+    fi
+    
+    # Make scripts executable
+    find "$TARGET_DIR/.carl/scripts" -name "*.sh" -type f -exec chmod +x {} \; 2>/dev/null || true
+    find "$TARGET_DIR/.claude/hooks" -name "*.sh" -type f -exec chmod +x {} \; 2>/dev/null || true
+    
+    # Clean up
+    rm -rf "$temp_dir"
+    
+    echo -e "${GREEN}✅ CARL files downloaded and installed successfully${NC}"
+}
+
+# Copy CARL files from source (when running from git repository)
 copy_carl_files() {
     echo -e "${BLUE}📋 Installing CARL system files...${NC}"
     
@@ -539,24 +597,23 @@ copy_carl_files() {
     if [ -f "$SCRIPT_DIR/.carl/scripts/carl-helpers.sh" ]; then
         # Running from CARL repository
         source_dir="$SCRIPT_DIR"
+        
+        # Copy all CARL files
+        echo "   📂 Copying .claude directory..."
+        cp -r "$source_dir/.claude/"* "$TARGET_DIR/.claude/" 2>/dev/null || true
+        
+        echo "   📂 Copying .carl directory..."
+        cp -r "$source_dir/.carl/"* "$TARGET_DIR/.carl/" 2>/dev/null || true
+        
+        # Make scripts executable
+        find "$TARGET_DIR/.carl/scripts" -name "*.sh" -type f -exec chmod +x {} \; 2>/dev/null || true
+        find "$TARGET_DIR/.claude/hooks" -name "*.sh" -type f -exec chmod +x {} \; 2>/dev/null || true
+        
+        echo -e "${GREEN}✅ CARL files installed successfully${NC}"
     else
-        echo -e "${RED}❌ Cannot find CARL source files${NC}"
-        echo "   Make sure you're running install.sh from the CARL repository"
-        exit 1
+        # Running via curl - download files instead
+        download_carl_files
     fi
-    
-    # Copy all CARL files
-    echo "   📂 Copying .claude directory..."
-    cp -r "$source_dir/.claude/"* "$TARGET_DIR/.claude/" 2>/dev/null || true
-    
-    echo "   📂 Copying .carl directory..."
-    cp -r "$source_dir/.carl/"* "$TARGET_DIR/.carl/" 2>/dev/null || true
-    
-    # Make scripts executable
-    find "$TARGET_DIR/.carl/scripts" -name "*.sh" -type f -exec chmod +x {} \; 2>/dev/null || true
-    find "$TARGET_DIR/.claude/hooks" -name "*.sh" -type f -exec chmod +x {} \; 2>/dev/null || true
-    
-    echo -e "${GREEN}✅ CARL files installed successfully${NC}"
 }
 
 # Configure Claude Code hooks
