@@ -68,7 +68,7 @@ get_carl_version() {
     fi
     
     # Fallback version (only used if both git and API fail)
-    version="1.4.4"
+    version="1.6.1"
     echo "$version"
 }
 
