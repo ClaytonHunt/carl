@@ -11,7 +11,8 @@
       "Write",
       "Edit",
       "Bash(chmod:*)",
-      "Bash(touch:*)"
+      "Bash(touch:*)",
+      "WebFetch(domain:docs.anthropic.com)"
     ],
     "deny": []
   },

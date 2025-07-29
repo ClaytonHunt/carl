@@ -59,155 +59,63 @@ END FUNCTION
 
 ### 3. CARL Intent Generation for Backend Features
 ```yaml
-# Example backend feature intent
-id: user_authentication_api
-parent: user_management_system
-complexity: medium
-
-intent:
-  what: "Secure API endpoints for user authentication and session management"
-  why: "Enable secure user access to protected resources"
-  who: ["end_users", "mobile_clients", "web_applications"]
-
-api_contracts:
-  authentication:
-    - endpoint: "POST /api/auth/login"
-      purpose: "User credential validation and token generation"
-      request_schema: "LoginCredentials"
-      response_schema: "AuthenticationResponse"
-    - endpoint: "POST /api/auth/refresh"
-      purpose: "Access token refresh using refresh token"
-      request_schema: "RefreshRequest"
-      response_schema: "TokenResponse"
-
-data_requirements:
-  entities: ["User", "Session", "RefreshToken"]
-  relationships: 
-    - "User has_many Sessions"
-    - "Session belongs_to User"
-    - "RefreshToken belongs_to User"
-  constraints:
-    - "Email must be unique and valid format"
-    - "Password must meet complexity requirements"
-    - "Sessions expire after 30 minutes of inactivity"
-
-business_rules:
-  authentication:
-    - "Maximum 5 failed login attempts triggers account lockout"
-    - "Account lockout duration increases exponentially"
-    - "Refresh tokens are single-use and rotate on each refresh"
-  authorization:
-    - "Only authenticated users can access protected endpoints"
-    - "Admin users have access to all resources"
-    - "Regular users can only access their own data"
+# Template: .carl/templates/intent.template.carl
+# Domain Extension: backend_api_feature
+# Metadata:
+#   type: feature
+#   complexity: medium
+#   scope_specific_content: |
+#     api_contracts:
+#       authentication:
+#         - endpoint: "POST /api/auth/login"
+#           purpose: "User credential validation and token generation"
+#           request_schema: "LoginCredentials"
+#           response_schema: "AuthenticationResponse"
+#         - endpoint: "POST /api/auth/refresh"
+#           purpose: "Access token refresh using refresh token"
+#           request_schema: "RefreshRequest"
+#           response_schema: "TokenResponse"
+#     data_requirements:
+#       entities: ["User", "Session", "RefreshToken"]
+#       relationships: 
+#         - "User has_many Sessions"
+#         - "Session belongs_to User"
+#         - "RefreshToken belongs_to User"
+#       constraints:
+#         - "Email must be unique and valid format"
+#         - "Password must meet complexity requirements"
+#         - "Sessions expire after 30 minutes of inactivity"
+#     business_rules:
+#       authentication:
+#         - "Maximum 5 failed login attempts triggers account lockout"
+#         - "Account lockout duration increases exponentially"
+#         - "Refresh tokens are single-use and rotate on each refresh"
+#       authorization:
+#         - "Only authenticated users can access protected endpoints"
+#         - "Admin users have access to all resources"
+#         - "Regular users can only access their own data"
 ```
 
 ### 4. Service Context Mapping
 ```yaml
-# Example service context file
-service_id: user_authentication_service
-service_type: application_service
-
-api_endpoints:
-  public:
-    - path: "/api/auth/login"
-      method: "POST"
-      authentication: "none"
-      rate_limit: "5_per_minute_per_ip"
-    - path: "/api/auth/register"
-      method: "POST"
-      authentication: "none"
-      rate_limit: "3_per_minute_per_ip"
-  
-  protected:
-    - path: "/api/auth/profile"
-      method: "GET"
-      authentication: "jwt_token"
-      authorization: "user_own_data"
-
-dependencies:
-  databases:
-    - name: "user_database"
-      type: "postgresql"
-      tables: ["users", "sessions", "refresh_tokens"]
-      connection: "user_db_pool"
-  
-  external_services:
-    - name: "email_service"
-      type: "smtp"
-      purpose: "password_reset_emails"
-      endpoint: "smtp://mail.company.com"
-  
-  internal_services:
-    - name: "logging_service"
-      type: "http_api"
-      purpose: "audit_logging"
-      endpoint: "http://logging-service:8080"
-
-data_contracts:
-  input_validation:
-    - field: "email"
-      type: "string"
-      constraints: ["required", "email_format", "max_length_255"]
-    - field: "password"
-      type: "string"
-      constraints: ["required", "min_length_8", "complexity_requirements"]
-  
-  output_schemas:
-    - name: "UserResponse"
-      fields: ["id", "email", "created_at", "last_login"]
-      excludes: ["password_hash", "salt"]
+# Template: .carl/templates/context.template.carl
+# Context Type: service
+# Metadata:
+#   context_type: service
+#   analysis_method: code_analysis
+#   service_type: application_service
+#   includes_api_contracts: true
+#   includes_data_contracts: true
 ```
 
 ### 5. Backend Implementation State
 ```yaml
-# Example backend state file
-service_id: user_authentication_service
-last_updated: "2024-01-15T10:30:00Z"
-phase: production
-
-implementation:
-  completed:
-    - feature: "basic_login"
-      endpoints: ["/api/auth/login"]
-      tests: "unit,integration,e2e"
-      coverage: 95%
-      performance: "avg_response_150ms"
-    
-    - feature: "user_registration"
-      endpoints: ["/api/auth/register"]
-      tests: "unit,integration"
-      coverage: 90%
-      validation: "comprehensive_input_validation"
-  
-  in_progress:
-    - feature: "password_reset"
-      endpoints: ["/api/auth/reset-password"]
-      progress: 70%
-      blockers: ["email_service_integration"]
-      eta: "2024-01-20"
-  
-  planned:
-    - feature: "two_factor_auth"
-      priority: "high"
-      effort_estimate: "2_weeks"
-      dependencies: ["sms_service_integration"]
-
-technical_metrics:
-  performance:
-    avg_response_time: "145ms"
-    p95_response_time: "300ms"
-    throughput: "1000_requests_per_second"
-  
-  reliability:
-    uptime: "99.9%"
-    error_rate: "0.1%"
-    availability_sla: "99.5%"
-  
-  security:
-    vulnerability_scan: "passed"
-    penetration_test: "scheduled_monthly"
-    compliance: ["owasp_top_10", "gdpr"]
+# Template: .carl/templates/state.template.carl
+# State Type: backend_service_implementation
+# Metadata:
+#   tracking_type: api_implementation
+#   includes_technical_metrics: true
+#   metrics_categories: ["performance", "reliability", "security"]
 ```
 
 ## CARL-Specific Analysis Patterns
@@ -285,21 +193,12 @@ END FUNCTION
 
 ### Data Model Analysis Standards:
 ```yaml
-data_analysis_quality:
-  entity_coverage:
-    - all_models_identified: true
-    - relationships_mapped: true
-    - constraints_documented: true
-  
-  business_logic:
-    - validation_rules_extracted: true
-    - workflow_patterns_identified: true
-    - business_constraints_documented: true
-  
-  integration_patterns:
-    - service_dependencies_mapped: true
-    - data_access_patterns_identified: true
-    - caching_strategies_documented: true
+# Template: .carl/templates/quality_standards.template.carl
+# Domain: backend_data_analysis
+# Quality Focus:
+#   - entity_coverage (all_models_identified, relationships_mapped)
+#   - business_logic (validation_rules_extracted, workflow_patterns_identified)
+#   - integration_patterns (service_dependencies_mapped, data_access_patterns_identified)
 ```
 
 ## Communication Patterns

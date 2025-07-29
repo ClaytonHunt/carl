@@ -57,95 +57,41 @@ END FUNCTION
 
 ### 3. CARL Intent Generation for Architecture
 ```yaml
-# Example architectural intent file
-id: system_architecture
-type: architectural_foundation
-complexity: high
-
-intent:
-  what: "System provides scalable, maintainable architecture foundation"
-  why: "Support business requirements with reliable, performant system"
-  who: ["all_users", "system_administrators", "developers"]
-
-architectural_decisions:
-  style: "microservices" # or monolith, layered, event-driven
-  data_architecture: "database_per_service"
-  communication_pattern: "async_messaging"
-  deployment_strategy: "containerized"
-
-constraints:
-  must_have: ["horizontal_scaling", "fault_tolerance", "observability"]
-  should_have: ["automated_deployment", "circuit_breakers", "caching"]
-  must_not: ["single_points_of_failure", "tight_coupling", "shared_databases"]
-
-quality_attributes:
-  performance: "response_time < 200ms"
-  availability: "99.9% uptime"
-  scalability: "handle_10x_current_load"
-  maintainability: "modular_loosely_coupled"
+# Template: .carl/templates/intent.template.carl
+# Domain Extension: architectural_foundation
+# Metadata:
+#   type: architectural_foundation
+#   complexity: high
+#   scope_specific_content: |
+#     architectural_decisions:
+#       style: "microservices" # or monolith, layered, event-driven
+#       data_architecture: "database_per_service"
+#       communication_pattern: "async_messaging"
+#       deployment_strategy: "containerized"
+#     quality_attributes:
+#       performance: "response_time < 200ms"
+#       availability: "99.9% uptime"
+#       scalability: "handle_10x_current_load"
+#       maintainability: "modular_loosely_coupled"
 ```
 
 ### 4. Component Context Mapping
 ```yaml
-# Example component context file
-component_id: user_management_service
-architectural_layer: application_service
-
-relationships:
-  depends_on:
-    - component: user_database
-      type: data_persistence
-      contract: user_repository_interface
-    - component: authentication_service
-      type: service_dependency
-      contract: auth_validation_api
-  
-  provides_to:
-    - component: user_profile_ui
-      type: api_service
-      contract: user_management_rest_api
-    - component: admin_dashboard
-      type: api_service
-      contract: user_admin_api
-
-integration_patterns:
-  inbound: ["rest_api", "message_queue"]
-  outbound: ["database_orm", "http_client"]
-  cross_cutting: ["logging", "monitoring", "security"]
+# Template: .carl/templates/context.template.carl
+# Context Type: component
+# Metadata:
+#   context_type: component
+#   analysis_method: code_analysis
+#   architectural_layer: application_service
 ```
 
 ### 5. Architectural State Tracking
 ```yaml
-# Example architectural state file
-architectural_component: microservices_infrastructure
-last_updated: "2024-01-15T10:30:00Z"
-phase: production
-
-implementation_status:
-  completed:
-    - pattern: api_gateway
-      implementation: nginx_ingress
-      health_check: passing
-    - pattern: service_discovery
-      implementation: kubernetes_dns
-      health_check: passing
-  
-  in_progress:
-    - pattern: distributed_tracing
-      implementation: jaeger
-      progress: 60%
-      eta: "2024-01-20"
-  
-  planned:
-    - pattern: event_sourcing
-      priority: medium
-      effort_estimate: "3_weeks"
-
-architectural_health:
-  coupling_level: low
-  cohesion_level: high
-  complexity_score: medium
-  technical_debt_items: 3
+# Template: .carl/templates/state.template.carl
+# State Type: architectural_implementation
+# Metadata:
+#   tracking_type: architectural_patterns
+#   includes_health_metrics: true
 ```
 
 ## CARL-Specific Analysis Patterns
@@ -207,21 +153,13 @@ END FUNCTION
 
 ### CARL File Quality Standards:
 ```yaml
-carl_file_quality_checks:
-  intent_files:
-    - architectural_decisions_documented: true
-    - quality_attributes_specified: true
-    - constraints_clearly_defined: true
-    
-  context_files:
-    - all_dependencies_mapped: true
-    - integration_contracts_specified: true
-    - relationship_types_defined: true
-    
-  state_files:
-    - implementation_status_current: true
-    - health_metrics_available: true
-    - progress_tracking_accurate: true
+# Template: .carl/templates/quality_standards.template.carl
+# Domain: architectural_analysis
+# Quality Focus:
+#   - architectural_decisions_documented
+#   - quality_attributes_specified
+#   - all_dependencies_mapped
+#   - implementation_status_current
 ```
 
 ## Communication Patterns
