@@ -48,13 +48,13 @@ Just like Carl Wheezer asks clarifying questions in the show, CARL ensures your 
 **Option 1: Remote Installation (Recommended)**
 ```bash
 # Install in current directory
-curl -fsSL https://github.com/ClaytonHunt/carl/releases/latest/download/install.sh | bash
+bash <(curl -s https://github.com/ClaytonHunt/carl/releases/latest/download/install.sh)
 
 # Install in specific project
-curl -fsSL https://github.com/ClaytonHunt/carl/releases/latest/download/install.sh | bash -s -- /path/to/project
+bash <(curl -s https://github.com/ClaytonHunt/carl/releases/latest/download/install.sh) /path/to/project
 
 # Install globally for all projects
-curl -fsSL https://github.com/ClaytonHunt/carl/releases/latest/download/install.sh | bash -s -- --global
+bash <(curl -s https://github.com/ClaytonHunt/carl/releases/latest/download/install.sh) --global
 ```
 
 **Option 2: Local Installation**
@@ -62,13 +62,16 @@ curl -fsSL https://github.com/ClaytonHunt/carl/releases/latest/download/install.
 # Clone and install locally
 git clone https://github.com/claytonhunt/carl.git
 cd carl
-./install.sh /path/to/your/project
+./src/install.sh /path/to/your/project
 ```
 
 ### Updates
 ```bash
-# Update existing installation to latest version
-curl -fsSL https://github.com/ClaytonHunt/carl/releases/latest/download/install.sh | bash -s -- --update
+# Update existing installation to latest version (from within Claude Code)
+/carl:update
+
+# Or update from command line
+bash <(curl -s https://github.com/ClaytonHunt/carl/releases/latest/download/update-carl.sh)
 ```
 
 ### Start Using CARL

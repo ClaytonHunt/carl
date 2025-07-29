@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # CARL Update Script - Intelligent Update with Data Preservation
-# Version: 1.0.0
+# Version: 1.7.1
 # Preserves user data while updating system files
 
 set -e

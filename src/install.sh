@@ -1,4 +1,5 @@
 #!/bin/bash
+CARL_VERSION="1.7.1"
 
 # CARL Installation Script
 # Context-Aware Requirements Language - Easy deployment to any project

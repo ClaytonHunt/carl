@@ -57,7 +57,7 @@ $ /update /path/to/maybe-carl-project
 ```bash
 $ /update /path/to/non-carl-project
 ❌ No CARL installation found at /path/to/non-carl-project
-💡 Use 'bash <(curl -s https://raw.githubusercontent.com/ClaytonHunt/carl/main/install.sh) /path/to/non-carl-project' to install CARL
+💡 Use 'bash <(curl -s https://github.com/ClaytonHunt/carl/releases/latest/download/install.sh) /path/to/non-carl-project' to install CARL
 
 $ /update /nonexistent/path
 ❌ Directory does not exist: /nonexistent/path
@@ -213,7 +213,7 @@ carl_intelligent_update() {
     echo "🔄 Downloading latest CARL from GitHub..."
     
     # Download latest update script  
-    local update_url="https://raw.githubusercontent.com/ClaytonHunt/carl/main/update-carl.sh"
+    local update_url="https://github.com/ClaytonHunt/carl/releases/latest/download/update-carl.sh"
     
     if command -v curl >/dev/null 2>&1; then
         curl -s --max-time 30 "$update_url" > "$temp_dir/update-carl.sh" || {
@@ -234,7 +234,7 @@ carl_intelligent_update() {
     fi
     
     # Download install script (needed by update script)
-    local install_url="https://raw.githubusercontent.com/ClaytonHunt/carl/main/install.sh"
+    local install_url="https://github.com/ClaytonHunt/carl/releases/latest/download/install.sh"
     
     if command -v curl >/dev/null 2>&1; then
         curl -s --max-time 30 "$install_url" > "$temp_dir/install.sh" || {

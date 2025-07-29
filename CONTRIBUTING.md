@@ -6,6 +6,80 @@
 
 CARL is an AI-optimized planning system for Claude Code, featuring our beloved mascot Carl Wheezer from Jimmy Neutron. We believe in making development fun, efficient, and accessible to everyone.
 
+## 🔄 Development & Release Process
+
+### 📁 Repository Structure
+```
+carl/
+├── src/                    # Source files for release 
+│   ├── install.sh         # Main installation script
+│   └── update-carl.sh     # Update script
+├── .carl/                 # CARL project files
+├── .github/workflows/     # CI/CD automation
+├── docs/                  # Documentation
+└── README.md              # Project documentation
+```
+
+### 🚀 Release Process
+
+**For Maintainers:**
+
+1. **Development**: Work in `src/` directory
+   - All release files should be in `src/`
+   - Test changes thoroughly before releasing
+
+2. **Creating a Release**:
+   ```bash
+   # Tag the release
+   git tag v1.7.1
+   git push origin v1.7.1
+   
+   # GitHub Actions will automatically:
+   # - Update version numbers in src/ files
+   # - Create GitHub release with changelog
+   # - Make src/ files available via GitHub releases API
+   ```
+
+3. **Manual Release** (if needed):
+   ```bash
+   # Trigger manual release via GitHub Actions
+   # Go to Actions tab → Release CARL → Run workflow
+   ```
+
+### 🔧 Development Workflow
+
+1. **Fork & Clone**:
+   ```bash
+   git clone https://github.com/yourusername/carl.git
+   cd carl
+   ```
+
+2. **Make Changes**: Edit files in `src/` directory
+
+3. **Test Locally**:
+   ```bash
+   # Test installation script
+   ./src/install.sh /tmp/test-project
+   
+   # Test in your own project
+   ./src/install.sh /path/to/your/project
+   ```
+
+4. **Submit PR**: Target the `main` branch
+
+### 🤖 CI/CD Pipeline
+
+**Development Workflow** (runs on PR/push):
+- Shell script validation with shellcheck
+- Installation script testing
+- CARL configuration validation
+- Security scanning
+
+**Release Workflow** (runs on git tag):
+- Updates version numbers in `src/` files automatically
+- Creates GitHub release with changelog
+- Makes scripts available via GitHub releases API at `/releases/latest/download/`
+
 ## 🌟 Ways to Contribute
 
 ### 🎵 Audio Contributions
