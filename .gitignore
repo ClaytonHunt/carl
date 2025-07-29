@@ -14,7 +14,6 @@
 .carl/*.context.carl
 
 # Active development artifacts
-.carl/sessions/
 .carl/active/
 .carl/completed/
 
@@ -44,3 +43,5 @@ Thumbs.db
 *.log
 debug/
 logs/
+# Session files (user-specific, not tracked) - matches any .carl/sessions/ directory
+**/.carl/sessions/
