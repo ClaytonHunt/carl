@@ -24,10 +24,10 @@ Verify target directory contains CARL:
 - Resolve absolute path from relative/~ paths
 - Return error if directory doesn't exist or lacks CARL installation
 
-## 3. Check Version Status
+## 3. Check Version Status  
 Compare current and latest versions:
 - Read current version from `.carl/config/carl-settings.json`
-- Query GitHub API for latest release version
+- Query GitHub API for latest release version from `https://github.com/claytonhunt/carl`
 - Compare versions to determine if update is needed
 - For `--check` option, display version information and exit
 - Handle network failures gracefully with fallback behavior
@@ -43,7 +43,7 @@ Manage FIFO backup system:
 
 ## 5. Download and Apply Update
 Execute the update process:
-- Download latest `update-carl.sh` script from GitHub using curl/wget
+- Download latest `update-carl.sh` script from `https://github.com/claytonhunt/carl` using curl/wget
 - Download latest `install.sh` script (dependency for updater)
 - Make scripts executable and run update process
 - Preserve user data during update (session files, custom configs)
