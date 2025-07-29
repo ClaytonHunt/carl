@@ -3,22 +3,10 @@
 # Normal CARL projects should track these files
 
 # Project-specific CARL artifacts
-.carl/index.carl
-.carl/vision.carl
-.carl/roadmap.carl
-.carl/objectives.carl
-.carl/process.carl
-.carl/decisions.carl
-.carl/*.intent.carl
-.carl/*.state.carl
-.carl/*.context.carl
 
 # Active development artifacts
-.carl/active/
-.carl/completed/
 
 # User-specific configurations
-.carl/config/carl-settings.json
 
 # Local personalities (keep template only)
 # .carl/personalities.config.carl is tracked as template
