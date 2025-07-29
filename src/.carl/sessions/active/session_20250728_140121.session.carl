@@ -1,0 +1,24 @@
+# CARL Session Tracking
+# Session ID: session_20250728_140121
+# Created: 2025-07-28T14:01:21-04:00
+
+session_metadata:
+  session_id: "session_20250728_140121"
+  start_time: "2025-07-28T14:01:21-04:00"
+  working_directory: "/home/clayton/projects/carl"
+  git_branch: "main"
+  git_commit: "09851496a1591ed3a3de1f6acc8c92fe5a58db48"
+  user: "Clayton Hunt"
+
+session_activities:
+  # Activities will be appended here during the session
+
+session_milestones:
+  # Milestones will be tracked here
+
+progress_metrics:
+  files_modified: 43
+  lines_added: 3812
+  lines_removed: 1378
+  activities_count: 0
+  milestones_count: 0

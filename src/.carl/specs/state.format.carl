@@ -1,0 +1,170 @@
+# CARL State Format Specification
+# Version: 1.0  
+# Purpose: Define structure for [name].state.carl files tracking implementation progress
+
+format_specification:
+  artifact_type: "state"
+  file_extension: ".state.carl"
+  ai_optimized: true
+  real_time_updates: true
+  progress_tracking: true
+
+required_sections:
+  state_metadata:
+    - feature_id: "matching_id_from_corresponding_intent_file"
+    - intent_reference: "path_to_matching_intent_file"
+    - phase: "planning|development|testing|deployment|completed"
+    - completion_percentage: "0_to_100_calculated_from_implementation_progress"
+    - last_updated: "iso_timestamp_of_most_recent_change"
+    - update_source: "hook|manual|automated_analysis"
+
+  implementation_progress:
+    completed_components:
+      - component: "name_of_completed_component"
+        file_path: "relative_path_to_implementation_file"
+        completion_date: "when_component_was_finished"
+        test_coverage: "percentage_or_status"
+        quality_metrics: "code_quality_indicators"
+        
+    in_progress_components:
+      - component: "name_of_component_being_worked_on"
+        file_path: "relative_path_to_implementation_file"
+        progress_percentage: "0_to_100_for_this_component"
+        estimated_completion: "target_completion_date"
+        current_developer: "who_is_working_on_this"
+        blockers: "array_of_current_impediments"
+
+    pending_components:
+      - component: "name_of_planned_component"
+        priority: "P0|P1|P2|P3"
+        dependencies: "what_must_be_done_first"
+        estimated_effort: "time_estimate"
+
+  quality_metrics:
+    test_coverage:
+      - unit_tests: "percentage_and_details"
+      - integration_tests: "percentage_and_details"
+      - end_to_end_tests: "percentage_and_details"
+      - test_files: "array_of_test_file_paths"
+      
+    code_quality:
+      - static_analysis_score: "linting_and_analysis_results"
+      - complexity_metrics: "cyclomatic_complexity_measurements"
+      - maintainability_index: "code_maintainability_score"
+      - technical_debt: "identified_debt_items_and_severity"
+
+    performance_metrics:
+      - response_times: "measured_performance_data"
+      - resource_usage: "memory_cpu_and_storage_impact"
+      - scalability_tests: "load_testing_results"
+      - bottlenecks: "identified_performance_issues"
+
+  deployment_status:
+    environments:
+      - environment_name: "development|staging|production"
+        deployment_status: "not_deployed|deployed|failed"
+        deployment_date: "when_last_deployed"
+        version: "deployed_version_identifier"
+        health_status: "healthy|degraded|down"
+        
+    release_readiness:
+      - feature_flags: "status_of_feature_toggles"
+      - configuration: "environment_specific_settings"
+      - dependencies: "external_service_dependencies"
+      - rollback_plan: "strategy_for_reverting_changes"
+
+progress_calculation:
+  completion_algorithm:
+    component_weighting: "how_components_contribute_to_overall_percentage"
+    quality_gates: "requirements_that_affect_completion_status"
+    acceptance_criteria_mapping: "how_intent_criteria_map_to_implementation"
+    
+  milestone_tracking:
+    - milestone_name: "significant_progress_marker"
+      target_date: "planned_completion_date"
+      actual_date: "when_milestone_was_achieved"
+      success_criteria: "how_to_measure_milestone_completion"
+
+  velocity_metrics:
+    - sprint_velocity: "story_points_or_tasks_completed_per_time_period"
+    - burndown_data: "remaining_work_over_time"
+    - predictive_completion: "estimated_completion_based_on_current_velocity"
+
+integration_points:
+  continuous_integration:
+    - build_status: "current_CI_pipeline_status"
+    - test_results: "automated_test_execution_results"
+    - deployment_pipeline: "CD_pipeline_status_and_history"
+    
+  monitoring_integration:
+    - error_rates: "production_error_monitoring_data"
+    - usage_metrics: "how_feature_is_being_used"
+    - performance_monitoring: "real_time_performance_data"
+
+context_optimization:
+  ai_consumption_priority:
+    high: ["completion_percentage", "in_progress_components", "blockers"]
+    medium: ["quality_metrics", "deployment_status"]
+    low: ["historical_data", "detailed_metrics"]
+    
+  update_frequency:
+    real_time: ["completion_percentage", "current_blockers", "build_status"]
+    daily: ["quality_metrics", "velocity_metrics"]
+    weekly: ["performance_trends", "technical_debt_assessment"]
+
+automated_updates:
+  hook_integration:
+    - git_commits: "update_progress_based_on_code_changes"
+    - test_execution: "update_coverage_and_quality_metrics"
+    - deployment_events: "update_deployment_status"
+    - ci_cd_integration: "sync_with_build_and_deployment_pipelines"
+    
+  analysis_triggers:
+    - "file_modification_in_tracked_components"
+    - "test_suite_execution_completion"
+    - "deployment_pipeline_completion"
+    - "manual_progress_update_request"
+
+validation_rules:
+  data_consistency: "completion_percentage_must_match_component_progress"
+  reference_integrity: "intent_reference_must_exist_and_be_valid"
+  progress_logic: "components_cannot_regress_without_explanation"
+  timestamp_validation: "updates_must_have_realistic_timestamps"
+
+archival_strategy:
+  completion_criteria: "when_to_move_state_file_to_completed_directory"
+  historical_preservation: "maintain_final_state_for_post_mortem_analysis"
+  cleanup_rules: "what_temporary_data_can_be_removed_after_completion"
+
+migration_compatibility:
+  from_legacy_format: "convert_existing_state_tracking_to_new_structure"
+  progress_preservation: "maintain_all_historical_progress_data"
+  metric_migration: "convert_existing_quality_metrics_to_new_format"
+  integration_updates: "update_hook_scripts_to_use_new_state_format"
+
+example_structure:
+  minimal_state: |
+    feature_id: "user_authentication_system"
+    intent_reference: "@.carl/requirements/active/user-auth.intent.carl"
+    phase: "development"
+    completion_percentage: 65
+    
+    implementation_progress:
+      completed_components:
+        - component: "User Registration API"
+          file_path: "src/controllers/auth.js"
+          completion_date: "2025-01-15"
+          test_coverage: 89
+          
+      in_progress_components:
+        - component: "JWT Token Service"
+          file_path: "src/services/jwt.js"
+          progress_percentage: 40
+          estimated_completion: "2025-01-20"
+
+# Implementation Notes:
+# - State files track HOW the implementation is progressing
+# - Should be updated automatically by hooks when possible
+# - Link back to corresponding .intent.carl files
+# - Focus on measurable progress and quality metrics
+# - Enable predictive completion analysis

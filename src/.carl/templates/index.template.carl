@@ -1,0 +1,83 @@
+# CARL Project Index - Master AI Reference
+# Project: {PROJECT_NAME}
+# Generated: {CREATION_DATE}
+# Version: {CARL_VERSION}
+
+project_name: "{PROJECT_NAME}"
+project_type: "{PROJECT_TYPE}"
+carl_version: "{CARL_VERSION}"
+
+# Core Process Reference (Always loaded first)
+development_process: "@.carl/process.carl"
+
+# Active Requirements (Max 5 most recent)
+active_requirements:
+{ACTIVE_REQUIREMENTS_REFS}
+
+# Current Implementation Focus
+current_focus: "{CURRENT_FOCUS_AREA}"
+active_implementations:
+{ACTIVE_IMPLEMENTATION_REFS}
+
+# Architecture Context
+system_context: "@.carl/architecture/active/system-overview.context.carl"
+
+# Session History (Last 3 sessions only)
+recent_sessions: "@.carl/sessions/recent.carl"
+
+# Status Summary (Auto-generated, keep minimal)
+last_updated: "{LAST_UPDATE_TIMESTAMP}"
+completion_status: "{OVERALL_COMPLETION_PERCENTAGE}%"
+current_sprint: "{CURRENT_SPRINT_OR_PHASE}"
+
+# Quick Access References (Max 3 each)
+quick_references:
+  high_priority_items:
+{HIGH_PRIORITY_REFS}
+  recent_changes:
+{RECENT_CHANGE_REFS}
+  next_actions:
+{NEXT_ACTION_REFS}
+
+# Context Optimization Settings
+context_settings:
+  max_tokens: 800
+  priority_sections: ["development_process", "active_requirements", "current_focus"]
+  refresh_frequency: "session_start"
+  compression_enabled: true
+
+# Template Variables:
+# {PROJECT_NAME} - Name of the project
+# {CREATION_DATE} - ISO timestamp of index creation
+# {CARL_VERSION} - Current CARL version
+# {PROJECT_TYPE} - Detected project type (web_app, library, service, etc.)
+# {ACTIVE_REQUIREMENTS_REFS} - Up to 5 most recent active requirements
+# {CURRENT_FOCUS_AREA} - What the team is currently working on
+# {ACTIVE_IMPLEMENTATION_REFS} - Current implementation state files
+# {LAST_UPDATE_TIMESTAMP} - When index was last updated
+# {OVERALL_COMPLETION_PERCENTAGE} - Project completion percentage
+# {CURRENT_SPRINT_OR_PHASE} - Current development phase
+# {HIGH_PRIORITY_REFS} - Most important items requiring attention
+# {RECENT_CHANGE_REFS} - Recently modified requirements or implementations
+# {NEXT_ACTION_REFS} - Recommended next steps
+
+# Reference Format Examples:
+# active_requirements:
+#   - "@.carl/requirements/active/user-auth.intent.carl"
+#   - "@.carl/requirements/active/dashboard.intent.carl"
+#   - "@.carl/requirements/active/api-optimization.intent.carl"
+
+# active_implementations:
+#   - "@.carl/implementation/active/user-auth.state.carl"
+#   - "@.carl/implementation/active/dashboard.state.carl"
+
+# CRITICAL RULES:
+# 1. NEVER append session data directly to this file
+# 2. Keep total content under 800 tokens when loaded
+# 3. Use @ references to external files, not inline content
+# 4. Update only high-level status, not detailed progress
+# 5. Rotate references to keep only most relevant items
+
+# Session data goes to: .carl/sessions/YYYY-MM-DD.session.carl
+# Detailed progress goes to: .carl/implementation/active/*.state.carl
+# Completed items go to: .carl/*/completed/ directories
