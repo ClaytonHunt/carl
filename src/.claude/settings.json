@@ -1,7 +1,7 @@
 {
   "permissions": {
     "allow": [
-      "Bash(mkdir:*)",      
+      "Bash(mkdir:*)",
       "Bash(find:*)",
       "Bash(mv:*)",
       "Bash(grep:*)",

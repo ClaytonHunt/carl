@@ -1,7 +1,7 @@
 {
   "permissions": {
     "allow": [
-      "Bash(mkdir:*)",      
+      "Bash(mkdir:*)",
       "Bash(find:*)",
       "Bash(mv:*)",
       "Bash(grep:*)",
@@ -11,8 +11,7 @@
       "Write",
       "Edit",
       "Bash(chmod:*)",
-      "Bash(touch:*)",
-      "WebFetch(domain:docs.anthropic.com)"
+      "Bash(touch:*)"
     ],
     "deny": []
   },

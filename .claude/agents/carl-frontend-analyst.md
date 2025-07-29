@@ -59,163 +59,72 @@ END FUNCTION
 
 ### 3. CARL Intent Generation for Frontend Features
 ```yaml
-# Example frontend feature intent
-id: user_profile_management
-parent: user_management_system
-complexity: medium
-
-intent:
-  what: "Intuitive interface for users to view and edit their profile information"
-  why: "Enable users to maintain accurate personal information and preferences"
-  who: ["authenticated_users", "profile_administrators"]
-
-user_journeys:
-  view_profile:
-    steps:
-      - "User navigates to profile page"
-      - "System displays current profile information"
-      - "User reviews personal details and preferences"
-    success_criteria:
-      - "Profile loads within 2 seconds"
-      - "All user data displayed accurately"
-      - "Interface is responsive across devices"
-  
-  edit_profile:
-    steps:
-      - "User clicks edit profile button"
-      - "Form fields become editable with current values"
-      - "User modifies desired information"
-      - "User saves changes with validation feedback"
-      - "System confirms successful update"
-    success_criteria:
-      - "Validation feedback immediate and clear"
-      - "Save operation completes within 3 seconds"
-      - "Success confirmation clearly visible"
-
-ui_requirements:
-  components: ["ProfileCard", "EditForm", "ImageUpload", "PreferencesPanel"]
-  interactions:
-    - "Click-to-edit functionality for profile fields"
-    - "Drag-and-drop image upload with preview"
-    - "Real-time validation with error messaging"
-    - "Auto-save draft functionality"
-  
-  responsive_design:
-    - "Mobile-first approach with touch-friendly interactions"
-    - "Tablet layout optimization for form fields"
-    - "Desktop layout with sidebar navigation"
-
-accessibility_requirements:
-  - "Screen reader compatible with semantic HTML"
-  - "Keyboard navigation for all interactive elements"
-  - "High contrast mode support for visual impairments"
-  - "Focus indicators clearly visible for form fields"
-  - "Error messages announced to assistive technologies"
+# Template: .carl/templates/intent.template.carl
+# Domain Extension: frontend_user_interface
+# Metadata:
+#   type: feature
+#   complexity: medium
+#   scope_specific_content: |
+#     user_journeys:
+#       view_profile:
+#         steps:
+#           - "User navigates to profile page"
+#           - "System displays current profile information"
+#           - "User reviews personal details and preferences"
+#         success_criteria:
+#           - "Profile loads within 2 seconds"
+#           - "All user data displayed accurately"
+#           - "Interface is responsive across devices"
+#       edit_profile:
+#         steps:
+#           - "User clicks edit profile button"
+#           - "Form fields become editable with current values"
+#           - "User modifies desired information"
+#           - "User saves changes with validation feedback"
+#           - "System confirms successful update"
+#         success_criteria:
+#           - "Validation feedback immediate and clear"
+#           - "Save operation completes within 3 seconds"
+#           - "Success confirmation clearly visible"
+#     ui_requirements:
+#       components: ["ProfileCard", "EditForm", "ImageUpload", "PreferencesPanel"]
+#       interactions:
+#         - "Click-to-edit functionality for profile fields"
+#         - "Drag-and-drop image upload with preview"
+#         - "Real-time validation with error messaging"
+#         - "Auto-save draft functionality"
+#       responsive_design:
+#         - "Mobile-first approach with touch-friendly interactions"
+#         - "Tablet layout optimization for form fields"
+#         - "Desktop layout with sidebar navigation"
+#     accessibility_requirements:
+#       - "Screen reader compatible with semantic HTML"
+#       - "Keyboard navigation for all interactive elements"
+#       - "High contrast mode support for visual impairments"
+#       - "Focus indicators clearly visible for form fields"
+#       - "Error messages announced to assistive technologies"
 ```
 
 ### 4. Component Context Mapping
 ```yaml
-# Example component context file
-component_id: user_profile_form
-component_type: form_component
-
-relationships:
-  parent_components:
-    - component: "ProfilePage"
-      relationship: "rendered_within"
-      props_received: ["user_data", "on_save", "validation_rules"]
-  
-  child_components:
-    - component: "FormField"
-      relationship: "contains_multiple"
-      data_flow: "field_values_and_validation"
-    - component: "ImageUpload"
-      relationship: "contains_one"
-      data_flow: "profile_image_data"
-  
-  state_dependencies:
-    - store: "user_profile_store"
-      data: ["current_user", "profile_data", "loading_state"]
-      mutations: ["UPDATE_PROFILE", "SET_LOADING"]
-    
-  api_dependencies:
-    - endpoint: "/api/users/profile"
-      methods: ["GET", "PUT"]
-      purpose: "fetch_and_update_profile_data"
-    - endpoint: "/api/users/avatar"
-      methods: ["POST"]
-      purpose: "upload_profile_image"
-
-interaction_patterns:
-  user_actions:
-    - action: "field_focus"
-      trigger: "user_clicks_input_field"
-      response: "highlight_field_and_show_validation"
-    - action: "form_submit"
-      trigger: "user_clicks_save_button"
-      response: "validate_then_api_call_with_loading_state"
-  
-  data_flow:
-    - direction: "parent_to_child"
-      data: "initial_profile_values"
-      trigger: "component_mount"
-    - direction: "child_to_parent"
-      data: "form_field_changes"
-      trigger: "user_input_events"
+# Template: .carl/templates/context.template.carl
+# Context Type: ui_component
+# Metadata:
+#   context_type: component
+#   analysis_method: code_analysis
+#   component_type: form_component
+#   includes_interaction_patterns: true
+#   includes_state_dependencies: true
 ```
 
 ### 5. Frontend Implementation State
 ```yaml
-# Example frontend state file
-component_id: user_profile_management
-last_updated: "2024-01-15T10:30:00Z"
-phase: development
-
-implementation:
-  completed:
-    - component: "ProfileCard"
-      features: ["data_display", "responsive_layout"]
-      tests: "unit,integration"
-      accessibility: "wcag_aa_compliant"
-      browser_support: ["chrome", "firefox", "safari", "edge"]
-    
-    - component: "EditForm"
-      features: ["field_editing", "real_time_validation"]
-      tests: "unit,e2e"
-      accessibility: "keyboard_navigation"
-      performance: "render_time_under_100ms"
-  
-  in_progress:
-    - component: "ImageUpload"
-      features: ["drag_drop_upload", "image_preview"]
-      progress: 80%
-      blockers: ["file_size_validation"]
-      eta: "2024-01-18"
-  
-  planned:
-    - component: "PreferencesPanel"
-      features: ["settings_management", "theme_selection"]
-      priority: "medium"
-      effort_estimate: "1_week"
-
-user_experience_metrics:
-  performance:
-    page_load_time: "1.8s"
-    first_contentful_paint: "1.2s"
-    largest_contentful_paint: "2.1s"
-    cumulative_layout_shift: "0.05"
-  
-  usability:
-    user_satisfaction_score: "8.5/10"
-    task_completion_rate: "95%"
-    error_rate: "2%"
-    accessibility_score: "92/100"
-  
-  browser_compatibility:
-    chrome: "98%_compatible"
-    firefox: "96%_compatible"  
-    safari: "94%_compatible"
-    mobile_safari: "91%_compatible"
+# Template: .carl/templates/state.template.carl
+# State Type: frontend_ui_implementation
+# Metadata:
+#   tracking_type: ui_component_implementation
+#   includes_ux_metrics: true
+#   metrics_categories: ["performance", "usability", "browser_compatibility"]
 ```
 
 ## CARL-Specific Analysis Patterns
@@ -297,21 +206,12 @@ END FUNCTION
 
 ### User Experience Analysis Standards:
 ```yaml
-ux_analysis_quality:
-  user_journeys:
-    - all_workflows_identified: true
-    - user_goals_clearly_defined: true
-    - success_criteria_measurable: true
-  
-  component_analysis:
-    - relationships_accurately_mapped: true
-    - data_flow_patterns_documented: true
-    - interaction_patterns_identified: true
-  
-  accessibility_compliance:
-    - wcag_requirements_assessed: true
-    - keyboard_navigation_evaluated: true
-    - screen_reader_compatibility_tested: true
+# Template: .carl/templates/quality_standards.template.carl
+# Domain: frontend_ux_analysis
+# Quality Focus:
+#   - user_journeys (all_workflows_identified, user_goals_clearly_defined)
+#   - component_analysis (relationships_accurately_mapped, interaction_patterns_identified)
+#   - accessibility_compliance (wcag_requirements_assessed, keyboard_navigation_evaluated)
 ```
 
 ## Communication Patterns

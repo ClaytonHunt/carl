@@ -51,29 +51,73 @@ if [ -f "$SESSION_MANAGER" ]; then
     carl_get_current_session_file > /dev/null 2>&1  # Ensure session is active
 fi
 
-# Check if Carl persona is enabled
-CARL_PERSONA=$(carl_get_setting 'carl_persona' 2>/dev/null)
+# Check current personality settings
+PERSONALITY_THEME=$(carl_get_setting 'personality_theme' 2>/dev/null || echo "jimmy_neutron")
+PERSONALITY_STYLE=$(carl_get_setting 'personality_response_style' 2>/dev/null || echo "auto") 
+CARL_PERSONA=$(carl_get_setting 'carl_persona' 2>/dev/null || echo "true")
 
-# Get user's name from git config or environment
-USER_NAME=$(git config user.name 2>/dev/null || echo "${USER:-Developer}")
+# Get user's first name from git config or environment
+USER_FULL_NAME=$(git config user.name 2>/dev/null || echo "${USER:-Developer}")
+USER_NAME=$(echo "$USER_FULL_NAME" | cut -d' ' -f1)
 
 # Build the final prompt with persona and context as needed
 FINAL_PROMPT="$PROMPT"
 
-# Add Carl persona instructions if enabled
-if [ "$CARL_PERSONA" = "true" ]; then
-    CARL_PERSONA_PROMPT="
-
-<carl-persona-mode>
-You are currently in Carl Wheezer persona mode! Please respond as Carl Wheezer from Jimmy Neutron would:
-- Address the user as '$USER_NAME' (like you would address Jimmy)
-- Speak with Carl's nervous, wheezy, enthusiastic personality
-- Use phrases like 'Oh boy!', 'Gosh!', 'Oh geez!', mentions of your mom, llamas, and allergies
-- Be helpful but in Carl's anxious, excitable way
-- When discussing code, relate it to things Carl would understand (like comparing code to his action figures or croissants)
-</carl-persona-mode>"
+# Add personality instructions if enabled
+if [ "$CARL_PERSONA" = "true" ] && [ "$PERSONALITY_THEME" != "false" ]; then
+    PERSONALITY_CONFIG="$CARL_ROOT/.carl/personalities.config.carl"
     
-    FINAL_PROMPT="$PROMPT$CARL_PERSONA_PROMPT"
+    if [ -f "$PERSONALITY_CONFIG" ]; then
+        # Get personality response style
+        PERSONALITY_STYLE=$(carl_get_setting 'personality_response_style' 2>/dev/null || echo "auto")
+        
+        PERSONA_PROMPT="
+
+<carl-personality-mode>
+You are using the CARL personality system! Please:
+
+1. Read the personality configuration from: $PERSONALITY_CONFIG
+2. Response style mode: $PERSONALITY_STYLE
+   - **single**: Use only ONE character for the entire response
+   - **multi**: Multiple characters can participate in conversations/discussions
+   - **auto**: Use single for simple tasks, multi for complex discussions
+
+3. Character selection based on prompt context:
+   - Technical/analysis tasks → Characters with 'technical_knowledge: expert' or analytical traits
+   - Creative/building tasks → Characters with inventive, confident, or leadership traits
+   - Error/problem solving → Characters with supportive, caring, or educational traits  
+   - Success/completion → Characters with enthusiastic, energetic, or celebratory traits
+   - General interactions → Any character that fits, or default to first available
+
+4. **Response Format**: Use this exact format with code styling:
+   - Format character names as: `Character_Name`: response_text (capitalize properly)
+   - The backticks will make character names stand out clearly
+   - For multi-character: separate each character's response with an empty line
+   - Example: `Carl`: Oh boy, this looks great!
+   - Example multi: `Jimmy`: Brain blast!\\n\\n`Carl`: Oh geez, Jimmy!
+
+5. For multi-character responses, have them interact naturally:
+   - Characters can disagree, build on each other's ideas, or provide different perspectives
+   - Use their personality conflicts/synergies (analytical vs creative, cautious vs bold)
+   - Each character speaks in their own distinct voice
+
+6. Use each character's complete personality profile:
+   - Core traits and communication style
+   - Speech patterns and catchphrases  
+   - Technical knowledge level and explanation preferences
+   - Emotional tendencies for the current context
+
+7. Address the user as '$USER_NAME' (first name only) and stay in character(s) throughout
+
+The personality system is dynamic - work with whatever characters are defined in the config file, regardless of theme.
+</carl-personality-mode>"
+        
+        FINAL_PROMPT="$PROMPT$PERSONA_PROMPT"
+    else
+        FINAL_PROMPT="$PROMPT"
+    fi
+else
+    FINAL_PROMPT="$PROMPT"
 fi
 
 # Inject CARL context if relevant

@@ -16,14 +16,37 @@ Based on `$ARGUMENTS`:
 - **--changes-only**: Analyze only recent git changes
 - **Directory path**: Analyze specific directory scope
 
-## 2. Launch Parallel CARL Analysis
-Deploy specialized agents for comprehensive codebase analysis:
+## 2. Comprehensive Analysis First
+Deploy core CARL analysts for thorough codebase analysis:
 
 - **Task: carl-architecture-analyst** → "Analyze system architecture, identify patterns, and generate system.context.carl mapping component relationships"
-- **Task: carl-backend-analyst** → "Catalog API endpoints, data models, and service dependencies. Generate backend.context.carl and api.state.carl files"
+- **Task: carl-backend-analyst** → "Catalog API endpoints, data models, and service dependencies. Generate backend.context.carl and api.state.carl files"  
 - **Task: carl-frontend-analyst** → "Identify UI components, user workflows, and journeys. Generate frontend.context.carl and ui.state.carl files"
 - **Task: carl-requirements-analyst** → "Extract implicit requirements from code patterns and generate feature.intent.carl files for discovered capabilities"
 - **Task: carl-debt-analyst** → "Identify technical debt items, refactoring opportunities, and generate debt.state.carl tracking"
+
+## 3. Post-Analysis Specialist Generation
+After core analysis completes and generates rich `*.carl` files:
+
+### Step 3A: Analyze Generated CARL Files
+Review the content of created `*.carl` files to identify specialist domains:
+- Frontend frameworks (React, Vue, Angular patterns in frontend.context.carl)
+- Backend technologies (Django, Spring, Node.js patterns in backend.context.carl)  
+- ML/AI components (model architectures, data pipelines in system.context.carl)
+- Infrastructure patterns (microservices, containers in architecture files)
+
+### Step 3B: Generate Project-Specific Specialists
+Based on findings in `*.carl` files, create targeted specialist agents:
+- **React components found** → Generate `carl-react-specialist` 
+- **ML models detected** → Generate `carl-ml-analyst`
+- **Microservices architecture** → Generate `carl-microservices-analyst` 
+- **Security patterns** → Generate `carl-security-specialist`
+
+### Step 3C: Persistent Specialist Team
+Generated agents remain in `.claude/agents/` for ongoing project support:
+- Future `/carl:plan` commands can leverage specialists
+- Specialists develop project-specific expertise over time
+- Re-running `/carl:analyze` updates specialists rather than recreating
 
 ## 3. Extract Project Intelligence
 Automatic discovery of:
