@@ -960,7 +960,8 @@ initialize_carl_config() {
     "quiet_hours_start": "22:00",
     "quiet_hours_end": "08:00",
     "volume_level": 75,
-    "personality_theme": "jimmy_neutron"
+    "personality_theme": "jimmy_neutron",
+    "personality_response_style": "auto"
   },
   "development_settings": {
     "auto_context_injection": true,

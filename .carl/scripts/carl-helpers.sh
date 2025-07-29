@@ -101,6 +101,9 @@ carl_get_setting() {
         "personality_theme")
             carl_get_json_value "$config_file" "audio_settings.personality_theme" "jimmy_neutron"
             ;;
+        "personality_response_style")
+            carl_get_json_value "$config_file" "audio_settings.personality_response_style" "auto"
+            ;;
         "session_tracking")
             carl_get_json_value "$config_file" "development_settings.session_tracking" "true"
             ;;
