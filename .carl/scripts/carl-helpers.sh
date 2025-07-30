@@ -139,6 +139,18 @@ carl_get_active_context() {
         context+="$(head -15 "$carl_root/.carl/process.carl")\n\n"
     fi
     
+    # Add project-specific process context
+    if [ -f "$carl_root/.carl/project/process.carl" ]; then
+        context+="## Project Process Context\n"
+        context+="$(head -15 "$carl_root/.carl/project/process.carl")\n\n"
+    fi
+    
+    # Add active work context
+    if [ -f "$carl_root/.carl/project/active.work.carl" ]; then
+        context+="## Active Work Context\n"
+        context+="$(head -25 "$carl_root/.carl/project/active.work.carl")\n\n"
+    fi
+    
     # Add current session context using new session manager
     local session_manager="$carl_root/.carl/scripts/carl-session-manager.sh"
     if [ -f "$session_manager" ]; then
@@ -150,7 +162,7 @@ carl_get_active_context() {
     fi
     
     # Add recent CARL file updates (top 5 most recent) - updated file extensions
-    local recent_files=$(find "$carl_root/.carl" -name "*.intent.carl" -o -name "*.state.carl" -o -name "*.context.carl" | xargs ls -t 2>/dev/null | head -5)
+    local recent_files=$(find "$carl_root/.carl/project" -name "*.intent.carl" -o -name "*.state.carl" -o -name "*.context.carl" 2>/dev/null | xargs ls -t 2>/dev/null | head -5)
     if [ -n "$recent_files" ]; then
         context+="## Recently Updated CARL Files\n"
         echo "$recent_files" | while read file; do
@@ -176,7 +188,7 @@ carl_get_targeted_context() {
     
     # Search for CARL files matching keywords
     for keyword in $keywords; do
-        local matches=$(find "$carl_root/.carl" -name "*$keyword*" -type f 2>/dev/null)
+        local matches=$(find "$carl_root/.carl/project" -name "*$keyword*" -type f 2>/dev/null)
         relevant_files="$relevant_files $matches"
     done
     
@@ -302,7 +314,7 @@ carl_update_context_for_file() {
     local file_name=$(basename "$file_path")
     
     # Look for related CARL files based on file path patterns
-    local related_contexts=$(find "$carl_root/.carl/contexts" -name "*$(echo "$file_dir" | tr '/' '-')*" -o -name "*$(echo "$file_name" | cut -d'.' -f1)*" 2>/dev/null)
+    local related_contexts=$(find "$carl_root/.carl/project" -name "*$(echo "$file_dir" | tr '/' '-')*" -o -name "*$(echo "$file_name" | cut -d'.' -f1)*" 2>/dev/null)
     
     # Update context files with change timestamp
     for context_file in $related_contexts; do
@@ -340,10 +352,10 @@ EOF
 carl_get_active_features() {
     local carl_root="$(carl_get_root)"
     
-    # Find intent files that indicate active features
-    find "$carl_root/.carl/intents" -name "*.intent" 2>/dev/null | while read intent_file; do
+    # Find intent files that indicate active features in new project structure
+    find "$carl_root/.carl/project" -name "*.intent.carl" 2>/dev/null | while read intent_file; do
         if [ -f "$intent_file" ]; then
-            local feature_id=$(basename "$intent_file" .intent)
+            local feature_id=$(basename "$intent_file" .intent.carl)
             local status=$(grep "^status:" "$intent_file" 2>/dev/null | cut -d':' -f2 | tr -d ' ')
             echo "  - id: $feature_id"
             echo "    status: ${status:-unknown}"
@@ -494,7 +506,7 @@ carl_generate_next_session_recommendations() {
     fi
     
     # Check for incomplete work
-    if find "$carl_root/.carl/states" -name "*.state" -exec grep -l "in_progress" {} \; 2>/dev/null | head -1 > /dev/null; then
+    if find "$carl_root/.carl/project" -name "*.state.carl" -exec grep -l "in_progress" {} \; 2>/dev/null | head -1 > /dev/null; then
         echo "• Continue work on in-progress features tracked in CARL"
     fi
     

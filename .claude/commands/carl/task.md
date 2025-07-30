@@ -1,14 +1,66 @@
 ---
 allowed-tools: Task(carl-backend-analyst), Task(carl-frontend-analyst), Task(carl-architecture-analyst), Task(carl-requirements-analyst), Task(carl-debt-analyst), Read, Write, Edit, MultiEdit, Bash, Glob, Grep
-description: Execute development tasks with comprehensive CARL context integration
-argument-hint: [task description] | --from-intent [file] | --fix-debt [item] | --tdd
+description: Execute development tasks with intelligent work suggestions and comprehensive CARL context integration
+argument-hint: [task description] | --from-intent [file] | --fix-debt [item] | --tdd | --continue | --next | --suggest
 ---
 
-# CARL Task Execution Instructions
+# CARL Intelligent Task Execution Instructions
 
-Execute development tasks with full CARL (Context-Aware Requirements Language) context by:
+Execute development tasks with intelligent work queue management and full CARL (Context-Aware Requirements Language) context by:
 
-## 1. Load CARL Context for Task
+## 1. Intelligent Work Suggestion (When No Task Provided)
+
+**A. Check for Empty or Suggestion Arguments**
+If `$ARGUMENTS` is empty, contains only flags (--continue, --next, --suggest), or is unclear:
+
+1. **Load Active Work Context**:
+   - Read `.carl/project/active.work.carl` for current work queue status
+   - Load active intent progress and current substep
+   - Check ready_for_work queue for available tasks
+   - Review intelligent_suggestions for next logical tasks
+
+2. **Present Intelligent Suggestions**:
+   ```
+   CARL Task Assistant 🎯
+   
+   Current Context: [ACTIVE_INTENT_NAME] ([COMPLETION]% complete)
+   Current Phase: [CURRENT_PHASE]
+   
+   Based on your work patterns and current progress, here are my suggestions:
+   
+   🔥 Continue Current Work:
+   1. [CURRENT_SUBSTEP_DESCRIPTION] (Est: [TIME])
+      ↳ You were working on this in your last session
+   
+   ⚡ Next Logical Tasks:
+   2. [NEXT_LOGICAL_TASK] (Est: [TIME])
+      ↳ [REASONING_FOR_SUGGESTION]
+   3. [ALTERNATIVE_TASK] (Est: [TIME])
+      ↳ [REASONING_FOR_SUGGESTION]
+   
+   📋 Available from Queue:
+   4. [QUEUED_TASK_1] (Priority: [PRIORITY], Est: [TIME])
+   5. [QUEUED_TASK_2] (Priority: [PRIORITY], Est: [TIME])
+   
+   🚀 Quick Wins:
+   6. [QUICK_WIN_TASK] (Est: [TIME])
+      ↳ Small task to build momentum
+   
+   Which task would you like to work on?
+   Or describe what you'd like to do: [Wait for user input]
+   ```
+
+3. **Handle User Selection**:
+   - If user selects numbered option, load that task context
+   - If user provides new task description, proceed with normal workflow
+   - If user wants to continue current work, load active substep context
+
+**B. Flag-Based Suggestions**
+- `--continue`: Automatically load and continue current active substep
+- `--next`: Show next logical task in current epic/feature workflow
+- `--suggest`: Show comprehensive suggestion menu as above
+
+## 2. Load CARL Context for Task
 Automatic context loading based on `$ARGUMENTS`:
 - **Search Related Files**: Find `.intent.carl`, `.state.carl`, and `.context.carl` files related to task
 - **Load Requirements**: Extract constraints, success criteria, and business rules from CARL files
@@ -66,13 +118,15 @@ Generate implementation using loaded CARL context:
 - **Meet Quality Standards**: Achieve test coverage and code quality requirements
 - **Document Changes**: Update relevant CARL state files with implementation progress
 
-## 6. Update CARL State Files
+## 6. Update CARL State Files and Active Work
 Continuously track implementation progress:
 - **Update State Files**: Record completed components and test coverage
 - **Track Quality Metrics**: Update code quality and performance measurements  
 - **Document Technical Debt**: Note any debt introduced or resolved
+- **Update Active Work**: Mark current task progress in `.carl/project/active.work.carl`
 - **Record Session Context**: Maintain implementation notes and next steps
 - **Link to Intent**: Ensure traceability to original requirements
+- **Queue Next Tasks**: Add discovered follow-up work to ready_for_work queue
 
 ## 7. Validate Implementation Quality
 Ensure implementation meets CARL standards:
@@ -83,10 +137,54 @@ Ensure implementation meets CARL standards:
 - **Performance Check**: Validate performance criteria are achieved
 
 ## Example Usage
+
+**Intelligent Work Suggestions:**
+- `/carl:task` → Shows intelligent suggestions based on active work and queue
+- `/carl:task --continue` → Automatically continues current active substep
+- `/carl:task --next` → Shows next logical task in current workflow
+- `/carl:task --suggest` → Comprehensive suggestion menu with context
+
+**Direct Task Execution:**
 - `/carl:task "implement user dashboard"` → Auto-loads relevant CARL context
 - `/carl:task --from-intent user-profile.intent.carl` → Direct implementation from CARL file
 - `/carl:task --tdd "shopping cart logic"` → Enhanced TDD workflow
 - `/carl:task --fix-debt authentication-complexity` → Technical debt focus
 
-Execute development tasks with perfect CARL context integration, ensuring implementation aligns with requirements, constraints, and quality standards while maintaining comprehensive progress tracking.
+**Interactive Example:**
+```
+> /carl:task
+
+CARL Task Assistant 🎯
+
+Current Context: Requirements-Driven Workflow (35% complete)
+Current Phase: foundation
+
+Based on your work patterns and current progress, here are my suggestions:
+
+🔥 Continue Current Work:
+1. Complete example intent/state context files (Est: 30 min)
+   ↳ You were working on this in your last session
+
+⚡ Next Logical Tasks:
+2. Update /carl:plan for interactive workflow (Est: 2 hours)
+   ↳ Next critical path item after foundation
+3. Create format specifications for new files (Est: 1 hour)
+   ↳ Needed for template validation and tooling
+
+📋 Available from Queue:
+4. Interactive Planning System (Priority: high, Est: 4 hours)
+5. Intelligent Task Management (Priority: high, Est: 4 hours)
+
+🚀 Quick Wins:
+6. Update documentation for new structure (Est: 30 min)
+   ↳ Small task to build momentum
+
+Which task would you like to work on?
+Or describe what you'd like to do: > 1
+
+Loading context for: Complete example intent/state context files...
+[Proceeds with task execution]
+```
+
+Execute development tasks with intelligent work queue management and perfect CARL context integration, ensuring implementation aligns with requirements, constraints, and quality standards while maintaining comprehensive progress tracking.
 

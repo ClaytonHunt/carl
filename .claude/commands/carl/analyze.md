@@ -99,6 +99,13 @@ Use CARL templates to create comprehensive documentation:
 - Data flow mapping
 - Technology decisions and constraints
 
+**Project Process Files (.carl/project/process.carl)**: Analyze project characteristics to create development workflow:
+- **Methodology Detection**: Identify if project uses TDD (presence of test files), CI/CD (GitHub Actions, etc.), agile practices
+- **Quality Standards**: Extract from existing linting configs, test requirements, code review patterns
+- **Technology Patterns**: Document established patterns from codebase analysis
+- **Security Practices**: Identify security patterns, authentication methods, data protection
+- **Performance Requirements**: Extract from existing benchmarks, monitoring, or performance tests
+
 ## 5. Analyze Dependencies and Gaps
 **Smart Analysis:**
 - Parse import/require statements for internal dependencies
@@ -113,7 +120,15 @@ After analysis completion:
 1. **Update `.carl/index.carl`**: Add discovered features, tech stack, and architectural patterns
 2. **Create Session Record**: Generate analysis session in `.carl/sessions/` with discoveries and recommendations
 3. **Generate Strategic Files**: Create or update `.carl/mission.carl`, `.carl/roadmap.carl`, and `.carl/decisions.carl` using templates
-4. **Link Relationships**: Establish cross-references between related CARL files
+4. **Create Project Process Definition**: Generate `.carl/project/process.carl` defining project-specific development workflow:
+   - Development methodology (TDD, BDD, Agile, etc.)
+   - Quality gates and standards
+   - Testing requirements and coverage targets
+   - Code review processes
+   - Deployment workflow
+   - Technical stack and patterns
+   - Security and performance requirements
+5. **Link Relationships**: Establish cross-references between related CARL files
 
 ## 7. Generate Analysis Report
 Provide comprehensive analysis summary:

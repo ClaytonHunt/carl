@@ -1,0 +1,506 @@
+# CARL System Process Format Specification
+# Version: 1.0
+# Purpose: Define the structure for CARL system-level master process files (.carl/system/master.process.carl)
+
+file_extension: ".carl"
+file_path: ".carl/system/master.process.carl"
+encoding: "UTF-8"
+format: "YAML"
+ai_optimization: true
+human_consumption: false
+design_priority: "maximum_ai_comprehension_and_reference_efficiency"
+token_budget_target: "1500_tokens_maximum"
+purpose: "prevent_carl_system_drift_and_ensure_process_consistency"
+
+structure:
+  header:
+    required: true
+    description: "AI-optimized header for system process identification"
+    format: |
+      # CARL System Master Process Definition
+      # Version: {CARL_VERSION} | AI-Optimized Reference
+      # Last Updated: {TIMESTAMP}
+      # Purpose: Authoritative system process reference for commands and agents
+
+  system_metadata:
+    required: true
+    description: "System identification and versioning information"
+    fields:
+      process_version:
+        type: "string"
+        format: "semantic_version"
+        description: "Version of master process definition (tied to CARL system version)"
+      carl_system_version:
+        type: "string"
+        format: "semantic_version"
+        description: "CARL system version this process definition supports"
+      last_updated:
+        type: "timestamp"
+        format: "ISO 8601"
+        description: "When this process definition was last updated"
+      context_priority:
+        type: "string"
+        enum: ["critical", "high", "medium", "low"]
+        description: "Priority for AI context loading (critical = always load)"
+      ai_optimization_level:
+        type: "string"
+        enum: ["maximum", "high", "medium", "basic"]
+        description: "Level of AI optimization applied to content structure"
+      system_consistency_version:
+        type: "string"
+        format: "semantic_version"
+        description: "Version for tracking system consistency and migration needs"
+
+  command_workflows:
+    required: true
+    description: "Definitive workflow definitions for all CARL commands"
+    structure:
+      carl_plan:
+        required: true
+        description: "Planning command workflow and agent coordination"
+        fields:
+          primary_purpose:
+            type: "string"
+            description: "Core purpose of command for AI understanding"
+          workflow_sequence:
+            type: "array"
+            description: "Sequential steps in command execution"
+            item_format: "string"
+          agent_coordination:
+            type: "object"
+            description: "Agent invocation patterns and handoffs"
+            fields:
+              primary_agents:
+                type: "array"
+                description: "Always invoked agents in order"
+              conditional_agents:
+                type: "object"
+                description: "Conditionally invoked agents based on scope"
+              handoff_patterns:
+                type: "array"
+                description: "How agents pass work between each other"
+          output_artifacts:
+            type: "array"
+            description: "Files and structures created by this command"
+          context_requirements:
+            type: "array"
+            description: "Context elements required for optimal operation"
+          
+      carl_task:
+        required: true
+        description: "Task execution command workflow"
+        fields:
+          primary_purpose:
+            type: "string"
+            description: "Core purpose of command for AI understanding"
+          workflow_modes:
+            type: "object"
+            description: "Different execution modes and their workflows"
+            fields:
+              intelligent_suggestion:
+                type: "array"
+                description: "Workflow when no task specified"
+              direct_execution:
+                type: "array"
+                description: "Workflow for specific task execution"
+              active_work_continuation:
+                type: "array"
+                description: "Workflow for continuing active work"
+          context_dependencies:
+            type: "array"
+            description: "Required context for intelligent task suggestions"
+          
+      carl_analyze:
+        required: true
+        description: "Analysis command workflow and system understanding"
+        fields:
+          primary_purpose:
+            type: "string"
+            description: "Core purpose of command for AI understanding"
+          analysis_phases:
+            type: "array"
+            description: "Sequential phases of analysis execution"
+          specialist_coordination:
+            type: "array"
+            description: "How analysis coordinates multiple specialists"
+          output_generation:
+            type: "array"
+            description: "Artifacts generated during analysis"
+          
+      carl_status:
+        required: true
+        description: "Status reporting command workflow"
+        fields:
+          primary_purpose:
+            type: "string"
+            description: "Core purpose of command for AI understanding"
+          reporting_dimensions:
+            type: "array"
+            description: "Dimensions of project status assessed"
+          context_aggregation:
+            type: "array"
+            description: "How context is gathered and summarized"
+          
+      carl_settings:
+        required: true
+        description: "Settings management command workflow"
+        fields:
+          primary_purpose:
+            type: "string"
+            description: "Core purpose of command for AI understanding"
+          configuration_domains:
+            type: "array"
+            description: "Areas of CARL configuration managed"
+          validation_processes:
+            type: "array"
+            description: "How settings changes are validated"
+
+  agent_coordination_patterns:
+    required: true
+    description: "Standardized patterns for agent collaboration"
+    fields:
+      specialist_roles:
+        type: "object"
+        description: "Defined roles for each specialist agent"
+        fields:
+          carl_requirements_analyst:
+            type: "object"
+            description: "Requirements analysis specialist coordination"
+            fields:
+              primary_responsibilities:
+                type: "array"
+                description: "Core responsibilities in system workflows"
+              coordination_points:
+                type: "array"
+                description: "Key points where this agent coordinates with others"
+              output_expectations:
+                type: "array"
+                description: "Expected outputs for downstream agents"
+          carl_architecture_analyst:
+            type: "object"
+            description: "Architecture analysis specialist coordination"
+          carl_backend_analyst:
+            type: "object"
+            description: "Backend analysis specialist coordination"
+          carl_frontend_analyst:
+            type: "object"
+            description: "Frontend analysis specialist coordination"
+          carl_debt_analyst:
+            type: "object"
+            description: "Technical debt analysis specialist coordination"
+      
+      handoff_protocols:
+        type: "array"
+        description: "Standardized protocols for agent work handoffs"
+        item_structure:
+          from_agent: "string"
+          to_agent: "string"
+          trigger_conditions: "array"
+          handoff_data_format: "string"
+          validation_requirements: "array"
+      
+      parallel_execution_patterns:
+        type: "array"
+        description: "Patterns for coordinating parallel agent execution"
+        item_structure:
+          scenario: "string"
+          agents: "array"
+          coordination_mechanism: "string"
+          result_aggregation: "string"
+
+  file_system_architecture:
+    required: true
+    description: "Canonical CARL directory structure and relationships"
+    fields:
+      directory_hierarchy:
+        type: "object"
+        description: "Standard CARL directory structure"
+        structure:
+          carl_root:
+            path: ".carl/"
+            purpose: "Root directory for all CARL system files"
+            subdirectories:
+              project: "Project-specific CARL files (epics, features, stories, technical)"
+              system: "System-level CARL files (master process, system configs)"
+              templates: "Template files for generating CARL artifacts"
+              specs: "Format specifications for validation"
+              scripts: "System scripts and helpers"
+              sessions: "Session tracking and history"
+              config: "System configuration files"
+      
+      file_relationships:
+        type: "array"
+        description: "Key relationships between CARL file types"
+        item_structure:
+          relationship_type: "string"
+          source_files: "array"
+          target_files: "array"
+          relationship_description: "string"
+      
+      canonical_patterns:
+        type: "object"
+        description: "Standard patterns for file organization and naming"
+        fields:
+          naming_conventions:
+            type: "object"
+            description: "Standard naming patterns for different file types"
+          hierarchical_relationships:
+            type: "array"
+            description: "How files relate in hierarchical structures"
+          cross_references:
+            type: "array"
+            description: "Standard patterns for cross-file references"
+
+  context_optimization:
+    required: true
+    description: "Rules and strategies for AI context loading and management"
+    fields:
+      loading_strategies:
+        type: "object"
+        description: "Strategies for efficient context loading"
+        fields:
+          command_based_loading:
+            type: "object"
+            description: "Context loading strategies per command type"
+          lazy_loading_patterns:
+            type: "array"
+            description: "Patterns for loading context only when needed"
+          relevance_scoring:
+            type: "object"
+            description: "How to score context relevance for efficient loading"
+      
+      token_budget_management:
+        type: "object"
+        description: "Managing AI context token budgets efficiently"
+        fields:
+          priority_levels:
+            type: "array"
+            description: "Priority levels for context elements"
+          truncation_strategies:
+            type: "array"
+            description: "How to truncate context when budget is exceeded"
+          context_summarization:
+            type: "array"
+            description: "Methods for summarizing context to fit budget"
+      
+      injection_patterns:
+        type: "array"
+        description: "Patterns for injecting context into AI interactions"
+        item_structure:
+          pattern_name: "string"
+          trigger_conditions: "array"
+          injection_method: "string"
+          context_elements: "array"
+
+  quality_standards:
+    required: true
+    description: "System-wide quality gates and validation standards"
+    fields:
+      validation_rules:
+        type: "array"
+        description: "Rules for validating CARL system consistency"
+        item_structure:
+          rule_name: "string"
+          validation_target: "string"
+          validation_method: "string"
+          failure_action: "string"
+      
+      consistency_requirements:
+        type: "array"
+        description: "Requirements for maintaining system consistency"
+        item_structure:
+          requirement_name: "string"
+          scope: "string"
+          validation_frequency: "string"
+          remediation_process: "string"
+      
+      performance_standards:
+        type: "object"
+        description: "Performance requirements for system operations"
+        fields:
+          response_time_targets:
+            type: "object"
+            description: "Target response times for different operations"
+          resource_usage_limits:
+            type: "object"
+            description: "Resource usage limits for system processes"
+          scalability_requirements:
+            type: "array"
+            description: "Requirements for system scalability"
+
+  session_management:
+    required: true
+    description: "How CARL tracks and maintains work sessions"
+    fields:
+      session_lifecycle:
+        type: "array"
+        description: "Phases of a CARL work session"
+        item_format: "string"
+      
+      state_tracking:
+        type: "object"
+        description: "How session state is tracked and maintained"
+        fields:
+          active_work_tracking:
+            type: "array"
+            description: "Methods for tracking active work state"
+          progress_measurement:
+            type: "array"
+            description: "How progress is measured and recorded"
+          context_continuity:
+            type: "array"
+            description: "Maintaining context across session boundaries"
+      
+      session_transitions:
+        type: "array"
+        description: "How sessions transition between states"
+        item_structure:
+          transition_name: "string"
+          from_state: "string"
+          to_state: "string"
+          trigger_conditions: "array"
+          transition_actions: "array"
+
+  project_migration_standards:
+    required: true
+    description: "Standards for migrating projects to current CARL system version"
+    fields:
+      version_detection:
+        type: "object"
+        description: "How to detect current project CARL version and migration needs"
+        fields:
+          detection_methods:
+            type: "array"
+            description: "Methods for detecting project CARL version"
+          compatibility_checking:
+            type: "array"
+            description: "How to check compatibility with current system"
+          migration_necessity:
+            type: "array"
+            description: "Rules for determining when migration is needed"
+      
+      migration_workflows:
+        type: "object"
+        description: "Workflows for migrating projects to current standards"
+        fields:
+          file_structure_migration:
+            type: "array"
+            description: "Steps for migrating file structure to current standards"
+          content_format_migration:
+            type: "array"
+            description: "Steps for updating file content to current formats"
+          new_capability_integration:  
+            type: "array"
+            description: "Steps for integrating new CARL capabilities"
+      
+      validation_framework:
+        type: "object"
+        description: "Framework for validating successful migration"
+        fields:
+          migration_validation_rules:
+            type: "array"
+            description: "Rules for validating migration completion"
+          compatibility_testing:
+            type: "array"
+            description: "Tests to ensure migrated project works with current system"
+          rollback_procedures:
+            type: "array"
+            description: "Procedures for rolling back failed migrations"
+
+validation_rules:
+  command_workflow_completeness:
+    description: "All CARL commands must have complete workflow definitions"
+    rule: "Each command in command_workflows must have all required fields"
+  
+  agent_coordination_consistency:
+    description: "Agent coordination patterns must be consistent across commands"
+    rule: "Agent roles and handoff patterns must align across all workflows"
+  
+  context_optimization_feasibility:
+    description: "Context optimization strategies must be technically feasible"
+    rule: "Token budgets and loading strategies must be realistic for AI systems"
+  
+  file_system_architecture_accuracy:
+    description: "File system architecture must match actual CARL implementation"
+    rule: "Directory structure and relationships must reflect actual system"
+  
+  process_version_alignment:
+    description: "Process version must align with CARL system version"
+    rule: "process_version must be compatible with carl_system_version"
+
+usage_examples:
+  minimal_structure: |
+    system_metadata:
+      process_version: "1.0.0"
+      carl_system_version: "1.7.1"
+      context_priority: "high"
+      ai_optimization_level: "maximum"
+    
+    command_workflows:
+      carl_plan:
+        primary_purpose: "interactive_requirements_gathering_and_carl_file_generation"
+        workflow_sequence:
+          - "scope_detection_and_analysis"
+          - "requirements_analyst_invocation"
+          - "interactive_requirements_gathering"
+          - "specialist_agent_coordination"
+          - "carl_file_generation_from_templates"
+        agent_coordination:
+          primary_agents: ["carl-requirements-analyst"]
+          conditional_agents:
+            epic: ["carl-architecture-analyst", "carl-backend-analyst"]
+            feature: ["carl-backend-analyst", "carl-frontend-analyst"]
+    
+    agent_coordination_patterns:
+      specialist_roles:
+        carl_requirements_analyst:
+          primary_responsibilities:
+            - "scope_analysis_and_recommendation"
+            - "business_value_extraction"
+            - "stakeholder_need_analysis"
+    
+    context_optimization:
+      loading_strategies:
+        command_based_loading:
+          carl_plan: ["active_work_context", "project_vision", "existing_intents"]
+      token_budget_management:
+        priority_levels: ["critical", "high", "medium", "low"]
+
+best_practices:
+  ai_first_design:
+    - "Prioritize AI comprehension over human readability in all design decisions"
+    - "Structure content for maximum AI parsing efficiency and contextual reference"
+    - "Use consistent terminology optimized for AI understanding and disambiguation"
+    - "Design for token efficiency while maintaining semantic completeness"
+    - "Optimize for lazy loading and selective context injection based on AI needs"
+    - "Format data structures for optimal AI pattern recognition and processing"
+  
+  system_consistency_enforcement:
+    - "Ensure process definitions prevent CARL system from falling off the rails"
+    - "Maintain authoritative reference that prevents system drift across sessions"
+    - "Design for consistent behavior across extended conversations and restarts"
+    - "Enable new projects to fully understand current CARL process and structure"
+    - "Support project migration to take advantage of carefully crafted CARL capabilities"
+  
+  maintenance_and_evolution:
+    - "Update process definitions when system capabilities evolve"
+    - "Version control changes with migration path documentation"
+    - "Test across multiple project contexts and conversation lengths"
+    - "Validate that all agents and commands consume process consistently"
+
+integration_points:
+  context_injection:
+    description: "How master process integrates with context injection system"
+    access_pattern: "Loaded by carl-helpers.sh context functions based on active command"
+  
+  command_integration:
+    description: "How CARL commands reference master process"
+    access_pattern: "Commands load relevant process sections for workflow guidance"
+  
+  agent_coordination:
+    description: "How agents use master process for coordination"
+    access_pattern: "Agents reference coordination patterns for consistent behavior"
+  
+  validation_system:
+    description: "How validation system uses master process"
+    access_pattern: "Validation compares actual system behavior against process definitions"
