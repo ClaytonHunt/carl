@@ -71,3 +71,7 @@ Show confirmation of changes made:
 - `/carl:settings --audio-test` → Test audio system functionality
 
 Configure CARL system behavior to match your team preferences, project requirements, and workflow needs while maintaining optimal AI assistance performance.
+
+---
+
+**Link to detailed workflow:** `.carl/system/workflows/settings.workflow.carl` (when needed)

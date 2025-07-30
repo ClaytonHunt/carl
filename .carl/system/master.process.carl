@@ -51,9 +51,29 @@ quality_standards:
   performance_targets: ".carl/system/quality/performance-targets.carl"
   consistency_checks: ".carl/system/quality/consistency-checks.carl"
 
+# Critical file paths enforcement (NEVER DEVIATE)
+critical_file_paths:
+  specifications:
+    correct_path: ".carl/specs/"
+    never_use: [".carl/system/specifications/", ".carl/specifications/"]
+    pattern: "*.carl"
+  project_intents:
+    correct_path: ".carl/project/{epics|features|stories|technical}/"
+    never_use: [".carl/intents/", ".carl/project/intents/"]
+    pattern: "*.intent.carl"
+  project_states:
+    correct_path: ".carl/project/{epics|features|stories|technical}/"
+    never_use: [".carl/states/", ".carl/project/states/"]
+    pattern: "*.state.carl"
+  project_contexts:
+    correct_path: ".carl/project/{epics|features|stories|technical}/"
+    never_use: [".carl/contexts/", ".carl/project/contexts/"]
+    pattern: "*.context.carl"
+
 # Integration points for context loading
 context_integration:
   carl_helpers_integration: "carl_get_active_context() loads master process first"
   command_integration: "all command files reference workflow_file paths"
   token_budget_management: "lazy_loading_on_demand_workflow_access"
   performance_target: "sub_100ms_context_injection"
+  path_enforcement: "critical_file_paths section enforced in all contexts"

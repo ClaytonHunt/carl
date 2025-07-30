@@ -191,3 +191,7 @@ Provide comprehensive analysis summary:
 ```
 
 Perform comprehensive codebase analysis and generate complete CARL documentation structure optimized for AI-assisted development workflows.
+
+---
+
+**Link to detailed workflow:** `.carl/system/workflows/analyze.workflow.carl` (when needed)

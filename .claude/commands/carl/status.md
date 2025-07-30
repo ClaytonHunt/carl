@@ -86,3 +86,7 @@ Based on CARL analysis, provide:
 - `/carl:status --technical-debt` → Code quality and refactoring focus
 
 Generate comprehensive project status insights primarily from CARL files, ensuring fast and accurate reporting of project health, progress, and recommendations.
+
+---
+
+**Link to detailed workflow:** `.carl/system/workflows/status.workflow.carl` (when needed)

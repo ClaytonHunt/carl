@@ -62,6 +62,35 @@ If `$ARGUMENTS` is empty, contains only flags (--continue, --next, --suggest), o
 - `--next`: Show next logical task in current epic/feature workflow
 - `--suggest`: Show comprehensive suggestion menu as above
 
+## 1B. Session State Integration and Active Work Updates
+
+**CRITICAL ENHANCEMENT**: Integrate with session state persistence and active work tracking:
+
+**Session State Management**:
+```
+# Task execution with session state tracking
+execute_task_with_session_state() {
+    // Load current session and active work context
+    current_session = load_current_session_state()
+    active_work = load_active_work_context()
+    
+    // Update active work status when starting task
+    update_active_work_task_status("in_progress")
+    
+    // Execute task with full context integration
+    execute_task_with_carl_context()
+    
+    // Update session state and active work progress
+    update_session_progress_and_active_work()
+}
+```
+
+**Active Work Integration**:
+- Update `.carl/project/active.work.carl` when starting/completing tasks
+- Track task progress in session context
+- Maintain work queue status and intelligent suggestions
+- Integrate with epic/feature completion tracking
+
 ## 2. Load CARL Context for Task
 Automatic context loading based on `$ARGUMENTS`:
 - **Search Related Files**: Find `.intent.carl`, `.state.carl`, and `.context.carl` files related to task
@@ -189,4 +218,8 @@ Loading context for: Complete example intent/state context files...
 ```
 
 Execute development tasks with intelligent work queue management and perfect CARL context integration, ensuring implementation aligns with requirements, constraints, and quality standards while maintaining comprehensive progress tracking.
+
+---
+
+**Link to detailed workflow:** `.carl/system/workflows/task.workflow.carl` (when needed)
 

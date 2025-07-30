@@ -139,6 +139,25 @@ carl_get_active_context() {
         context+="$(cat "$carl_root/.carl/index.carl")\n\n"
     fi
     
+    # CRITICAL: Add file structure rules to prevent AI deviations
+    context+="## CRITICAL: CARL File Location Rules\n"
+    context+="# NEVER create files in these locations:\n"
+    context+="# ❌ .carl/system/specifications/ (WRONG)\n"
+    context+="# ❌ .carl/intents/ (WRONG)\n"
+    context+="# ❌ .carl/states/ (WRONG)\n"
+    context+="# \n"
+    context+="# ✅ ALWAYS use these exact paths:\n"
+    context+="# ✅ Specifications: .carl/specs/*.carl\n"
+    context+="# ✅ Intent files: .carl/project/{epics|features|stories|technical}/*.intent.carl\n"
+    context+="# ✅ State files: .carl/project/{epics|features|stories|technical}/*.state.carl\n"
+    context+="# ✅ Context files: .carl/project/{epics|features|stories|technical}/*.context.carl\n"
+    context+="# \n"
+    context+="# File Structure Specification Reference:\n"
+    if [ -f "$carl_root/.carl/specs/project.structure.format.carl" ]; then
+        context+="$(grep -A 15 'scope_directories:' "$carl_root/.carl/specs/project.structure.format.carl" 2>/dev/null)\n"
+    fi
+    context+="\n"
+
     # Add current process and workflow context
     if [ -f "$carl_root/.carl/process.carl" ]; then
         context+="## Current Process Context\n"
@@ -576,4 +595,100 @@ carl_get_latest_test_results() {
     else
         echo ""
     fi
+}
+
+# Path validation functions for CARL file consistency enforcement
+carl_validate_file_path() {
+    local file_path="$1"
+    local file_type="$2"
+    
+    # Define forbidden paths
+    local forbidden_specs=(
+        ".carl/system/specifications/"
+        ".carl/specifications/"
+    )
+    
+    local forbidden_intents=(
+        ".carl/intents/"
+        ".carl/project/intents/"
+    )
+    
+    local forbidden_states=(
+        ".carl/states/"
+        ".carl/project/states/"
+    )
+    
+    local forbidden_contexts=(
+        ".carl/contexts/"
+        ".carl/project/contexts/"
+    )
+    
+    # Check for forbidden paths
+    for forbidden in "${forbidden_specs[@]}"; do
+        if [[ "$file_path" == *"$forbidden"* ]]; then
+            echo "❌ ERROR: Invalid path '$file_path'"
+            echo "   Use '.carl/specs/' instead of '$forbidden'"
+            return 1
+        fi
+    done
+    
+    for forbidden in "${forbidden_intents[@]}"; do
+        if [[ "$file_path" == *"$forbidden"* ]]; then
+            echo "❌ ERROR: Invalid path '$file_path'"
+            echo "   Use '.carl/project/{epics|features|stories|technical}/' instead"
+            return 1
+        fi
+    done
+    
+    for forbidden in "${forbidden_states[@]}"; do
+        if [[ "$file_path" == *"$forbidden"* ]]; then
+            echo "❌ ERROR: Invalid path '$file_path'"
+            echo "   Use '.carl/project/{epics|features|stories|technical}/' instead"
+            return 1
+        fi
+    done
+    
+    for forbidden in "${forbidden_contexts[@]}"; do
+        if [[ "$file_path" == *"$forbidden"* ]]; then
+            echo "❌ ERROR: Invalid path '$file_path'"
+            echo "   Use '.carl/project/{epics|features|stories|technical}/' instead"
+            return 1
+        fi
+    done
+    
+    return 0
+}
+
+carl_suggest_correct_path() {
+    local file_path="$1"
+    local filename=$(basename "$file_path")
+    
+    if [[ "$filename" == *.intent.carl ]]; then
+        echo "✅ Suggested path: .carl/project/technical/${filename}"
+    elif [[ "$filename" == *.state.carl ]]; then
+        echo "✅ Suggested path: .carl/project/technical/${filename}"
+    elif [[ "$filename" == *.context.carl ]]; then
+        echo "✅ Suggested path: .carl/project/technical/${filename}"
+    elif [[ "$filename" == *.carl ]] && [[ "$filename" != *.intent.carl ]] && [[ "$filename" != *.state.carl ]]; then
+        echo "✅ Suggested path: .carl/specs/${filename}"
+    else
+        echo "✅ Check CARL file structure specification"
+    fi
+}
+
+carl_enforce_path_consistency() {
+    local operation="$1"
+    local file_path="$2"
+    
+    if ! carl_validate_file_path "$file_path"; then
+        echo ""
+        carl_suggest_correct_path "$file_path"
+        echo ""
+        echo "🔧 CARL Process Consistency Enforcement:"
+        echo "   Files must be created in their designated locations"
+        echo "   This ensures proper organization and AI context integration"
+        return 1
+    fi
+    
+    return 0
 }
