@@ -18,8 +18,14 @@ Streamlined requirements gathering and expert analysis for CARL project planning
 ## Workflow Execution
 
 **For New Requirements:**
-1. **Context Gathering**: Review any input the user may have given. Ask 2-3 focused questions about goal, stakeholders, constraints. Ask questions one at a time to avoid overwhelming the user.
-2. **Expert Analysis**: Task: carl-requirements-analyst → "Complete CARL analysis for: [USER_CONTEXT]. Include scope, business value, technical approach, and generate appropriate .intent.carl file."
+1. **Initialize Planning Session**: `carl_initialize_planning_session(user_input)` - Detect scope level and load project context for informed questioning
+2. **Sequential Question Gathering**: Execute question workflow one at a time, waiting for responses:
+   - `carl_ask_business_value_question_and_wait()`
+   - `carl_ask_stakeholders_question_informed_by_previous_answers()`
+   - `carl_ask_constraints_question_informed_by_context()`
+   - `carl_ask_success_criteria_question_with_full_context()`
+   - `carl_ask_dependencies_question_with_complete_picture()`
+3. **Complete Context Analysis**: `carl_compile_all_answers_with_initial_input()` → Validate requirements completeness → Task: carl-requirements-analyst with COMPLETE context only
 
 **For Existing Intents:**
 ```
@@ -38,11 +44,15 @@ Explain: purpose, scope, completion status, next actions
 
 ## Implementation
 
-Execute streamlined workflow with token-efficient context gathering:
-- Detect scope from keywords or arguments
-- Ask minimal essential questions for context
-- Compile complete context for analyst
-- Generate appropriate CARL files based on analysis
-- Update active work queue
+Execute pseudocode function-based workflow with session state persistence:
+- `carl_initialize_planning_session(user_input)` → Load project context, detect scope
+- `carl_execute_sequential_questioning()` → ONE question at a time with session persistence
+- `carl_compile_complete_context()` → All answers + initial input before analysis
+- `carl_invoke_analyst_with_complete_context()` → NO analysis in vacuum
+- `carl_generate_files_and_update_state()` → Create intent files, update active work
+
+**Session State Management**: Persist question-answer state between interactions using `.carl/.tmp/planning_session_[timestamp].json` for incomplete sessions
+
+**Critical Rule**: Requirements analyst is ONLY invoked after ALL questions answered and context compilation validated
 
 Link to detailed workflow: `.carl/system/workflows/plan.workflow.carl` (when needed)
