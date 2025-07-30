@@ -34,34 +34,42 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "version_number=${VERSION#v}" >> $GITHUB_OUTPUT
 
-      - name: Validate src files exist
+      - name: Validate files exist
         run: |
-          if [ ! -f "src/install.sh" ]; then
-            echo "❌ src/install.sh not found"
+          if [ ! -f "install.sh" ]; then
+            echo "❌ install.sh not found"
             exit 1
           fi
-          if [ ! -f "src/update-carl.sh" ]; then
-            echo "❌ src/update-carl.sh not found"
+          if [ ! -f "update-carl.sh" ]; then
+            echo "❌ update-carl.sh not found"
             exit 1
           fi
-          echo "✅ All required src files found"
+          if [ ! -d ".carl" ]; then
+            echo "❌ .carl directory not found"
+            exit 1
+          fi
+          if [ ! -d ".claude" ]; then
+            echo "❌ .claude directory not found"
+            exit 1
+          fi
+          echo "✅ All required files and directories found"
 
-      - name: Update version in src files
+      - name: Update version in files
         run: |
           VERSION_NUMBER="${{ steps.version.outputs.version_number }}"
-          echo "🔄 Updating version to $VERSION_NUMBER in src files..."
+          echo "🔄 Updating version to $VERSION_NUMBER in files..."
           
           # Update install.sh version
-          if grep -q "CARL_VERSION=" src/install.sh; then
-            sed -i "s/CARL_VERSION=.*/CARL_VERSION=\"$VERSION_NUMBER\"/" src/install.sh
+          if grep -q "CARL_VERSION=" install.sh; then
+            sed -i "s/CARL_VERSION=.*/CARL_VERSION=\"$VERSION_NUMBER\"/" install.sh
           else
             # Add version if not present
-            sed -i '/^#!/a CARL_VERSION="'$VERSION_NUMBER'"' src/install.sh
+            sed -i '/^#!/a CARL_VERSION="'$VERSION_NUMBER'"' install.sh
           fi
           
           # Update update-carl.sh version  
-          if grep -q "# Version:" src/update-carl.sh; then
-            sed -i "s/# Version:.*/# Version: $VERSION_NUMBER/" src/update-carl.sh
+          if grep -q "# Version:" update-carl.sh; then
+            sed -i "s/# Version:.*/# Version: $VERSION_NUMBER/" update-carl.sh
           fi
 
       - name: Commit version updates
@@ -72,7 +80,7 @@ jobs:
           if git diff --quiet; then
             echo "ℹ️ No version changes to commit"
           else
-            git add src/
+            git add install.sh update-carl.sh
             git commit -m "Release ${{ steps.version.outputs.version }}: Update version numbers"
             git push origin HEAD:main
           fi
@@ -121,6 +129,12 @@ jobs:
             echo EOF
           } >> $GITHUB_OUTPUT
 
+      - name: Create release archive
+        run: |
+          echo "📦 Creating CARL release archive..."
+          tar -czf carl-${{ steps.version.outputs.version }}.tar.gz .carl .claude install.sh update-carl.sh
+          echo "✅ Archive created: carl-${{ steps.version.outputs.version }}.tar.gz"
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
@@ -128,11 +142,13 @@ jobs:
           name: "CARL ${{ steps.version.outputs.version }}"
           body: ${{ steps.changelog.outputs.changelog }}
           files: |
-            src/install.sh
-            src/update-carl.sh
+            install.sh
+            update-carl.sh
+            carl-${{ steps.version.outputs.version }}.tar.gz
           # These files will be available as:
           # - https://github.com/ClaytonHunt/carl/releases/latest/download/install.sh  
           # - https://github.com/ClaytonHunt/carl/releases/latest/download/update-carl.sh
+          # - https://github.com/ClaytonHunt/carl/releases/latest/download/carl-${{ steps.version.outputs.version }}.tar.gz
           draft: false
           prerelease: false
         env:

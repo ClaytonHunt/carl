@@ -4,14 +4,18 @@ on:
   push:
     branches: [ main, develop ]
     paths:
-      - 'src/**'
+      - 'install.sh'
+      - 'update-carl.sh'
       - '.carl/**'
+      - '.claude/**'
       - '.github/workflows/**'
   pull_request:
     branches: [ main ]
     paths:
-      - 'src/**'
+      - 'install.sh'
+      - 'update-carl.sh'
       - '.carl/**'
+      - '.claude/**'
       - '.github/workflows/**'
 
 jobs:
@@ -24,7 +28,7 @@ jobs:
 
       - name: Validate shell scripts
         run: |
-          echo "🔍 Validating shell scripts in src/"
+          echo "🔍 Validating shell scripts"
           
           # Check if shellcheck is available
           if ! command -v shellcheck >/dev/null 2>&1; then
@@ -32,11 +36,11 @@ jobs:
             sudo apt-get update && sudo apt-get install -y shellcheck
           fi
           
-          # Validate all shell scripts
-          find src/ -name "*.sh" -type f | while read -r script; do
-            echo "Checking $script..."
-            shellcheck "$script" || exit 1
-          done
+          # Validate install and update scripts
+          echo "Checking install.sh..."
+          shellcheck install.sh || exit 1
+          echo "Checking update-carl.sh..."
+          shellcheck update-carl.sh || exit 1
           
           echo "✅ All shell scripts passed validation"
 
@@ -49,7 +53,7 @@ jobs:
           cd "$TEST_DIR"
           
           # Test basic installation
-          bash "$GITHUB_WORKSPACE/src/install.sh" .
+          bash "$GITHUB_WORKSPACE/install.sh" .
           
           # Verify CARL was installed
           if [ ! -d ".carl" ]; then
@@ -114,7 +118,7 @@ jobs:
           echo "🔒 Running security scan on shell scripts..."
           
           # Check for common security issues
-          find src/ -name "*.sh" -type f | while read -r script; do
+          for script in install.sh update-carl.sh; do
             echo "Scanning $script for security issues..."
             
             # Check for dangerous patterns

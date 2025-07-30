@@ -1,5 +1,5 @@
 ---
-allowed-tools: Task(carl-architecture-analyst), Task(carl-backend-analyst), Task(carl-frontend-analyst), Task(carl-requirements-analyst), Task(carl-debt-analyst), Bash(git log:*), Bash(git diff:*), Read, Write, Glob, Grep
+allowed-tools: Task(carl-agent-builder), Bash(git log:*), Bash(git diff:*), Read, Write, Glob, Grep, LS
 description: Analyze codebase and generate comprehensive CARL files
 argument-hint: [directory] | --comprehensive | --sync | --changes-only
 ---
@@ -16,45 +16,67 @@ Based on `$ARGUMENTS`:
 - **--changes-only**: Analyze only recent git changes
 - **Directory path**: Analyze specific directory scope
 
-## 2. Comprehensive Analysis First
-Deploy core CARL analysts for thorough codebase analysis:
+## 2. Project Discovery and Analysis
+Discover project characteristics and generate appropriate specialists:
 
-- **Task: carl-architecture-analyst** → "Analyze system architecture, identify patterns, and generate system.context.carl mapping component relationships"
-- **Task: carl-backend-analyst** → "Catalog API endpoints, data models, and service dependencies. Generate backend.context.carl and api.state.carl files"  
-- **Task: carl-frontend-analyst** → "Identify UI components, user workflows, and journeys. Generate frontend.context.carl and ui.state.carl files"
-- **Task: carl-requirements-analyst** → "Extract implicit requirements from code patterns and generate feature.intent.carl files for discovered capabilities"
-- **Task: carl-debt-analyst** → "Identify technical debt items, refactoring opportunities, and generate debt.state.carl tracking"
+### Step 2A: Initial Project Discovery
+Use file system analysis to discover project patterns:
+- **Technology Stack**: Identify languages, frameworks, and tools from file extensions and package files
+- **Architecture Patterns**: Analyze directory structure for architectural insights
+- **Domain Complexity**: Assess project size, scope, and technical complexity
+- **Existing Documentation**: Review README, docs, and existing CARL files
 
-## 3. Post-Analysis Specialist Generation
-After core analysis completes and generates rich `*.carl` files:
+### Step 2B: Generate Domain-Specific Specialists
+Based on discovered project characteristics, create targeted specialist agents:
 
-### Step 3A: Analyze Generated CARL Files
-Review the content of created `*.carl` files to identify specialist domains:
-- Frontend frameworks (React, Vue, Angular patterns in frontend.context.carl)
-- Backend technologies (Django, Spring, Node.js patterns in backend.context.carl)  
-- ML/AI components (model architectures, data pipelines in system.context.carl)
-- Infrastructure patterns (microservices, containers in architecture files)
+**Technology-Based Specialists:**
+- **JavaScript/TypeScript projects** → Generate `carl-js-specialist`
+- **Python projects** → Generate `carl-python-specialist`
+- **Go projects** → Generate `carl-go-specialist`
+- **Rust projects** → Generate `carl-rust-specialist`
+- **Java projects** → Generate `carl-java-specialist`
+- **Bash/Shell projects** → Generate `carl-bash-specialist`
 
-### Step 3B: Generate Project-Specific Specialists
-Based on findings in `*.carl` files, create targeted specialist agents:
-- **React components found** → Generate `carl-react-specialist` 
-- **ML models detected** → Generate `carl-ml-analyst`
-- **Microservices architecture** → Generate `carl-microservices-analyst` 
-- **Security patterns** → Generate `carl-security-specialist`
+**Framework-Based Specialists:**
+- **React/Next.js** → Generate `carl-react-specialist`
+- **Vue.js** → Generate `carl-vue-specialist`
+- **Django/Flask** → Generate `carl-python-web-specialist`
+- **Spring Boot** → Generate `carl-spring-specialist`
+- **Docker/Kubernetes** → Generate `carl-containerization-specialist`
 
-### Step 3C: Persistent Specialist Team
-Generated agents remain in `.claude/agents/` for ongoing project support:
-- Future `/carl:plan` commands can leverage specialists
-- Specialists develop project-specific expertise over time
-- Re-running `/carl:analyze` updates specialists rather than recreating
+**Domain-Based Specialists:**
+- **API services** → Generate `carl-api-specialist`
+- **Database schemas** → Generate `carl-database-specialist`
+- **ML/AI models** → Generate `carl-ml-specialist`
+- **Mobile apps** → Generate `carl-mobile-specialist`
+- **CLI tools** → Generate `carl-cli-specialist`
+- **Audio/Media systems** → Generate `carl-audio-specialist`
 
-## 3. Extract Project Intelligence
-Automatic discovery of:
-- **Features**: Directory structure analysis, route/controller mapping
+### Step 2C: Deploy Generated Specialists
+Each generated specialist performs targeted analysis:
+- **Architecture Analysis**: Map system components and relationships
+- **Feature Discovery**: Identify implemented, partial, and planned capabilities
+- **Technical Debt Assessment**: Find improvement opportunities
+- **Documentation Generation**: Create appropriate `.intent.carl`, `.state.carl`, and `.context.carl` files
+
+## 3. Specialist-Driven Analysis
+Generated specialists perform comprehensive project analysis:
+
+### Intelligence Extraction
+Each specialist automatically discovers:
+- **Features**: Directory structure analysis, route/controller mapping, component hierarchies
 - **Implementation State**: Code completion status, test coverage, documentation gaps
-- **Dependencies**: Internal relationships, external integrations
-- **Technical Debt**: Code quality issues, performance bottlenecks
+- **Dependencies**: Internal relationships, external integrations, package dependencies
+- **Technical Debt**: Code quality issues, performance bottlenecks, outdated patterns
 - **Business Logic**: User workflows, business rules from code patterns
+- **Architecture Patterns**: Design patterns, architectural decisions, scalability considerations
+
+### Technology-Specific Analysis
+Specialists provide domain expertise:
+- **Language-specific patterns**: Idioms, best practices, ecosystem conventions
+- **Framework insights**: Configuration patterns, lifecycle management, plugin architectures
+- **Tooling integration**: Build systems, testing frameworks, deployment pipelines
+- **Performance characteristics**: Bottlenecks, optimization opportunities, scaling patterns
 
 ## 4. Generate CARL File Structure
 Use CARL templates to create comprehensive documentation:
