@@ -16,8 +16,10 @@ Based on `$ARGUMENTS`:
 - **--changes-only**: Analyze only recent git changes
 - **Directory path**: Analyze specific directory scope
 
-## 2. Project Discovery and Analysis
-Discover project characteristics and generate appropriate specialists:
+## 2. Project Discovery and Analysis  
+Discover project characteristics and generate appropriate specialists, following master process definition:
+- **Load Master Process**: Read `.carl/system/master.process.carl` for authoritative analysis workflow
+- **Follow Analysis Workflow**: Execute `carl_analyze` sequence from master process definition
 
 ### Step 2A: Initial Project Discovery
 Use file system analysis to discover project patterns:

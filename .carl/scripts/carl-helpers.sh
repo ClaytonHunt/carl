@@ -127,6 +127,12 @@ carl_get_active_context() {
     local carl_root="$(carl_get_root)"
     local context=""
     
+    # Load compact master process definition first for system consistency
+    if [ -f "$carl_root/.carl/system/master.process.carl" ]; then
+        context+="## CARL Master Process Context\n"
+        context+="$(cat "$carl_root/.carl/system/master.process.carl")\n\n"
+    fi
+    
     # Add CARL index for quick AI reference
     if [ -f "$carl_root/.carl/index.carl" ]; then
         context+="## CARL Project Index\n"

@@ -9,12 +9,14 @@ argument-hint: --summary | --detailed | --features | --technical-debt | --team
 Generate comprehensive project status dashboard by analyzing CARL (Context-Aware Requirements Language) files:
 
 ## 1. Read CARL System Files
-Priority order for comprehensive status analysis:
-1. Read `.carl/index.carl` for project overview and current state
-2. Read `.carl/sessions/active/*.session.carl` for current progress
-3. Read all `.state.carl` files for implementation status
-4. Read all `.context.carl` files for dependency health
-5. Read `.carl/roadmap.carl` and `.carl/mission.carl` for strategic context
+Priority order for comprehensive status analysis, following master process definition:
+1. Read `.carl/system/master.process.carl` for authoritative status workflow reference
+2. Read `.carl/index.carl` for project overview and current state
+3. Read `.carl/sessions/active/*.session.carl` for current progress
+4. Read all `.state.carl` files for implementation status
+5. Read all `.context.carl` files for dependency health
+6. Read `.carl/roadmap.carl` and `.carl/mission.carl` for strategic context
+7. Follow `carl_status` workflow sequence from master process definition
 
 ## 2. Analyze Status Components
 Based on `$ARGUMENTS`, focus analysis on:

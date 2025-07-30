@@ -14,10 +14,12 @@ Execute development tasks with intelligent work queue management and full CARL (
 If `$ARGUMENTS` is empty, contains only flags (--continue, --next, --suggest), or is unclear:
 
 1. **Load Active Work Context**:
+   - Read `.carl/system/master.process.carl` for authoritative task execution workflow
    - Read `.carl/project/active.work.carl` for current work queue status
    - Load active intent progress and current substep
    - Check ready_for_work queue for available tasks
    - Review intelligent_suggestions for next logical tasks
+   - Follow `carl_task` workflow sequence from master process definition
 
 2. **Present Intelligent Suggestions**:
    ```

@@ -34,13 +34,26 @@ work_queue:
       waiting_on: []
       estimated_effort: "3_days"
       description: "Fix planning system to ask one question at a time and prevent analysis in vacuum"
+      status: "75_percent_complete_pseudocode_structure_implemented"
+      current_phase: "pseudocode_structure"
+      next_milestone: "analyst_integration_testing"
       
     - id: "technical/carl-master-process-definition"
+      status: "completed"
       priority: "critical"
       dependencies_met: true
       waiting_on: []
       estimated_effort: "2_weeks"
       description: "Create AI-optimized master process definition for system consistency"
+      completion_date: "2025-07-30T14:30:00-04:00"
+      artifacts:
+        - ".carl/project/technical/carl-master-process-definition.intent.carl"
+        - ".carl/project/technical/carl-master-process-definition.state.carl"  
+        - ".carl/system/master.process.carl"
+      integration_complete: true
+      status: "85_percent_complete_master_process_definition_file_created"
+      current_phase: "development_core_implementation_complete"
+      next_milestone: "integration_with_context_loading_system"
       
     - id: "epics/installation-deployment-system"
       priority: "high"

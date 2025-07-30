@@ -9,11 +9,13 @@ argument-hint: --audio [on/off] | --depth [minimal/balanced/comprehensive] | --t
 Configure CARL (Context-Aware Requirements Language) system behavior by:
 
 ## 1. Load Current Configuration
-Read existing CARL configuration files:
+Read existing CARL configuration files, following master process definition:
+- Read `.carl/system/master.process.carl` for authoritative settings workflow reference
 - Read `.carl/config/carl-settings.json` for current settings
 - Read `.carl/config/user.conf` for user preferences
 - Read `.carl/config/team.conf` for team-specific configuration
 - Display current configuration based on `$ARGUMENTS` scope
+- Follow `carl_settings` workflow sequence from master process definition
 
 ## 2. Process Settings Arguments
 Based on `$ARGUMENTS`, modify settings:

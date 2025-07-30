@@ -1,0 +1,68 @@
+# CARL Plan Command Workflow Definition
+# Referenced by: .carl/system/master.process.carl
+# Purpose: Detailed workflow for /carl:plan command execution
+
+workflow_sequence:
+  1_scope_detection:
+    description: "classify requirement as epic/feature/story/technical"
+    keywords:
+      epic: ["system", "platform", "complete", "entire"]
+      feature: ["feature", "capability", "functionality"] 
+      story: ["fix", "update", "modify", "add"]
+      technical: ["refactor", "improve", "optimize"]
+    
+  2_context_loading:
+    description: "load relevant CARL project context"
+    required_files:
+      - ".carl/index.carl"
+      - ".carl/project/process.carl"
+      - ".carl/project/active.work.carl"
+    search_patterns: ["related existing intent files"]
+    
+  3_interactive_gathering:
+    description: "sequential interactive requirements gathering"
+    approach: "one_question_at_a_time"
+    focus_areas: ["business_value", "success_criteria", "constraints"]
+    
+  4_analyst_invocation:
+    description: "invoke carl-requirements-analyst with complete context"
+    agent: "carl-requirements-analyst"
+    handoff_data: "complete_user_input_with_detected_scope_level"
+    
+  5_specialist_coordination:
+    description: "conditional specialist agent coordination based on scope"
+    conditional_agents:
+      epic: ["carl-architecture-analyst", "carl-backend-analyst", "carl-frontend-analyst"]
+      feature: ["carl-backend-analyst", "carl-frontend-analyst"]
+      story: ["carl-debt-analyst"]
+      technical: ["carl-debt-analyst", "carl-architecture-analyst"]
+      
+  6_file_generation:
+    description: "scope-specific template-based CARL file generation"
+    output_artifacts:
+      - "scope_specific_intent_file_in_carl_project_hierarchy"
+      - "corresponding_state_file_for_progress_tracking"
+      
+  7_system_updates:
+    description: "update CARL system and integration"
+    updates:
+      - "active_work_queue_with_new_requirements"
+      - "session_record_with_planning_context"
+
+agent_coordination_patterns:
+  primary_handoff:
+    from: "scope_detector"
+    to: "carl-requirements-analyst"
+    trigger: "scope_classification_complete"
+    data_format: "complete_user_input_with_detected_scope_level"
+    
+  specialist_handoff:
+    from: "carl-requirements-analyst" 
+    to: "conditional_specialists"
+    trigger: "requirements_analysis_complete AND specialist_coordination_needed"
+    data_format: "comprehensive_requirements_context_with_scope_specific_analysis"
+
+performance_targets:
+  context_loading: "under_500ms"
+  total_workflow: "under_5_minutes_for_standard_requirements"
+  token_budget: "lazy_load_specialist_workflows_on_demand"
