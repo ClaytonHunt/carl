@@ -11,10 +11,9 @@ CARL is an AI-optimized planning system for Claude Code, featuring our beloved m
 ### 📁 Repository Structure
 ```
 carl/
-├── src/                    # Source files for release 
-│   ├── install.sh         # Main installation script
-│   └── update-carl.sh     # Update script
+├── install.sh             # Main installation & update script
 ├── .carl/                 # CARL project files
+├── .claude/               # Claude Code integration files
 ├── .github/workflows/     # CI/CD automation
 ├── docs/                  # Documentation
 └── README.md              # Project documentation
@@ -24,8 +23,8 @@ carl/
 
 **For Maintainers:**
 
-1. **Development**: Work in `src/` directory
-   - All release files should be in `src/`
+1. **Development**: Work in root directory
+   - All release files should be in the root directory
    - Test changes thoroughly before releasing
 
 2. **Creating a Release**:
@@ -35,9 +34,9 @@ carl/
    git push origin v1.7.1
    
    # GitHub Actions will automatically:
-   # - Update version numbers in src/ files
+   # - Update version numbers in install.sh
    # - Create GitHub release with changelog
-   # - Make src/ files available via GitHub releases API
+   # - Make install.sh available via GitHub releases API
    ```
 
 3. **Manual Release** (if needed):
@@ -54,15 +53,18 @@ carl/
    cd carl
    ```
 
-2. **Make Changes**: Edit files in `src/` directory
+2. **Make Changes**: Edit files in the repository
 
 3. **Test Locally**:
    ```bash
    # Test installation script
-   ./src/install.sh /tmp/test-project
+   ./install.sh /tmp/test-project
+   
+   # Test update functionality
+   ./install.sh --update /tmp/test-project
    
    # Test in your own project
-   ./src/install.sh /path/to/your/project
+   ./install.sh /path/to/your/project
    ```
 
 4. **Submit PR**: Target the `main` branch
@@ -76,9 +78,9 @@ carl/
 - Security scanning
 
 **Release Workflow** (runs on git tag):
-- Updates version numbers in `src/` files automatically
+- Updates version numbers in install.sh automatically
 - Creates GitHub release with changelog
-- Makes scripts available via GitHub releases API at `/releases/latest/download/`
+- Makes install.sh and carl-<version>.tar.gz available via GitHub releases API at `/releases/latest/download/`
 
 ## 🌟 Ways to Contribute
 

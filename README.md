@@ -62,7 +62,7 @@ bash <(curl -s https://github.com/ClaytonHunt/carl/releases/latest/download/inst
 # Clone and install locally
 git clone https://github.com/claytonhunt/carl.git
 cd carl
-./src/install.sh /path/to/your/project
+./install.sh /path/to/your/project
 ```
 
 ### Updates
@@ -71,7 +71,7 @@ cd carl
 /carl:update
 
 # Or update from command line
-bash <(curl -s https://github.com/ClaytonHunt/carl/releases/latest/download/update-carl.sh)
+bash <(curl -s https://github.com/ClaytonHunt/carl/releases/latest/download/install.sh) --update
 ```
 
 ### Start Using CARL

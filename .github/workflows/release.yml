@@ -40,10 +40,6 @@ jobs:
             echo "❌ install.sh not found"
             exit 1
           fi
-          if [ ! -f "update-carl.sh" ]; then
-            echo "❌ update-carl.sh not found"
-            exit 1
-          fi
           if [ ! -d ".carl" ]; then
             echo "❌ .carl directory not found"
             exit 1
@@ -66,11 +62,6 @@ jobs:
             # Add version if not present
             sed -i '/^#!/a CARL_VERSION="'$VERSION_NUMBER'"' install.sh
           fi
-          
-          # Update update-carl.sh version  
-          if grep -q "# Version:" update-carl.sh; then
-            sed -i "s/# Version:.*/# Version: $VERSION_NUMBER/" update-carl.sh
-          fi
 
       - name: Commit version updates
         run: |
@@ -80,7 +71,7 @@ jobs:
           if git diff --quiet; then
             echo "ℹ️ No version changes to commit"
           else
-            git add install.sh update-carl.sh
+            git add install.sh
             git commit -m "Release ${{ steps.version.outputs.version }}: Update version numbers"
             git push origin HEAD:main
           fi
@@ -132,7 +123,7 @@ jobs:
       - name: Create release archive
         run: |
           echo "📦 Creating CARL release archive..."
-          tar -czf carl-${{ steps.version.outputs.version }}.tar.gz .carl .claude install.sh update-carl.sh
+          tar -czf carl-${{ steps.version.outputs.version }}.tar.gz .carl .claude install.sh
           echo "✅ Archive created: carl-${{ steps.version.outputs.version }}.tar.gz"
 
       - name: Create GitHub Release
@@ -143,11 +134,9 @@ jobs:
           body: ${{ steps.changelog.outputs.changelog }}
           files: |
             install.sh
-            update-carl.sh
             carl-${{ steps.version.outputs.version }}.tar.gz
           # These files will be available as:
           # - https://github.com/ClaytonHunt/carl/releases/latest/download/install.sh  
-          # - https://github.com/ClaytonHunt/carl/releases/latest/download/update-carl.sh
           # - https://github.com/ClaytonHunt/carl/releases/latest/download/carl-${{ steps.version.outputs.version }}.tar.gz
           draft: false
           prerelease: false

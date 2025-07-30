@@ -161,14 +161,15 @@ show_help() {
     echo "  ./install.sh --global           # Install globally for user"
     echo "  ./install.sh --force            # Force reinstall"
     echo ""
-    echo "Remote Installation/Update (via curl):"
+    echo "Remote Installation (via curl):"
     echo "  # Latest release (recommended - always uses latest stable version)"
-    echo "  curl -fsSL \$(curl -s https://api.github.com/repos/ClaytonHunt/carl/releases/latest | grep 'browser_download_url.*install.sh' | cut -d'\"' -f4) | bash"
-    echo "  curl -fsSL \$(curl -s https://api.github.com/repos/ClaytonHunt/carl/releases/latest | grep 'browser_download_url.*install.sh' | cut -d'\"' -f4) | bash -s -- --update"
+    echo "  curl -fsSL https://github.com/ClaytonHunt/carl/releases/latest/download/install.sh | bash"
     echo ""
-    echo "  # Direct from main branch (development version)"
-    echo "  curl -fsSL https://raw.githubusercontent.com/ClaytonHunt/carl/main/install.sh | bash"
-    echo "  curl -fsSL https://raw.githubusercontent.com/ClaytonHunt/carl/main/install.sh | bash -s -- --update"
+    echo "Update:"
+    echo "  # From within a CARL-enabled project:"
+    echo "  bash install.sh --update"
+    echo ""
+    echo "  # Or use the /carl:update command in Claude Code"
 }
 
 # Check system requirements
@@ -337,11 +338,98 @@ create_update_backup() {
   "target_directory": "$target_dir",
   "from_version": "$current_version",
   "size_mb": $backup_size,
-  "backup_type": "pre_update"
+  "backup_type": "pre_update",
+  "restore_command": "cd '$target_dir' && bash install.sh --restore-from $backup_dir"
 }
 EOF
     
     echo "✅ Backup created: $backup_dir (${backup_size}MB)"
+}
+
+# Preserve user data during updates
+preserve_user_data() {
+    local target_dir="$1"
+    local temp_preserve="$2"
+    
+    cd "$target_dir" || return 1
+    mkdir -p "$temp_preserve"
+    
+    echo "📁 Preserving user data..."
+    
+    # Preserve user sessions
+    if [ -d ".carl/sessions" ]; then
+        cp -r ".carl/sessions" "$temp_preserve/" 2>/dev/null || true
+        echo "   ✅ Preserved session history"
+    fi
+    
+    # Preserve user settings (but extract version for updating)
+    if [ -f ".carl/config/carl-settings.json" ]; then
+        cp ".carl/config/carl-settings.json" "$temp_preserve/carl-settings.json.old"
+        echo "   ✅ Preserved CARL settings"
+    fi
+    
+    # Preserve Claude local settings
+    if [ -f ".claude/settings.local.json" ]; then
+        cp ".claude/settings.local.json" "$temp_preserve/"
+        echo "   ✅ Preserved Claude local settings"
+    fi
+    
+    # Preserve custom index.carl if it exists and has been modified
+    if [ -f ".carl/index.carl" ]; then
+        # Check if it's different from default (simple check)
+        local lines=$(wc -l < ".carl/index.carl")
+        if [ "$lines" -gt 10 ]; then  # Default is usually short
+            cp ".carl/index.carl" "$temp_preserve/index.carl.custom"
+            echo "   ✅ Preserved custom index.carl"
+        fi
+    fi
+}
+
+# Restore user data after update
+restore_user_data() {
+    local target_dir="$1"
+    local temp_preserve="$2"
+    local new_version="$3"
+    
+    cd "$target_dir" || return 1
+    
+    echo "📁 Restoring user data..."
+    
+    # Restore sessions
+    if [ -d "$temp_preserve/sessions" ]; then
+        rm -rf ".carl/sessions"
+        cp -r "$temp_preserve/sessions" ".carl/"
+        echo "   ✅ Restored session history"
+    fi
+    
+    # Merge settings (update version but keep user preferences)
+    if [ -f "$temp_preserve/carl-settings.json.old" ] && [ -f ".carl/config/carl-settings.json" ]; then
+        # Use jq if available, otherwise do simple replacement
+        if command -v jq >/dev/null 2>&1; then
+            # Merge settings intelligently with jq
+            jq -s '.[0] * .[1] | .carl_version = "'"$new_version"'" | .last_updated = now | strftime("%Y-%m-%dT%H:%M:%SZ")' \
+                "$temp_preserve/carl-settings.json.old" \
+                ".carl/config/carl-settings.json" > ".carl/config/carl-settings.json.tmp" && \
+                mv ".carl/config/carl-settings.json.tmp" ".carl/config/carl-settings.json"
+            echo "   ✅ Merged CARL settings (preserved user preferences)"
+        else
+            # Fallback: just update version
+            sed -i "s/\"carl_version\": \".*\"/\"carl_version\": \"$new_version\"/" ".carl/config/carl-settings.json"
+            echo "   ✅ Updated CARL version in settings"
+        fi
+    fi
+    
+    # Restore Claude local settings
+    if [ -f "$temp_preserve/settings.local.json" ]; then
+        cp "$temp_preserve/settings.local.json" ".claude/"
+        echo "   ✅ Restored Claude local settings"
+    fi
+    
+    # Restore custom index.carl
+    if [ -f "$temp_preserve/index.carl.custom" ]; then
+        cp "$temp_preserve/index.carl.custom" ".carl/index.carl"
+        echo "   ✅ Restored custom index.carl"
+    fi
 }
 
 # Version detection and migration logic
@@ -1211,6 +1299,13 @@ main() {
         echo -e "${CYAN}🎯 Target directory: ${NC}$TARGET_DIR"
         echo ""
         
+        # Validate CARL installation exists
+        if [ ! -f "$TARGET_DIR/.carl/config/carl-settings.json" ] && [ ! -f "$TARGET_DIR/.carl/index.carl" ]; then
+            echo -e "${RED}❌ No CARL installation found at $TARGET_DIR${NC}"
+            echo "💡 Use the install script without --update to add CARL to this project"
+            exit 1
+        fi
+        
         # Update workflow
         check_requirements || handle_error "requirements check"
         
@@ -1227,8 +1322,14 @@ main() {
             exit 0
         fi
         
+        # Create temporary directory for preserved data
+        local temp_preserve=$(mktemp -d)
+        
         # Create backup before update
         create_update_backup "$TARGET_DIR" "$MAX_BACKUPS" || handle_error "backup creation"
+        
+        # Preserve user data
+        preserve_user_data "$TARGET_DIR" "$temp_preserve" || handle_error "user data preservation"
         
         # Update files first (provides source files for migration)
         copy_carl_files || handle_error "file updating"
@@ -1239,6 +1340,12 @@ main() {
         # Configure hooks and settings
         configure_claude_hooks || handle_error "Claude Code hook configuration"
         initialize_carl_config || handle_error "CARL configuration update"
+        
+        # Restore user data (this will merge settings)
+        restore_user_data "$TARGET_DIR" "$temp_preserve" "$target_version" || handle_error "user data restoration"
+        
+        # Cleanup
+        rm -rf "$temp_preserve"
         
         echo ""
         echo -e "${GREEN}✅ CARL updated successfully from $current_version to $target_version${NC}"

@@ -66,10 +66,9 @@ For update operations (unless `--no-backup` specified):
 
 ### 5. Update Execution
 For actual updates:
-- Download latest update script from GitHub: `https://github.com/ClaytonHunt/carl/releases/latest/download/update-carl.sh`
-- Download install script: `https://github.com/ClaytonHunt/carl/releases/latest/download/install.sh`
-- Execute update script with target directory
-- Preserve user configurations and customizations
+- Download latest install script from GitHub: `https://github.com/ClaytonHunt/carl/releases/latest/download/install.sh`
+- Execute install script with `--update` flag and target directory
+- The install script will automatically preserve user configurations and customizations
 - Verify update success
 
 ### 6. Backup Management Operations

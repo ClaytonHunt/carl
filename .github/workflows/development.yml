@@ -36,11 +36,9 @@ jobs:
             sudo apt-get update && sudo apt-get install -y shellcheck
           fi
           
-          # Validate install and update scripts
+          # Validate install script
           echo "Checking install.sh..."
           shellcheck install.sh || exit 1
-          echo "Checking update-carl.sh..."
-          shellcheck update-carl.sh || exit 1
           
           echo "✅ All shell scripts passed validation"
 
@@ -118,18 +116,16 @@ jobs:
           echo "🔒 Running security scan on shell scripts..."
           
           # Check for common security issues
-          for script in install.sh update-carl.sh; do
-            echo "Scanning $script for security issues..."
-            
-            # Check for dangerous patterns
-            if grep -n "eval\|exec\|system\|`" "$script"; then
-              echo "⚠️ Warning: Found potentially dangerous commands in $script"
-            fi
-            
-            # Check for hardcoded secrets (basic check)
-            if grep -iE "(password|secret|key|token).*=" "$script"; then
-              echo "⚠️ Warning: Possible hardcoded secrets in $script"
-            fi
-          done
+          echo "Scanning install.sh for security issues..."
+          
+          # Check for dangerous patterns
+          if grep -n "eval\|exec\|system\|`" "install.sh"; then
+            echo "⚠️ Warning: Found potentially dangerous commands in install.sh"
+          fi
+          
+          # Check for hardcoded secrets (basic check)  
+          if grep -iE "(password|secret|key|token).*=" "install.sh"; then
+            echo "⚠️ Warning: Possible hardcoded secrets in install.sh"
+          fi
           
           echo "✅ Security scan completed"
