@@ -1,0 +1,279 @@
+# CARL Task Execution Workflow
+# Comprehensive task execution logic with intelligent work management
+# Version: 2.0.0 | Extracted from task.md for architectural consistency
+# Last Updated: 2025-07-30T19:00:00-04:00
+
+workflow_metadata:
+  workflow_version: "2.0.0"
+  extracted_from: ".claude/commands/carl/task.md"
+  purpose: "intelligent_task_execution_with_context_integration"
+  token_budget: "comprehensive_workflow_with_lazy_loading"
+  integration_pattern: "dual_layer_architecture"
+
+# === INTELLIGENT WORK SUGGESTION SYSTEM ===
+
+intelligent_suggestion_workflow:
+  trigger_conditions:
+    - "arguments_empty_or_suggestion_flags"
+    - "continue_next_suggest_flags_present"
+    - "unclear_task_description"
+  
+  context_loading_sequence:
+    1. "load_master_process_carl_for_authoritative_workflow"
+    2. "load_active_work_carl_for_current_queue_status"
+    3. "load_active_intent_progress_and_current_substep"
+    4. "check_ready_for_work_queue_for_available_tasks"
+    5. "review_intelligent_suggestions_for_next_logical_tasks"
+    6. "follow_carl_task_workflow_sequence_from_master_process"
+  
+  suggestion_presentation_template: |
+    CARL Task Assistant 🎯
+    
+    Current Context: [ACTIVE_INTENT_NAME] ([COMPLETION]% complete)
+    Current Phase: [CURRENT_PHASE]
+    
+    Based on your work patterns and current progress, here are my suggestions:
+    
+    🔥 Continue Current Work:
+    1. [CURRENT_SUBSTEP_DESCRIPTION] (Est: [TIME])
+       ↳ You were working on this in your last session
+    
+    ⚡ Next Logical Tasks:
+    2. [NEXT_LOGICAL_TASK] (Est: [TIME])
+       ↳ [REASONING_FOR_SUGGESTION]
+    3. [ALTERNATIVE_TASK] (Est: [TIME])
+       ↳ [REASONING_FOR_SUGGESTION]
+    
+    📋 Available from Queue:
+    4. [QUEUED_TASK_1] (Priority: [PRIORITY], Est: [TIME])
+    5. [QUEUED_TASK_2] (Priority: [PRIORITY], Est: [TIME])
+    
+    🚀 Quick Wins:
+    6. [QUICK_WIN_TASK] (Est: [TIME])
+       ↳ Small task to build momentum
+    
+    Which task would you like to work on?
+    Or describe what you'd like to do: [Wait for user input]
+  
+  user_selection_handling:
+    numbered_option: "load_that_task_context_and_proceed"
+    new_task_description: "proceed_with_normal_workflow"
+    continue_current_work: "load_active_substep_context"
+  
+  flag_based_operations:
+    continue_flag: "automatically_load_and_continue_current_active_substep"
+    next_flag: "show_next_logical_task_in_current_epic_feature_workflow"
+    suggest_flag: "show_comprehensive_suggestion_menu_as_above"
+
+# === SESSION STATE INTEGRATION ===
+
+session_state_management:
+  execution_with_session_tracking: |
+    execute_task_with_session_state() {
+        // Load current session and active work context
+        current_session = load_current_session_state()
+        active_work = load_active_work_context()
+        
+        // Update active work status when starting task
+        update_active_work_task_status("in_progress")
+        
+        // Execute task with full context integration
+        execute_task_with_carl_context()
+        
+        // Update session state and active work progress
+        update_session_progress_and_active_work()
+    }
+  
+  active_work_integration:
+    - "update_carl_project_active_work_carl_when_starting_completing_tasks"
+    - "track_task_progress_in_session_context"
+    - "maintain_work_queue_status_and_intelligent_suggestions"
+    - "integrate_with_epic_feature_completion_tracking"
+
+# === CARL CONTEXT LOADING ===
+
+context_loading_workflow:
+  automatic_context_loading_based_on_arguments:
+    search_related_files: "find_intent_carl_state_carl_and_context_carl_files_related_to_task"
+    load_requirements: "extract_constraints_success_criteria_and_business_rules_from_carl_files"
+    check_dependencies: "identify_affected_components_and_integration_points"
+    assess_current_state: "load_implementation_progress_and_technical_debt_from_state_files"
+
+# === WORKFLOW ENFORCEMENT AND VALIDATION ===
+
+workflow_enforcement:
+  requirements_driven_enforcement: "validate_proper_requirements_before_task_execution"
+  
+  validation_workflow: |
+    carl_validate_requirements() {
+        // Check if task has associated intent file
+        if (task_requires_intent && !intent_file_exists):
+            show_requirements_guidance()
+            suggest_carl_plan_command()
+            return BLOCKED
+        
+        // Validate work is properly planned
+        if (implementation_work && !proper_planning):
+            show_planning_guidance()
+            offer_to_create_requirements()
+            return BLOCKED_WITH_GUIDANCE
+        
+        // Allow emergency override
+        if (user_confirms_override):
+            log_override_reason()
+            proceed_with_warning()
+        
+        return PROCEED
+    }
+  
+  enforcement_actions:
+    require_intent_files: "block_implementation_work_without_associated_intent_carl_files"
+    validate_planning: "ensure_work_fits_within_defined_requirements_and_scope"
+    provide_guidance: "clear_error_messages_with_helpful_next_steps"
+    emergency_override: "force_flag_available_for_exceptional_circumstances"
+    educational_messaging: "explain_benefits_of_requirements_driven_development"
+
+# === IMPLEMENTATION APPROACH SELECTION ===
+
+implementation_approach_selection:
+  based_on_task_type_and_arguments:
+    feature_implementation: "use_tdd_with_comprehensive_test_coverage"
+    bug_fixes: "focus_on_root_cause_analysis_and_regression_prevention"
+    technical_debt: "apply_refactoring_with_quality_improvements"
+    tdd_flag: "enhanced_test_driven_development_workflow"
+    from_intent_flag: "direct_implementation_from_carl_intent_file"
+
+# === CONTEXTUAL SPECIALISTS DEPLOYMENT ===
+
+contextual_specialists:
+  deployment_based_on_task_requirements:
+    backend_tasks:
+      - "Task: carl-backend-analyst → Provide API implementation context and data requirements for: $ARGUMENTS"
+      - "Task: carl-architecture-analyst → Ensure service integration compliance for: $ARGUMENTS"
+    
+    frontend_tasks:
+      - "Task: carl-frontend-analyst → Supply UI/UX requirements and component patterns for: $ARGUMENTS"
+      - "Task: carl-requirements-analyst → Extract user journey and interaction requirements for: $ARGUMENTS"
+    
+    technical_debt_tasks:
+      - "Task: carl-debt-analyst → Analyze refactoring approach and quality improvements for: $ARGUMENTS"
+      - "Task: carl-architecture-analyst → Assess architectural impact and consistency for: $ARGUMENTS"
+
+# === TEST-DRIVEN DEVELOPMENT WORKFLOW ===
+
+tdd_workflow:
+  when_implementing_features: "follow_red_green_refactor_cycle"
+  
+  red_phase_write_failing_test_with_carl_context:
+    - "use_security_constraints_from_carl_intent_files"
+    - "apply_performance_criteria_from_success_criteria"
+    - "include_integration_requirements_from_context_files"
+    - "define_expected_behavior_from_business_rules"
+  
+  green_phase_write_minimal_passing_implementation:
+    - "use_existing_components_identified_in_carl_context"
+    - "follow_integration_patterns_from_carl_analysis"
+    - "implement_just_enough_to_satisfy_failing_tests"
+  
+  refactor_phase_improve_with_carl_quality_standards:
+    - "apply_security_patterns_from_carl_requirements"
+    - "follow_architectural_patterns_from_context_files"
+    - "add_proper_error_handling_and_logging"
+    - "optimize_performance_to_meet_carl_criteria"
+
+# === IMPLEMENTATION WITH CARL CONTEXT ===
+
+implementation_with_carl_context:
+  generate_implementation_using_loaded_carl_context:
+    follow_existing_patterns: "use_established_code_conventions_from_project_analysis"
+    respect_constraints: "implement_within_security_performance_and_business_constraints"
+    integrate_properly: "connect_with_existing_components_and_services_correctly"
+    meet_quality_standards: "achieve_test_coverage_and_code_quality_requirements"
+    document_changes: "update_relevant_carl_state_files_with_implementation_progress"
+
+# === STATE FILES AND ACTIVE WORK UPDATES ===
+
+state_files_and_active_work_updates:
+  continuously_track_implementation_progress:
+    update_state_files: "record_completed_components_and_test_coverage"
+    track_quality_metrics: "update_code_quality_and_performance_measurements"
+    document_technical_debt: "note_any_debt_introduced_or_resolved"
+    update_active_work: "mark_current_task_progress_in_carl_project_active_work_carl"
+    record_session_context: "maintain_implementation_notes_and_next_steps"
+    link_to_intent: "ensure_traceability_to_original_requirements"
+    queue_next_tasks: "add_discovered_follow_up_work_to_ready_for_work_queue"
+
+# === IMPLEMENTATION QUALITY VALIDATION ===
+
+implementation_quality_validation:
+  ensure_implementation_meets_carl_standards:
+    run_all_tests: "verify_test_suite_passes_with_new_implementation"
+    check_coverage: "ensure_test_coverage_meets_carl_quality_requirements"
+    validate_integration: "confirm_proper_integration_with_existing_systems"
+    security_review: "verify_security_constraints_from_carl_intent_files_are_met"
+    performance_check: "validate_performance_criteria_are_achieved"
+
+# === USAGE EXAMPLES AND PATTERNS ===
+
+usage_examples:
+  intelligent_work_suggestions:
+    - "carl_task → Shows intelligent suggestions based on active work and queue"
+    - "carl_task --continue → Automatically continues current active substep"
+    - "carl_task --next → Shows next logical task in current workflow"
+    - "carl_task --suggest → Comprehensive suggestion menu with context"
+  
+  direct_task_execution:
+    - "carl_task 'implement user dashboard' → Auto-loads relevant CARL context"
+    - "carl_task --from-intent user-profile.intent.carl → Direct implementation from CARL file"
+    - "carl_task --tdd 'shopping cart logic' → Enhanced TDD workflow"
+    - "carl_task --fix-debt authentication-complexity → Technical debt focus"
+  
+  interactive_example_template: |
+    > carl_task
+    
+    CARL Task Assistant 🎯
+    
+    Current Context: Requirements-Driven Workflow (35% complete)
+    Current Phase: foundation
+    
+    Based on your work patterns and current progress, here are my suggestions:
+    
+    🔥 Continue Current Work:
+    1. Complete example intent/state context files (Est: 30 min)
+       ↳ You were working on this in your last session
+    
+    ⚡ Next Logical Tasks:
+    2. Update /carl:plan for interactive workflow (Est: 2 hours)
+       ↳ Next critical path item after foundation
+    3. Create format specifications for new files (Est: 1 hour)
+       ↳ Needed for template validation and tooling
+    
+    📋 Available from Queue:
+    4. Interactive Planning System (Priority: high, Est: 4 hours)
+    5. Intelligent Task Management (Priority: high, Est: 4 hours)
+    
+    🚀 Quick Wins:
+    6. Update documentation for new structure (Est: 30 min)
+       ↳ Small task to build momentum
+    
+    Which task would you like to work on?
+    Or describe what you'd like to do: > 1
+    
+    Loading context for: Complete example intent/state context files...
+    [Proceeds with task execution]
+
+# === INTEGRATION POINTS ===
+
+integration_architecture:
+  dual_layer_architecture: "simple_command_interface_with_rich_workflow_context"
+  master_process_integration: "loads_master_process_definition_first_for_consistency"
+  lazy_loading_pattern: "workflow_file_loaded_on_demand_for_token_efficiency"
+  context_injection: "follows_established_token_efficient_pattern"
+  performance_target: "sub_100ms_context_loading_maintained"
+
+# === WORKFLOW EXECUTION SUMMARY ===
+
+execution_summary: |
+  Execute development tasks with intelligent work queue management and perfect CARL context integration, 
+  ensuring implementation aligns with requirements, constraints, and quality standards while maintaining 
+  comprehensive progress tracking and architectural consistency across the CARL system.
