@@ -1,0 +1,225 @@
+# Startup Project Vision Template
+# Template for early-stage startups focused on rapid iteration and market validation
+# Template Type: startup_project
+# Strategic Focus: market_validation, rapid_iteration, pivot_flexibility
+
+template_metadata:
+  template_type: "startup_project"
+  template_version: "1.0.0"
+  strategic_focus: ["market_validation", "rapid_iteration", "pivot_flexibility"]
+  project_characteristics: ["early_stage", "small_team", "uncertain_market", "resource_constrained"]
+  recommended_for: ["mvp_development", "market_exploration", "proof_of_concept"]
+
+# Project Identity - Define your startup's core identity
+project_identity:
+  name: "[YOUR_PROJECT_NAME]"
+  # Help: Choose a name that reflects your value proposition or solution approach
+  # Example: "TaskFlow" for a productivity app, "SecureVault" for a security tool
+  
+  mission: "[DEFINE_YOUR_MISSION]"
+  # Help: One sentence describing why your startup exists and what problem you solve
+  # Example: "Empower small businesses to streamline their workflow through intelligent task automation"
+  # Focus on: WHO you serve, WHAT problem you solve, HOW you solve it differently
+  
+  value_proposition: "[YOUR_UNIQUE_VALUE_PROPOSITION]"
+  # Help: What makes your solution different and valuable to users
+  # Example: "The only task management tool that learns your work patterns and automates routine decisions"
+  # Include: Unique benefit, target audience, competitive advantage
+  
+  target_market: "[DEFINE_TARGET_MARKET]"
+  # Help: Specific market segment you're initially targeting
+  # Example: "Remote teams of 5-20 people in creative agencies"
+  # Be specific: Size, industry, characteristics, pain points
+
+# Strategic Objectives - Your key strategic goals (prioritize 3-5 objectives)
+strategic_objectives:
+  - id: "market_validation"
+    description: "[VALIDATE_MARKET_NEED]"
+    # Help: How will you prove there's real demand for your solution?
+    # Example: "Achieve 1000+ active users with 60%+ weekly retention within 6 months"
+    priority: 1
+    success_metrics: ["[MEASURABLE_VALIDATION_METRIC]"]
+    # Example: ["1000+ active users", "60%+ weekly retention", "10+ customer interviews confirming problem"]
+  
+  - id: "product_market_fit"
+    description: "[ACHIEVE_PRODUCT_MARKET_FIT]"
+    # Help: What evidence will show you've found the right solution for the right market?
+    # Example: "Demonstrate clear product-market fit through user growth and engagement metrics"
+    priority: 2
+    success_metrics: ["[PMF_INDICATOR_METRIC]"]
+    # Example: ["40%+ of users would be 'very disappointed' without product", "Organic growth rate > 20%/month"]
+  
+  - id: "sustainable_growth"
+    description: "[ESTABLISH_GROWTH_ENGINE]"
+    # Help: How will you create repeatable, scalable growth?
+    # Example: "Build sustainable user acquisition and retention systems"
+    priority: 3
+    success_metrics: ["[GROWTH_METRIC]"]
+    # Example: ["Customer acquisition cost < $50", "Monthly recurring revenue growth > 20%"]
+
+# Alignment Criteria - Weighted criteria for evaluating feature alignment (must sum to 1.0)
+alignment_criteria:
+  market_validation:
+    weight: 0.30
+    # Startup Priority: Does this help validate market demand and user needs?
+    measurement_rules:
+      - "Features that directly test market hypotheses and gather user feedback"
+      - "Capabilities that reduce time-to-market for testing core value propositions"
+      - "Analytics and measurement tools for understanding user behavior and needs"
+    
+  user_experience:
+    weight: 0.25
+    # Startup Priority: Does this create compelling user value and engagement?
+    measurement_rules:
+      - "Features that significantly improve user satisfaction and engagement"
+      - "Capabilities that reduce user friction and increase adoption"
+      - "Functionality that creates 'wow moments' and drives word-of-mouth growth"
+    
+  technical_agility:
+    weight: 0.20
+    # Startup Priority: Does this maintain our ability to iterate quickly and pivot?
+    measurement_rules:
+      - "Features that don't lock in architectural decisions prematurely"
+      - "Capabilities that support rapid experimentation and A/B testing"
+      - "Technical debt that doesn't significantly slow future development"
+    
+  resource_efficiency:
+    weight: 0.15
+    # Startup Priority: Does this make efficient use of limited time and resources?
+    measurement_rules:
+      - "Features with high impact-to-effort ratios for current stage"
+      - "Capabilities that leverage existing systems and third-party services"
+      - "Functionality that can be built with current team skills and capacity"
+    
+  competitive_advantage:
+    weight: 0.10
+    # Startup Priority: Does this create or maintain competitive differentiation?
+    measurement_rules:
+      - "Features that are difficult for competitors to replicate quickly"
+      - "Capabilities that strengthen network effects or data advantages"
+      - "Functionality that increases switching costs for users"
+
+# Stakeholders - Key people and groups affected by your project
+stakeholders:
+  primary_users: ["[PRIMARY_USER_TYPE]"]
+  # Help: Who are your main users? Be specific about roles, needs, contexts
+  # Example: ["small_business_owners", "remote_team_leads", "freelance_project_managers"]
+  
+  secondary_users: ["[SECONDARY_USER_TYPE]"]
+  # Help: Who else uses or benefits from your product?
+  # Example: ["team_members", "clients_of_users", "integration_partners"]
+  
+  key_stakeholders: ["[INTERNAL_STAKEHOLDERS]"]
+  # Help: Internal stakeholders crucial to success
+  # Example: ["founding_team", "early_investors", "advisory_board"]
+  
+  external_influencers: ["[EXTERNAL_STAKEHOLDERS]"]
+  # Help: External parties that influence success
+  # Example: ["industry_influencers", "integration_partners", "regulatory_bodies"]
+
+# Success Criteria - How you'll measure overall project success
+success_criteria:
+  user_adoption: "[USER_ADOPTION_METRIC]"
+  # Help: How will you measure user adoption and engagement?
+  # Example: "1000+ monthly active users with 70%+ monthly retention"
+  
+  market_validation: "[MARKET_VALIDATION_METRIC]"
+  # Help: How will you prove market demand?
+  # Example: "10+ paying customers with $10k+ monthly recurring revenue"
+  
+  product_quality: "[QUALITY_METRIC]"
+  # Help: How will you measure product satisfaction?
+  # Example: "Net Promoter Score > 50, < 5% churn rate"
+  
+  business_viability: "[BUSINESS_METRIC]"
+  # Help: How will you measure business sustainability?
+  # Example: "Break-even on customer acquisition within 12 months"
+
+# Technical Context - Technology and architecture considerations
+technical_context:
+  technology_stack: ["[CURRENT_TECH_STACK]"]
+  # Help: What technologies are you using or planning to use?
+  # Example: ["react", "node.js", "postgresql", "aws"]
+  
+  architectural_principles: ["[ARCHITECTURE_PRINCIPLES]"]
+  # Help: What architectural principles guide your technical decisions?
+  # Example: ["microservices_ready", "cloud_native", "api_first", "mobile_responsive"]
+  
+  scalability_considerations: ["[SCALABILITY_FACTORS]"]
+  # Help: What scalability factors are important for your growth trajectory?
+  # Example: ["horizontal_scaling", "global_distribution", "multi_tenant_architecture"]
+  
+  technical_constraints: ["[CONSTRAINTS]"]
+  # Help: What technical limitations or requirements must you work within?
+  # Example: ["limited_engineering_resources", "compliance_requirements", "integration_requirements"]
+
+# Risk Assessment - Key risks and mitigation strategies
+risk_factors:
+  market_risks:
+    - risk: "[MARKET_RISK]"
+      # Example: "Competitor launches similar solution first"
+      mitigation: "[MITIGATION_STRATEGY]"
+      # Example: "Focus on unique differentiation and faster iteration cycles"
+  
+  technical_risks:
+    - risk: "[TECHNICAL_RISK]"
+      # Example: "Scaling challenges with current architecture"
+      mitigation: "[MITIGATION_STRATEGY]"
+      # Example: "Design for modularity and plan architecture evolution milestones"
+  
+  resource_risks:
+    - risk: "[RESOURCE_RISK]"
+      # Example: "Limited runway for extensive development"
+      mitigation: "[MITIGATION_STRATEGY]"
+      # Example: "Prioritize MVP features and seek additional funding or revenue"
+
+# Cross-References - Links to other CARL files
+cross_references:
+  roadmap_file: ".carl/project/roadmap.carl"
+  # Link to your project roadmap for implementation timeline
+  
+  decisions_file: ".carl/decisions.carl"
+  # Link to architectural and strategic decisions
+  
+  process_file: ".carl/project/process.carl"
+  # Link to your development process and methodology
+
+# Template Completion Guide
+completion_guide:
+  getting_started:
+    - "Replace all [PLACEHOLDER] text with your specific project details"
+    - "Focus on being specific rather than generic - avoid buzzwords"
+    - "Use measurable, observable criteria wherever possible"
+    - "Start with 3-5 strategic objectives - you can add more later"
+  
+  alignment_criteria_tips:
+    - "Market validation should be highest weight for early-stage startups"
+    - "User experience is critical for consumer-facing products"
+    - "Technical agility enables rapid iteration and pivoting"
+    - "Adjust weights based on your specific startup context and stage"
+  
+  validation_checklist:
+    - "All strategic objectives have measurable success metrics"
+    - "Alignment criteria weights sum to exactly 1.0"
+    - "Target market is specific enough to guide product decisions"
+    - "Success criteria are achievable within 6-12 months"
+    - "Risk assessment covers market, technical, and resource dimensions"
+
+# Template Notes
+template_notes: |
+  This template is optimized for early-stage startups focused on finding product-market fit.
+  
+  Key startup-specific considerations:
+  - Higher weight on market validation and user experience
+  - Emphasis on rapid iteration and pivot flexibility
+  - Resource efficiency is crucial given limited runway
+  - Success metrics focused on proving market demand
+  
+  Customize this template based on:
+  - Your specific industry and market context
+  - Current stage (pre-product, MVP, post-launch)
+  - Team size and capabilities
+  - Funding situation and runway
+  
+  Remember: This vision should evolve as you learn from users and market feedback.
+  Plan to review and update quarterly, especially in early stages.

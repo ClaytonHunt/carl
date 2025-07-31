@@ -11,11 +11,11 @@ Generate comprehensive project status dashboard by analyzing CARL (Context-Aware
 ## 1. Read CARL System Files
 Priority order for comprehensive status analysis, following master process definition:
 1. Read `.carl/system/master.process.carl` for authoritative status workflow reference
-2. Read `.carl/index.carl` for project overview and current state
+2. Read `.carl/project/vision.carl` for project overview and strategic context
 3. Read `.carl/sessions/active/*.session.carl` for current progress
 4. Read all `.state.carl` files for implementation status
 5. Read all `.context.carl` files for dependency health
-6. Read `.carl/roadmap.carl` and `.carl/mission.carl` for strategic context
+6. Read `.carl/project/roadmap.carl` and `.carl/project/vision.carl` for strategic context
 7. Follow `carl_status` workflow sequence from master process definition
 
 ## 2. Analyze Status Components

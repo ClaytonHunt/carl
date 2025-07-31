@@ -116,13 +116,22 @@ Use CARL templates to create comprehensive documentation:
 - Detect missing test coverage and documentation gaps
 - Flag security vulnerabilities and performance issues
 
+**Alignment Analysis:**
+- If `.carl/project/vision.carl` exists, validate all discovered features against strategic alignment criteria
+- Generate alignment scores for existing feature implementations
+- Identify features that may represent unplanned strategic pivots
+- Flag potential scope creep or misaligned development efforts
+- Recommend feature prioritization based on alignment scoring
+
 ## 6. Update CARL System
 After analysis completion:
 
-1. **Update `.carl/index.carl`**: Add discovered features, tech stack, and architectural patterns
+1. **Update `.carl/project/vision.carl`**: Add discovered features, tech stack, and architectural patterns
 2. **Create Session Record**: Generate analysis session in `.carl/sessions/` with discoveries and recommendations
-3. **Generate Strategic Files**: Create or update `.carl/mission.carl`, `.carl/roadmap.carl`, and `.carl/decisions.carl` using templates
-4. **Create Project Process Definition**: Generate `.carl/project/process.carl` defining project-specific development workflow:
+3. **Generate Strategic Files**: Create or update `.carl/project/vision.carl`, `.carl/project/roadmap.carl`, and `.carl/decisions.carl` using templates
+4. **Project Vision Discovery**: If no project vision exists, extract from existing docs OR initiate discovery session with key questions, then generate appropriate vision file
+5. **Alignment Validation**: If project vision exists, validate all discovered features against alignment criteria and generate alignment report
+6. **Create Project Process Definition**: Generate `.carl/project/process.carl` defining project-specific development workflow:
    - Development methodology (TDD, BDD, Agile, etc.)
    - Quality gates and standards
    - Testing requirements and coverage targets

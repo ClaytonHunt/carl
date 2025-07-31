@@ -117,8 +117,7 @@ Scans existing code and generates CARL files for perfect AI context.
 - `[name].intent.carl` files - Requirements and specifications
 - `[name].state.carl` files - Implementation progress tracking  
 - `[name].context.carl` files - System relationships and dependencies
-- `index.carl` - Master AI reference file
-- Strategic artifacts: `vision.carl`, `roadmap.carl`, `objectives.carl`
+- Strategic artifacts: `vision.carl`, `roadmap.carl` (in .carl/project/)
 - Process documentation: `process.carl`, `decisions.carl`
 - `.carl/sessions/` directory - Development session tracking
 
@@ -190,7 +189,7 @@ Manage the Jimmy Neutron character cast, configure personality responses, and cu
 ```
 Human Layer: Simple commands (/carl:plan, /carl:task, /carl:status, /carl:analyze, /carl:settings)
      ↓
-AI Layer: Structured CARL files (.intent.carl, .state.carl, .context.carl, index.carl)
+AI Layer: Structured CARL files (.intent.carl, .state.carl, .context.carl, vision.carl)
 ```
 
 **Benefits:**
@@ -232,7 +231,7 @@ AI Layer: Structured CARL files (.intent.carl, .state.carl, .context.carl, index
 - **Session End**: Save state, generate summaries, complete session tracking
 
 **Session Management:**
-- **Isolated Tracking**: Sessions tracked separately from index.carl to prevent pollution
+- **Isolated Tracking**: Sessions tracked separately from project context to prevent pollution
 - **Activity Logging**: Comprehensive logging of development activities
 - **State Preservation**: Session state maintained across interruptions
 - **Migration Support**: Automatic migration system for architecture updates
@@ -323,15 +322,17 @@ your-project/
 │   ├── config/            # CARL configuration
 │   ├── templates/         # CARL file templates
 │   ├── sessions/          # Session tracking data
-│   ├── active/            # Currently active work
-│   ├── completed/         # Completed work artifacts
-│   ├── index.carl         # Master AI reference file
-│   ├── vision.carl        # Product vision and goals
-│   ├── roadmap.carl       # Development roadmap
-│   ├── objectives.carl    # Current objectives
+│   ├── project/           # Project structure with epics, features, stories
+│   │   ├── vision.carl  # Strategic project vision
+│   │   ├── roadmap.carl         # Development roadmap  
+│   │   ├── epics/               # Epic-level requirements
+│   │   ├── features/            # Feature-level requirements
+│   │   ├── stories/             # User story requirements
+│   │   └── technical/           # Technical initiatives
+│   ├── active.work.carl   # Currently active work
 │   ├── process.carl       # Team processes
 │   ├── decisions.carl     # Strategic decisions
-│   └── [name].[type].carl # Project-specific CARL files
+│   └── [name].[type].carl # Legacy CARL files
 └── [your project files]
 ```
 
@@ -562,8 +563,8 @@ carl_test_category start
 
 **Context not injecting:**
 ```bash
-# Verify CARL index file
-cat .carl/index.carl
+# Verify CARL project structure
+ls -la .carl/project/
 
 # Test context loading
 source .carl/scripts/carl-helpers.sh

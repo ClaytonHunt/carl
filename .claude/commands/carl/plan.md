@@ -6,26 +6,36 @@ argument-hint: [requirement description] | --from-intent [file] | --details [fil
 
 # CARL Interactive Planning
 
-Streamlined requirements gathering and expert analysis for CARL project planning.
+🚨 **MANDATORY WORKFLOW ENFORCEMENT** 🚨
+
+## ⚠️ CRITICAL RULES - NEVER DEVIATE
+
+**MANDATORY**: For new requirements - ASK QUESTIONS ONE AT A TIME before any analysis
+**MANDATORY**: Wait for user response to each question before proceeding
+**MANDATORY**: NO analysis until ALL questions answered and context compiled
 
 ## Planning Modes
 
-**New Requirement Planning**: Ask context questions → Pass to requirements analyst
+**New Requirement Planning**: Ask context questions ONE AT A TIME → Pass to requirements analyst
 **Existing Intent Operations**: 
 - `--from-intent [name]` → Breakdown or modify existing intent
 - `--details [name]` → Explain intent with work planned/completed
 
-## Workflow Execution
+## 🔒 ENFORCED WORKFLOW EXECUTION
 
-**For New Requirements:**
-1. **Initialize Planning Session**: `carl_initialize_planning_session(user_input)` - Detect scope level and load project context for informed questioning
-2. **Sequential Question Gathering**: Execute question workflow one at a time, waiting for responses:
-   - `carl_ask_business_value_question_and_wait()`
-   - `carl_ask_stakeholders_question_informed_by_previous_answers()`
-   - `carl_ask_constraints_question_informed_by_context()`
-   - `carl_ask_success_criteria_question_with_full_context()`
-   - `carl_ask_dependencies_question_with_complete_picture()`
-3. **Complete Context Analysis**: `carl_compile_all_answers_with_initial_input()` → Validate requirements completeness → Task: carl-requirements-analyst with COMPLETE context only
+**For New Requirements - MANDATORY SEQUENCE:**
+1. **MANDATORY**: Ask ONE question, wait for response
+2. **MANDATORY**: Ask next question based on previous answer, wait for response  
+3. **MANDATORY**: Continue one-at-a-time until context complete
+4. **MANDATORY**: Only after ALL answers collected → invoke analyst
+
+**MANDATORY Questions (ask ONE at a time):**
+- Question 1: "What specific outcome or capability should this deliver?"
+- Question 2: "Who are the primary users/stakeholders?" 
+- Question 3: "What constraints or requirements must we consider?"
+- Question 4: "How will we know this is successful?"
+
+**MANDATORY**: After ALL questions answered → Task: carl-requirements-analyst with COMPLETE context
 
 **For Existing Intents:**
 ```

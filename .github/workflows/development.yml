@@ -82,8 +82,8 @@ jobs:
             echo "✅ carl-settings.json is valid JSON"
           fi
           
-          if [ -f ".carl/index.carl" ]; then
-            echo "✅ CARL index file exists"
+          if [ -f ".carl/project/vision.carl" ]; then
+            echo "✅ CARL vision file exists"
           fi
 
       - name: Check for version consistency
@@ -96,10 +96,10 @@ jobs:
             echo "Settings version: $SETTINGS_VERSION"
           fi
           
-          # Extract version from index.carl if it exists  
-          if [ -f ".carl/index.carl" ]; then
-            INDEX_VERSION=$(grep '^project_version:' .carl/index.carl | cut -d'"' -f2)
-            echo "Index version: $INDEX_VERSION"
+          # Extract version from vision.carl if it exists  
+          if [ -f ".carl/project/vision.carl" ]; then
+            VISION_VERSION=$(grep '^version:' .carl/project/vision.carl | cut -d'"' -f2)
+            echo "Vision version: $VISION_VERSION"
           fi
           
           echo "✅ Version check completed"

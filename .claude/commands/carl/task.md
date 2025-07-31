@@ -29,8 +29,9 @@ Streamlined task execution with intelligent work management and comprehensive CA
 
 **For Direct Tasks:**
 1. **Load CARL Context**: Search related intent/state/context files for task requirements
-2. **Deploy Specialists**: Launch appropriate analysts based on task requirements
-3. **Execute with Context**: Apply TDD, follow patterns, respect constraints, update progress
+2. **Alignment Validation**: Validate task alignment against project vision (if available)
+3. **Deploy Specialists**: Launch appropriate analysts based on task requirements
+4. **Execute with Context**: Apply TDD, follow patterns, respect constraints, update progress
 
 **For Flag Operations:**
 ```

@@ -49,12 +49,12 @@ else
 fi
 
 PROJECT_TYPE=$(detect_project_type "$PROJECT_DIR")
-CARL_INDEX="$PROJECT_DIR/.carl/index.carl"
+CARL_VISION="$PROJECT_DIR/.carl/project/vision.carl"
 
-if [ -f "$CARL_INDEX" ]; then
-    update_carl_index "$PROJECT_TYPE" "$CARL_INDEX"
-    echo "Detected project type: $PROJECT_TYPE"
+if [ -f "$CARL_VISION" ]; then
+    # Note: Project type detection now integrated into vision.carl format
+    echo "Detected project type: $PROJECT_TYPE (modern CARL structure)"
 else
-    echo "CARL index not found at $CARL_INDEX"
+    echo "CARL vision file not found at $CARL_VISION"
     exit 1
 fi

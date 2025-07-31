@@ -1,0 +1,271 @@
+# Enterprise Project Vision Template
+# Template for enterprise projects emphasizing compliance, scalability, and integration
+# Template Type: enterprise_project
+# Strategic Focus: scalability, compliance, integration, governance
+
+template_metadata:
+  template_type: "enterprise_project"
+  template_version: "1.0.0"
+  strategic_focus: ["scalability", "compliance", "integration", "governance"]
+  project_characteristics: ["large_organization", "regulatory_requirements", "complex_stakeholders", "established_systems"]
+  recommended_for: ["internal_systems", "customer_platforms", "compliance_initiatives", "digital_transformation"]
+
+# Project Identity - Define your enterprise project's core identity
+project_identity:
+  name: "[YOUR_PROJECT_NAME]"
+  # Help: Choose a name that reflects business value and organizational alignment
+  # Example: "CustomerHub360" for a CRM system, "ComplianceCenter" for regulatory platform
+  
+  mission: "[DEFINE_YOUR_MISSION]"
+  # Help: Describe how this project serves organizational goals and stakeholder needs
+  # Example: "Enable seamless customer relationship management across all business units while ensuring regulatory compliance"
+  # Focus on: Business alignment, stakeholder value, operational excellence
+  
+  business_value_proposition: "[YOUR_BUSINESS_VALUE]"
+  # Help: Quantifiable business benefits this project will deliver
+  # Example: "Reduce customer service response time by 40% while improving compliance reporting accuracy to 99.5%"
+  # Include: Efficiency gains, cost savings, revenue impact, risk reduction
+  
+  organizational_scope: "[DEFINE_SCOPE]"
+  # Help: Which parts of the organization will this project impact?
+  # Example: "Customer service, sales, and compliance teams across North American operations"
+  # Be specific: Departments, regions, user counts, system integrations
+
+# Strategic Objectives - Your key business objectives (prioritize 3-7 objectives)
+strategic_objectives:
+  - id: "operational_efficiency"
+    description: "[IMPROVE_OPERATIONAL_EFFICIENCY]"
+    # Help: How will this project improve business operations and productivity?
+    # Example: "Streamline customer onboarding process to reduce time-to-value by 50%"
+    priority: 1
+    success_metrics: ["[EFFICIENCY_METRIC]"]
+    # Example: ["50% reduction in onboarding time", "30% increase in team productivity", "90% process automation"]
+  
+  - id: "compliance_governance"
+    description: "[ENSURE_COMPLIANCE_GOVERNANCE]"
+    # Help: How will this project address regulatory and governance requirements?
+    # Example: "Maintain 100% compliance with GDPR, SOX, and industry regulations"
+    priority: 2
+    success_metrics: ["[COMPLIANCE_METRIC]"]
+    # Example: ["100% audit trail coverage", "Zero compliance violations", "99.9% data accuracy"]
+  
+  - id: "scalability_performance"
+    description: "[ACHIEVE_SCALABILITY_PERFORMANCE]"
+    # Help: How will this project support organizational growth and performance needs?
+    # Example: "Support 10x user growth while maintaining sub-second response times"
+    priority: 3
+    success_metrics: ["[SCALABILITY_METRIC]"]
+    # Example: ["Handle 100,000+ concurrent users", "99.99% uptime SLA", "Sub-200ms API response time"]
+  
+  - id: "integration_interoperability"
+    description: "[ENABLE_INTEGRATION_INTEROPERABILITY]"
+    # Help: How will this project integrate with existing enterprise systems?
+    # Example: "Seamlessly integrate with existing ERP, CRM, and identity management systems"
+    priority: 4
+    success_metrics: ["[INTEGRATION_METRIC]"]
+    # Example: ["100% data synchronization accuracy", "Real-time integration with 5+ core systems"]
+
+# Alignment Criteria - Weighted criteria for evaluating feature alignment (must sum to 1.0)
+alignment_criteria:
+  business_value:
+    weight: 0.25
+    # Enterprise Priority: Does this deliver measurable business impact and ROI?
+    measurement_rules:
+      - "Features that directly support key business processes and objectives"
+      - "Capabilities that provide quantifiable efficiency gains or cost savings"
+      - "Functionality that enables new business capabilities or revenue streams"
+    
+  compliance_governance:
+    weight: 0.25
+    # Enterprise Priority: Does this meet regulatory and governance requirements?
+    measurement_rules:
+      - "Features that ensure data privacy, security, and regulatory compliance"
+      - "Capabilities that provide audit trails and governance controls"
+      - "Functionality that supports risk management and compliance reporting"
+    
+  scalability_architecture:
+    weight: 0.20
+    # Enterprise Priority: Does this support enterprise-scale requirements?
+    measurement_rules:
+      - "Features designed for high availability and performance at scale"
+      - "Capabilities that integrate well with enterprise architecture patterns"
+      - "Functionality that supports multi-tenant, multi-region deployment"
+    
+  integration_compatibility:
+    weight: 0.15
+    # Enterprise Priority: Does this integrate well with existing enterprise systems?
+    measurement_rules:
+      - "Features that leverage existing enterprise APIs and data sources"
+      - "Capabilities that follow enterprise integration and security standards"
+      - "Functionality that supports single sign-on and identity management"
+    
+  operational_excellence:
+    weight: 0.15
+    # Enterprise Priority: Does this support operational excellence and maintainability?
+    measurement_rules:
+      - "Features that include comprehensive monitoring and observability"
+      - "Capabilities that support automated deployment and operations"
+      - "Functionality that provides clear operational metrics and health indicators"
+
+# Stakeholders - Key people and groups in enterprise context
+stakeholders:
+  primary_users: ["[PRIMARY_BUSINESS_USERS]"]
+  # Help: Who are the main business users of this system?
+  # Example: ["customer_service_representatives", "sales_managers", "compliance_officers"]
+  
+  secondary_users: ["[SECONDARY_USERS]"]
+  # Help: Who else will interact with or benefit from this system?
+  # Example: ["executives", "auditors", "business_analysts", "customers"]
+  
+  business_stakeholders: ["[BUSINESS_STAKEHOLDERS]"]
+  # Help: Key business stakeholders who influence requirements and success
+  # Example: ["department_heads", "process_owners", "business_sponsors", "executive_committee"]
+  
+  technical_stakeholders: ["[TECHNICAL_STAKEHOLDERS]"]
+  # Help: Technical stakeholders responsible for implementation and operations
+  # Example: ["enterprise_architects", "security_team", "infrastructure_team", "development_team"]
+  
+  external_stakeholders: ["[EXTERNAL_STAKEHOLDERS]"]
+  # Help: External parties that influence or are impacted by this project
+  # Example: ["regulatory_bodies", "auditors", "vendors", "customers", "partners"]
+
+# Success Criteria - How you'll measure enterprise project success
+success_criteria:
+  business_impact: "[BUSINESS_IMPACT_METRIC]"
+  # Help: How will you measure business value and impact?
+  # Example: "$2M annual cost savings through process automation and efficiency gains"
+  
+  user_adoption: "[USER_ADOPTION_METRIC]"
+  # Help: How will you measure user adoption and satisfaction?
+  # Example: "95% user adoption across all business units within 6 months"
+  
+  system_performance: "[PERFORMANCE_METRIC]"
+  # Help: How will you measure system performance and reliability?
+  # Example: "99.99% uptime SLA with sub-second response times for 95% of requests"
+  
+  compliance_achievement: "[COMPLIANCE_METRIC]"
+  # Help: How will you measure compliance and governance success?
+  # Example: "100% compliance with all regulatory requirements and zero audit findings"
+
+# Technical Context - Enterprise technology and architecture considerations
+technical_context:
+  enterprise_architecture: ["[ARCHITECTURE_PATTERNS]"]
+  # Help: What enterprise architecture patterns and principles guide this project?
+  # Example: ["microservices", "event_driven", "api_first", "cloud_native"]
+  
+  technology_stack: ["[ENTERPRISE_TECH_STACK]"]
+  # Help: What enterprise technologies and platforms will you use?
+  # Example: ["java_spring", "kubernetes", "postgresql", "kafka", "redis"]
+  
+  integration_requirements: ["[INTEGRATION_SYSTEMS]"]
+  # Help: What existing enterprise systems must this project integrate with?
+  # Example: ["salesforce_crm", "sap_erp", "active_directory", "oracle_database"]
+  
+  security_requirements: ["[SECURITY_REQUIREMENTS]"]
+  # Help: What security and compliance requirements must be met?
+  # Example: ["sso_integration", "role_based_access", "data_encryption", "audit_logging"]
+  
+  operational_requirements: ["[OPERATIONAL_REQUIREMENTS]"]
+  # Help: What operational and monitoring requirements are needed?
+  # Example: ["24x7_monitoring", "automated_deployment", "disaster_recovery", "capacity_planning"]
+
+# Risk Assessment - Enterprise-specific risks and mitigation strategies
+risk_factors:
+  business_risks:
+    - risk: "[BUSINESS_RISK]"
+      # Example: "Delayed implementation impacts critical business processes"
+      mitigation: "[MITIGATION_STRATEGY]"
+      # Example: "Phased rollout with fallback procedures and comprehensive testing"
+  
+  technical_risks:
+    - risk: "[TECHNICAL_RISK]"
+      # Example: "Integration complexity with legacy systems causes delays"
+      mitigation: "[MITIGATION_STRATEGY]"
+      # Example: "Early POC development and dedicated integration testing environment"
+  
+  compliance_risks:
+    - risk: "[COMPLIANCE_RISK]"
+      # Example: "System fails to meet regulatory audit requirements"
+      mitigation: "[MITIGATION_STRATEGY]"
+      # Example: "Regular compliance reviews and automated compliance testing"
+  
+  operational_risks:
+    - risk: "[OPERATIONAL_RISK]"
+      # Example: "Insufficient operational procedures for production support"
+      mitigation: "[MITIGATION_STRATEGY]"
+      # Example: "Comprehensive runbooks and 24x7 support team training"
+
+# Governance - Enterprise governance and oversight
+governance_framework:
+  steering_committee: ["[STEERING_COMMITTEE_MEMBERS]"]
+  # Help: Who provides strategic oversight and decision-making authority?
+  # Example: ["cto", "coo", "business_unit_heads", "enterprise_architect"]
+  
+  project_governance: ["[GOVERNANCE_PROCESSES]"]
+  # Help: What governance processes and checkpoints will be used?
+  # Example: ["monthly_steering_committee", "quarterly_architecture_review", "compliance_checkpoints"]
+  
+  change_management: ["[CHANGE_MANAGEMENT_APPROACH]"]
+  # Help: How will organizational change be managed?
+  # Example: ["user_training_program", "change_champions", "communication_plan", "feedback_loops"]
+
+# Cross-References - Links to other enterprise CARL files
+cross_references:
+  roadmap_file: ".carl/project/roadmap.carl"
+  # Link to detailed project roadmap and milestones
+  
+  decisions_file: ".carl/decisions.carl"
+  # Link to architectural and business decisions
+  
+  process_file: ".carl/project/process.carl"
+  # Link to enterprise development and governance processes
+  
+  architecture_file: ".carl/project/architecture.carl"
+  # Link to enterprise architecture documentation
+
+# Template Completion Guide
+completion_guide:
+  getting_started:
+    - "Replace all [PLACEHOLDER] text with specific enterprise project details"
+    - "Focus on measurable business outcomes and quantifiable benefits"
+    - "Ensure alignment with enterprise architecture and governance standards"
+    - "Include specific compliance and regulatory requirements"
+  
+  alignment_criteria_tips:
+    - "Business value and compliance typically have highest weights in enterprise context"
+    - "Scalability is crucial for enterprise-scale deployment"
+    - "Integration compatibility is essential for enterprise ecosystem"
+    - "Adjust weights based on your specific enterprise priorities and constraints"
+  
+  stakeholder_considerations:
+    - "Include both business and technical stakeholders"
+    - "Consider external stakeholders like auditors and regulatory bodies"
+    - "Account for change management and user adoption challenges"
+    - "Plan for ongoing governance and oversight requirements"
+  
+  validation_checklist:
+    - "All strategic objectives support broader enterprise goals"
+    - "Success criteria are measurable and aligned with business KPIs"
+    - "Compliance requirements are clearly defined and testable"
+    - "Integration requirements cover all necessary enterprise systems"
+    - "Governance framework includes appropriate oversight and decision-making"
+
+# Template Notes
+template_notes: |
+  This template is optimized for enterprise projects with complex stakeholder needs,
+  regulatory requirements, and integration challenges.
+  
+  Key enterprise-specific considerations:
+  - Higher emphasis on compliance, governance, and risk management
+  - Scalability and integration are critical success factors
+  - Multiple stakeholder groups with different perspectives and requirements
+  - Long-term operational excellence and maintainability
+  
+  Customize this template based on:
+  - Your specific industry and regulatory environment
+  - Enterprise architecture standards and technology stack
+  - Organizational maturity and change management capabilities
+  - Project scope and complexity level
+  
+  Remember: Enterprise projects require ongoing governance and stakeholder alignment.
+  Plan for regular reviews and updates as requirements and priorities evolve.

@@ -41,7 +41,7 @@ This document captures all key design decisions made during the development of C
 **Architecture**:
 ```
 Human Layer: Simple commands (/plan, /task, /status, /analyze, /settings)
-AI Layer: Structured CARL files (.intent, .state, .context, index.carl)
+AI Layer: Structured CARL files (.intent, .state, .context, vision.carl)
 ```
 
 **Impact**: 
@@ -66,7 +66,7 @@ AI Layer: Structured CARL files (.intent, .state, .context, index.carl)
 - Allows independent updates without conflicts
 
 **Additional Files**:
-- `index.carl` - Master AI reference for quick context loading
+- `vision.carl` - Strategic project vision for AI context
 - Session files - Work continuity tracking
 - Templates - Consistent file generation
 

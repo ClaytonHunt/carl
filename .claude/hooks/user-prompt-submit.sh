@@ -23,7 +23,7 @@ if [ "$(carl_get_setting 'context_injection' 2>/dev/null)" = "false" ]; then
 fi
 
 # Check if CARL is initialized
-if [ ! -f "$CARL_ROOT/.carl/index.carl" ]; then
+if [ ! -d "$CARL_ROOT/.carl/project" ]; then
     echo "$PROMPT"
     exit 0
 fi
@@ -37,11 +37,29 @@ if echo "$PROMPT" | grep -qE "/carl:|/task|/plan|/status|/analyze|implement|buil
     CARL_CONTEXT=$(carl_get_active_context)
     # Add strategic context for planning and analysis
     STRATEGIC_CONTEXT=$(carl_get_strategic_context "$PROMPT")
+    
+    # Add alignment validation context for feature-related commands
+    if echo "$PROMPT" | grep -qiE "feature|plan|task|implement|create.*feature"; then
+        ALIGNMENT_CONTEXT=$(carl_get_alignment_validation_context "$PROMPT")
+        if [ -n "$ALIGNMENT_CONTEXT" ]; then
+            STRATEGIC_CONTEXT="$STRATEGIC_CONTEXT
+
+$ALIGNMENT_CONTEXT"
+        fi
+    fi
 elif echo "$PROMPT" | grep -qiE "feature|user story|requirement|bug|issue|component|service|api|database"; then
     # Inject context for feature/technical discussions
     CARL_CONTEXT=$(carl_get_targeted_context "$PROMPT")
     # Add strategic context for feature-related discussions
     STRATEGIC_CONTEXT=$(carl_get_strategic_context "$PROMPT")
+    
+    # Add alignment validation for feature discussions
+    ALIGNMENT_CONTEXT=$(carl_get_alignment_validation_context "$PROMPT")
+    if [ -n "$ALIGNMENT_CONTEXT" ]; then
+        STRATEGIC_CONTEXT="$STRATEGIC_CONTEXT
+
+$ALIGNMENT_CONTEXT"
+    fi
 fi
 
 # Initialize session tracking if not already active

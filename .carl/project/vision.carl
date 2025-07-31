@@ -1,0 +1,118 @@
+metadata:
+  id: "carl_project_vision"
+  version: "1.0.0"
+  created_date: "2025-07-30T18:15:00-04:00"
+  last_updated: "2025-07-30T18:15:00-04:00"
+
+project_identity:
+  name: "CARL - Context-Aware Requirements Language"
+  description: "AI-Optimized Planning System that bridges human cognitive simplicity with AI context precision for Claude Code users"
+  core_value_proposition: "Only tool designed specifically for AI context optimization rather than human consumption"
+
+strategic_objectives:
+  - objective_id: "ai_context_optimization"
+    description: "Become the standard AI context system for all AI-assisted development workflows"
+    priority: 10
+    success_metrics:
+      - "95% AI context injection accuracy"
+      - "Sub-100ms context processing time"
+      - "100% compatibility with Claude Code workflows"
+    timeline: "2025 Q3-Q4"
+  
+  - objective_id: "developer_adoption" 
+    description: "Achieve widespread adoption among software developers using AI assistants"
+    priority: 9
+    success_metrics:
+      - "1000+ active installations"
+      - "90% user satisfaction rating"
+      - "Community-driven template contributions"
+    timeline: "2025 Q4 - 2026 Q1"
+  
+  - objective_id: "platform_integration"
+    description: "Seamless integration with major development platforms and tools"
+    priority: 8
+    success_metrics:
+      - "Native Claude Code integration complete"
+      - "Cross-platform compatibility (macOS/Linux/Windows)"
+      - "Hook system operational across all platforms"
+    timeline: "2025 Q3"
+
+alignment_criteria:
+  business_value:
+    weight: 0.3
+    measurement_rules:
+      - "Directly improves AI context accuracy and developer productivity"
+      - "Reduces cognitive load on developers using AI assistants"
+      - "Creates competitive advantage through AI optimization focus"
+      - "Generates measurable time savings in development workflows"
+  
+  strategic_coherence:
+    weight: 0.25
+    measurement_rules:
+      - "Aligns with dual-layer architecture principles"
+      - "Supports human simplicity with AI precision mission"
+      - "Advances position as only AI-context-optimized tool"
+      - "Strengthens Claude Code ecosystem integration"
+  
+  technical_architecture:
+    weight: 0.2
+    measurement_rules:
+      - "Compatible with existing bash implementation"
+      - "Maintains cross-platform compatibility"
+      - "Preserves sub-100ms performance targets"
+      - "Integrates with hook system and session management"
+  
+  resource_constraints:
+    weight: 0.15
+    measurement_rules:
+      - "Can be implemented by solo maintainer"
+      - "Requires minimal external dependencies"
+      - "Leverages existing CARL infrastructure"
+      - "Fits within community contribution model"
+  
+  risk_factors:
+    weight: 0.1
+    measurement_rules:
+      - "Does not compromise system security"
+      - "Maintains backward compatibility"
+      - "No breaking changes to existing workflows"
+      - "Manageable complexity for maintenance"
+
+stakeholders:
+  primary_users:
+    - name: "Software developers using Claude Code"
+      value_proposition: "Enhanced AI assistance through optimized context"
+    - name: "AI assistants (Claude, etc.)"
+      value_proposition: "Structured, precise context for better assistance"
+    - name: "Development teams using AI workflows"
+      value_proposition: "Systematic project context management"
+  
+  secondary_users:
+    - name: "Project managers using AI tools"
+      value_proposition: "Strategic alignment validation and governance"
+    - name: "Technical architects"
+      value_proposition: "Structured requirements and decision tracking"
+
+constraints:
+  technical:
+    - "Must maintain bash implementation for maximum compatibility"
+    - "Sub-100ms context injection performance requirement"
+    - "Cross-platform compatibility (macOS, Linux, Windows)"
+    - "Integration with existing Claude Code hook system"
+    - "YAML-based file format for AI parsing optimization"
+  
+  business:
+    - "Solo maintainer development model"
+    - "Community-driven contribution approach"
+    - "Open source project constraints"
+    - "No external funding dependencies"
+  
+  regulatory:
+    - "No data privacy concerns (local file processing only)"
+    - "No compliance requirements beyond standard open source"
+
+cross_references:
+  roadmap_file: ".carl/project/roadmap.carl"
+  architecture_files:
+    - ".carl/specs/system.process.format.carl"
+    - ".carl/specs/project.structure.format.carl"

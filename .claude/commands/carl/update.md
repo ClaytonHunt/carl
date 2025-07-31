@@ -46,7 +46,7 @@ Parse command arguments to determine:
 - Validate directory exists
 - Detect CARL installation by checking for:
   - `.carl/config/carl-settings.json` (primary)
-  - `.carl/index.carl` (secondary)
+  - `.carl/project/vision.carl` (secondary)
   - `.claude/settings.json` with CARL hooks (tertiary)
 
 ### 3. Version Management

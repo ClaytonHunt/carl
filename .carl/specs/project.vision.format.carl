@@ -1,9 +1,9 @@
 # CARL Project Vision Format Specification
 # Version: 1.0
-# Purpose: Define the structure for project vision alignment files (.carl/project/project.vision.carl)
+# Purpose: Define the structure for project vision alignment files (.carl/project/vision.carl)
 
 file_extension: ".carl"
-file_path: ".carl/project/project.vision.carl"
+file_path: ".carl/project/vision.carl"
 encoding: "UTF-8"
 format: "YAML"
 

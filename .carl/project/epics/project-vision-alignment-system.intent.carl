@@ -52,7 +52,7 @@ epic_breakdown:
   features: 
     - id: "project_vision_file_format"
       priority: "P0"
-      description: "Define and implement project.vision.carl file format with comprehensive alignment criteria"
+      description: "Define and implement vision.carl file format with comprehensive alignment criteria"
     - id: "alignment_validation_engine" 
       priority: "P0"
       description: "Core validation engine that scores feature alignment against project vision"

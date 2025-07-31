@@ -133,11 +133,11 @@ carl_get_active_context() {
         context+="$(cat "$carl_root/.carl/system/master.process.carl")\n\n"
     fi
     
-    # Add CARL index for quick AI reference
-    if [ -f "$carl_root/.carl/index.carl" ]; then
-        context+="## CARL Project Index\n"
-        context+="$(cat "$carl_root/.carl/index.carl")\n\n"
+    # Add project vision for strategic AI context
+    if [ -f "$carl_root/.carl/project/vision.carl" ]; then
+        context+="$(carl_get_vision_context)\n"
     fi
+    
     
     # CRITICAL: Add file structure rules to prevent AI deviations
     context+="## CRITICAL: CARL File Location Rules\n"
@@ -286,10 +286,10 @@ carl_get_strategic_context() {
     if echo "$prompt" | grep -qE "/carl:plan|/carl:analyze|major|strategic|roadmap|vision|decision"; then
         # DEEP CONTEXT - for planning and analysis commands
         context+="## Vision Context\n"
-        context+="$(carl_extract_vision_essence "$carl_root/.carl/vision.carl")\n\n"
+        context+="$(carl_get_vision_context)\n\n"
         
         context+="## Current Roadmap Phase\n" 
-        context+="$(carl_extract_roadmap_current_context "$carl_root/.carl/roadmap.carl")\n\n"
+        context+="$(carl_extract_roadmap_current_context "$carl_root/.carl/project/roadmap.carl")\n\n"
         
         context+="## Recent Strategic Decisions\n"
         context+="$(carl_extract_recent_strategic_decisions "$carl_root/.carl/decisions.carl" 5)\n\n"
@@ -297,18 +297,695 @@ carl_get_strategic_context() {
     elif echo "$prompt" | grep -qE "feature|requirement|priority|epic|story"; then
         # MEDIUM CONTEXT - for feature work
         context+="## Current Focus\n"
-        context+="$(carl_extract_roadmap_current_context "$carl_root/.carl/roadmap.carl")\n\n"
+        context+="$(carl_extract_roadmap_current_context "$carl_root/.carl/project/roadmap.carl")\n\n"
         
         context+="## Vision Goals\n"
-        context+="$(grep -A 3 'success_criteria:' "$carl_root/.carl/vision.carl" 2>/dev/null)\n\n"
+        context+="$(grep -A 3 'success_criteria:' "$carl_root/.carl/project/vision.carl" 2>/dev/null)\n\n"
         
     else
         # LIGHT CONTEXT - for general development
         context+="## Current Priority\n"
-        context+="$(grep -A 5 'current_focus:' "$carl_root/.carl/roadmap.carl" 2>/dev/null)\n\n"
+        context+="$(grep -A 5 'current_focus:' "$carl_root/.carl/project/roadmap.carl" 2>/dev/null)\n\n"
     fi
     
     echo -e "$context"
+}
+
+carl_get_alignment_validation_context() {
+    local prompt="$1"
+    local carl_root="$(carl_get_root)"
+    local context=""
+    
+    # Check if project has vision file
+    local vision_file="$carl_root/.carl/project/vision.carl"
+    if [ ! -f "$vision_file" ]; then
+        return 0
+    fi
+    
+    # Detect planning-related context and provide alignment validation instructions
+    if echo "$prompt" | grep -qiE "/carl:plan|feature|implement|create|build|add|new.*functionality"; then
+        context+="## Strategic Alignment Validation\n"
+        context+="Project has a defined strategic vision. During planning:\n\n"
+        
+        # Extract project mission/purpose for alignment checking
+        context+="### Project Purpose (from vision):\n"
+        context+="$(python3 -c "
+import yaml, sys
+try:
+    with open('$vision_file', 'r') as f:
+        data = yaml.safe_load(f)
+    if 'project_identity' in data:
+        mission = data['project_identity'].get('mission', '')
+        if mission:
+            print(f'Mission: {mission}')
+        value_prop = data['project_identity'].get('value_proposition', '')
+        if value_prop:
+            print(f'Value Proposition: {value_prop}')
+    print()
+    print('IMPORTANT: Validate that planned features align with this project purpose.')
+    print('If a feature seems unrelated, ask user to confirm this is intentional.')
+except Exception as e:
+    print('Project vision available - validate feature alignment during planning.')
+" 2>/dev/null || echo "Project vision available - validate feature alignment during planning.")\n\n"
+        
+        # Add validation instructions
+        context+="### Validation Instructions:\n"
+        context+="- Check if requested features align with project mission\n"
+        context+="- Question features that seem unrelated (e.g., 'garden shed design' for finance app)\n"
+        context+="- Ask for confirmation if misalignment detected\n"
+        context+="- Allow user to proceed after explicit confirmation\n\n"
+    fi
+    
+    echo -e "$context"
+}
+
+# Feedback and Guidance System Functions
+carl_generate_alignment_recommendations() {
+    local feature_description="$1"
+    local alignment_scores="$2"  # JSON string with score breakdown
+    local user_role="${3:-developer}"
+    local carl_root="$(carl_get_root)"
+    
+    # Parse alignment scores and generate recommendations
+    python3 -c "
+import json, yaml, sys
+from pathlib import Path
+
+def generate_recommendations(feature_desc, scores_json, role):
+    try:
+        scores = json.loads(scores_json) if scores_json else {}
+        
+        recommendations = {
+            'actionable_steps': [],
+            'strategic_insights': [],
+            'role_specific_guidance': [],
+            'improvement_priority': 'medium'
+        }
+        
+        # Role-specific guidance generation
+        if role == 'developer':
+            recommendations['role_specific_guidance'].extend([
+                'Focus on technical architecture alignment and implementation quality',
+                'Consider how feature integrates with existing system components',
+                'Ensure proper testing and documentation for strategic features'
+            ])
+        elif role == 'product_owner':
+            recommendations['role_specific_guidance'].extend([
+                'Evaluate business value alignment with strategic objectives',
+                'Consider stakeholder impact and user experience implications',
+                'Assess feature priority relative to roadmap commitments'
+            ])
+        elif role == 'strategic_decision_maker':
+            recommendations['role_specific_guidance'].extend([
+                'Review strategic coherence with long-term vision',
+                'Evaluate resource allocation impact and opportunity cost',
+                'Consider market positioning and competitive implications'
+            ])
+        
+        # Generate actionable recommendations based on scores
+        if 'business_value' in scores and scores['business_value'] < 70:
+            recommendations['actionable_steps'].append(
+                'Strengthen business value proposition by clearly defining user benefits and measurable outcomes'
+            )
+        
+        if 'strategic_coherence' in scores and scores['strategic_coherence'] < 70:
+            recommendations['actionable_steps'].append(
+                'Improve strategic alignment by connecting feature to specific strategic objectives'
+            )
+        
+        if 'technical_architecture' in scores and scores['technical_architecture'] < 70:
+            recommendations['actionable_steps'].append(
+                'Enhance technical integration by ensuring compatibility with existing architecture'
+            )
+        
+        if 'resource_constraints' in scores and scores['resource_constraints'] < 70:
+            recommendations['actionable_steps'].append(
+                'Optimize resource requirements by reducing scope or identifying efficiency opportunities'
+            )
+        
+        if 'risk_factors' in scores and scores['risk_factors'] < 70:
+            recommendations['actionable_steps'].append(
+                'Mitigate identified risks through contingency planning and risk reduction strategies'
+            )
+        
+        # Strategic insights
+        total_score = sum(scores.values()) / len(scores) if scores else 50
+        if total_score >= 80:
+            recommendations['improvement_priority'] = 'low'
+            recommendations['strategic_insights'].append('Feature shows strong strategic alignment - proceed with confidence')
+        elif total_score >= 60:
+            recommendations['improvement_priority'] = 'medium'
+            recommendations['strategic_insights'].append('Feature has good foundation - address specific alignment gaps')
+        else:
+            recommendations['improvement_priority'] = 'high'
+            recommendations['strategic_insights'].append('Feature needs significant alignment improvement before implementation')
+        
+        return recommendations
+        
+    except Exception as e:
+        return {'error': f'Recommendation generation failed: {str(e)}'}
+
+# Main execution
+feature_desc = '''$feature_description'''
+scores_json = '''$alignment_scores'''
+role = '''$user_role'''
+
+result = generate_recommendations(feature_desc, scores_json, role)
+print(json.dumps(result, indent=2))
+" 2>/dev/null || echo '{"error": "Python recommendation engine unavailable"}'
+}
+
+carl_format_guidance_output() {
+    local recommendations_json="$1"
+    local format="${2:-detailed}"
+    
+    python3 -c "
+import json, sys
+
+def format_guidance(recommendations_json, format_type):
+    try:
+        data = json.loads(recommendations_json)
+        
+        if 'error' in data:
+            return f'Guidance generation error: {data[\"error\"]}'
+        
+        output = []
+        
+        if format_type == 'summary':
+            output.append('## Alignment Guidance Summary')
+            output.append(f'Priority: {data.get(\"improvement_priority\", \"medium\").upper()}')
+            if data.get('strategic_insights'):
+                output.append(f'Key Insight: {data[\"strategic_insights\"][0]}')
+        
+        elif format_type == 'detailed':
+            output.append('## Strategic Alignment Recommendations')
+            output.append('')
+            
+            if data.get('strategic_insights'):
+                output.append('### Strategic Assessment:')
+                for insight in data['strategic_insights']:
+                    output.append(f'- {insight}')
+                output.append('')
+            
+            if data.get('actionable_steps'):
+                output.append('### Actionable Improvements:')
+                for i, step in enumerate(data['actionable_steps'], 1):
+                    output.append(f'{i}. {step}')
+                output.append('')
+            
+            if data.get('role_specific_guidance'):
+                output.append('### Role-Specific Guidance:')
+                for guidance in data['role_specific_guidance']:
+                    output.append(f'- {guidance}')
+                output.append('')
+        
+        elif format_type == 'executive':
+            output.append('## Executive Alignment Summary')
+            output.append(f'**Priority:** {data.get(\"improvement_priority\", \"medium\").upper()}')
+            if data.get('strategic_insights'):
+                output.append(f'**Assessment:** {data[\"strategic_insights\"][0]}')
+            action_count = len(data.get('actionable_steps', []))
+            if action_count > 0:
+                output.append(f'**Actions Required:** {action_count} strategic improvements identified')
+        
+        return '\\n'.join(output)
+        
+    except Exception as e:
+        return f'Format error: {str(e)}'
+
+# Main execution
+recommendations_json = '''$recommendations_json'''
+format_type = '''$format'''
+
+result = format_guidance(recommendations_json, format_type)
+print(result)
+" 2>/dev/null || echo "Guidance formatting unavailable"
+}
+
+carl_analyze_strategic_gaps() {
+    local carl_root="$(carl_get_root)"
+    local context_file="$1"  # Optional specific context file
+    
+    python3 -c "
+import os, yaml, json, glob
+from pathlib import Path
+
+def analyze_gaps(carl_root, context_file=None):
+    try:
+        gaps = {
+            'systematic_issues': [],
+            'improvement_pathways': [],
+            'trend_analysis': {},
+            'recommendations': []
+        }
+        
+        # Load project vision for gap analysis
+        vision_file = Path(carl_root) / '.carl' / 'project' / 'vision.carl'
+        if not vision_file.exists():
+            return {'error': 'Project vision file not found for gap analysis'}
+        
+        with open(vision_file, 'r') as f:
+            vision_data = yaml.safe_load(f)
+        
+        # Analyze pattern across feature files
+        feature_files = glob.glob(f'{carl_root}/.carl/project/features/*.intent.carl')
+        alignment_patterns = {}
+        
+        for feature_file in feature_files:
+            try:
+                with open(feature_file, 'r') as f:
+                    # Simple pattern analysis - could be enhanced
+                    content = f.read()
+                    if 'business_value' in content:
+                        alignment_patterns.setdefault('has_business_value', 0)
+                        alignment_patterns['has_business_value'] += 1
+                    if 'strategic_coherence' in content:
+                        alignment_patterns.setdefault('has_strategic_coherence', 0) 
+                        alignment_patterns['has_strategic_coherence'] += 1
+            except Exception:
+                continue
+        
+        # Generate gap insights
+        total_features = len(feature_files)
+        if total_features > 0:
+            if alignment_patterns.get('has_business_value', 0) / total_features < 0.8:
+                gaps['systematic_issues'].append('Many features lack clear business value definition')
+                gaps['improvement_pathways'].append('Implement business value assessment templates')
+            
+            if alignment_patterns.get('has_strategic_coherence', 0) / total_features < 0.8:
+                gaps['systematic_issues'].append('Strategic coherence documentation is inconsistent')
+                gaps['improvement_pathways'].append('Develop strategic coherence validation checklist')
+        
+        # Generate recommendations
+        if gaps['systematic_issues']:
+            gaps['recommendations'].append('Focus on systematic alignment process improvements')
+            gaps['recommendations'].append('Consider strategic planning workshop for alignment clarity')
+        
+        gaps['trend_analysis'] = {
+            'total_features_analyzed': total_features,
+            'alignment_coverage': f'{len(alignment_patterns) * 10}%'  # Simplified metric
+        }
+        
+        return gaps
+        
+    except Exception as e:
+        return {'error': f'Gap analysis failed: {str(e)}'}
+
+# Main execution
+carl_root = '''$carl_root'''
+context_file = '''$context_file''' if '''$context_file''' else None
+
+result = analyze_gaps(carl_root, context_file)
+print(json.dumps(result, indent=2))
+" 2>/dev/null || echo '{"error": "Strategic gap analysis unavailable"}'
+}
+
+carl_get_guidance_for_context() {
+    local context="$1"
+    local user_role="${2:-developer}"
+    local guidance_type="${3:-actionable}"
+    
+    # Generate contextual guidance based on current situation
+    case "$guidance_type" in
+        "pivot_detected")
+            echo "## Strategic Pivot Detected
+            
+This change appears to represent a strategic direction shift rather than feature misalignment.
+
+### Recommended Actions:
+1. **Stakeholder Review**: Schedule strategic review with key stakeholders
+2. **Vision Update**: Consider updating project vision to reflect new direction  
+3. **Impact Assessment**: Evaluate implications for existing roadmap and features
+4. **Communication**: Ensure team alignment on strategic direction change
+
+### Questions to Consider:
+- Does this pivot align with market conditions or user feedback?
+- What existing features might need reevaluation under new direction?
+- How does this affect resource allocation and timeline commitments?"
+            ;;
+        "alignment_low")
+            echo "## Low Alignment Detected
+
+This feature shows weak strategic alignment across multiple dimensions.
+
+### Immediate Actions:
+1. **Requirements Review**: Clarify feature purpose and business justification
+2. **Stakeholder Input**: Gather additional context from business stakeholders
+3. **Scope Refinement**: Consider reducing scope to improve alignment
+4. **Alternative Approaches**: Explore different implementation strategies
+
+### Focus Areas:
+- Strengthen connection to strategic objectives
+- Clarify measurable business value
+- Ensure technical architecture compatibility"
+            ;;
+        "actionable"|*)
+            echo "## Strategic Alignment Guidance
+
+Use alignment validation results to improve feature strategic value.
+
+### General Best Practices:
+1. **Business Value**: Connect every feature to measurable user or business outcomes
+2. **Strategic Coherence**: Ensure features advance core strategic objectives
+3. **Technical Integration**: Design for compatibility with existing architecture
+4. **Resource Optimization**: Balance feature scope with available resources
+5. **Risk Management**: Identify and mitigate potential implementation risks"
+            ;;
+    esac
+}
+
+# Vision Discovery and Template System Functions
+carl_discover_or_create_project_vision() {
+    local carl_root="$(carl_get_root)"
+    local vision_file="$carl_root/.carl/project/vision.carl"
+    
+    # Check if vision already exists
+    if [ -f "$vision_file" ]; then
+        echo "Project vision already exists at: $vision_file"
+        return 0
+    fi
+    
+    echo "## Project Vision Discovery"
+    echo
+    echo "No project vision found. Let me help you create one through discovery..."
+    echo
+    
+    # Try to extract vision from existing documentation
+    local readme_files=$(find "$carl_root" -maxdepth 2 -name "README*" -o -name "readme*" 2>/dev/null)
+    local package_files=$(find "$carl_root" -maxdepth 2 -name "package.json" -o -name "Cargo.toml" -o -name "pom.xml" 2>/dev/null)
+    
+    if [ -n "$readme_files" ] || [ -n "$package_files" ]; then
+        echo "**Found existing project documentation. Analyzing...**"
+        echo
+        
+        # Extract basic project info
+        local project_name=""
+        local project_description=""
+        
+        # Try to get project name and description from package files
+        if [ -n "$package_files" ]; then
+            for file in $package_files; do
+                if [[ "$file" == *"package.json" ]]; then
+                    project_name=$(grep '"name"' "$file" 2>/dev/null | sed 's/.*"name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/')
+                    project_description=$(grep '"description"' "$file" 2>/dev/null | sed 's/.*"description"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/')
+                    break
+                fi
+            done
+        fi
+        
+        # If we found some info, use it as a starting point
+        if [ -n "$project_name" ] || [ -n "$project_description" ]; then
+            echo "**Extracted Project Information:**"
+            [ -n "$project_name" ] && echo "- Name: $project_name"
+            [ -n "$project_description" ] && echo "- Description: $project_description"
+            echo
+        fi
+    fi
+    
+    # Start discovery session
+    echo "**Starting Vision Discovery Session**"
+    echo
+    echo "I'll ask you a few questions to understand your project's purpose and goals."
+    echo "This will help create a strategic vision for alignment validation."
+    echo
+    
+    # Ask key discovery questions
+    carl_ask_vision_discovery_questions
+}
+
+carl_ask_vision_discovery_questions() {
+    echo "## Vision Discovery Questions"
+    echo
+    echo "Please help me understand your project by answering these questions:"
+    echo
+    echo "### 1. Project Purpose"
+    echo "**What problem does your project solve?** (Be specific about the user problem)"
+    echo
+    echo "### 2. Target Users"
+    echo "**Who are your primary users?** (Be specific about user types, not just 'developers' or 'users')"
+    echo
+    echo "### 3. Value Proposition"
+    echo "**What makes your solution unique or valuable?** (How is it different from alternatives?)"
+    echo
+    echo "### 4. Project Type"
+    echo "**What type of project is this?**"
+    echo "- Startup/MVP (market validation focus)"
+    echo "- Enterprise application (compliance, integration focus)"
+    echo "- Open source tool (community, adoption focus)"
+    echo "- Internal tool (efficiency, productivity focus)"
+    echo "- Other (please specify)"
+    echo
+    echo "### 5. Success Metrics"
+    echo "**How will you measure success?** (What does 'done' or 'successful' look like?)"
+    echo
+    echo "---"
+    echo
+    echo "**Next Steps:**"
+    echo "After you provide these answers, I'll:"
+    echo "1. Generate a project vision file based on your responses"
+    echo "2. Choose an appropriate template for your project type"
+    echo "3. Enable strategic alignment validation for future feature planning"
+    echo
+    echo "**To continue:** Please answer the questions above, then ask me to create the vision based on your responses."
+}
+
+# Vision Template System Functions
+carl_list_available_vision_templates() {
+    local carl_root="$(carl_get_root)"
+    local templates_dir="$carl_root/.carl/templates/vision"
+    
+    if [ ! -d "$templates_dir" ]; then
+        echo "No vision templates found"
+        return 1
+    fi
+    
+    echo "## Available Vision Templates"
+    echo
+    
+    for template_file in "$templates_dir"/*.vision.template.carl; do
+        if [ -f "$template_file" ]; then
+            local template_name=$(basename "$template_file" .vision.template.carl)
+            local template_type=$(grep "template_type:" "$template_file" | head -1 | sed 's/.*template_type: *"\([^"]*\)".*/\1/')
+            local strategic_focus=$(grep "strategic_focus:" "$template_file" | head -1 | sed 's/.*strategic_focus: *\[\([^\]]*\)\].*/\1/' | sed 's/"//g')
+            local recommended_for=$(grep "recommended_for:" "$template_file" | head -1 | sed 's/.*recommended_for: *\[\([^\]]*\)\].*/\1/' | sed 's/"//g')
+            
+            echo "### $template_name"
+            echo "**Type**: $template_type"
+            echo "**Focus**: $strategic_focus"
+            echo "**Recommended for**: $recommended_for"
+            echo
+        fi
+    done
+}
+
+carl_recommend_vision_template() {
+    local project_size="${1:-unknown}"
+    local project_domain="${2:-unknown}"
+    local strategic_context="${3:-unknown}"
+    local stakeholder_complexity="${4:-unknown}"
+    
+    echo "## Vision Template Recommendation"
+    echo
+    echo "Based on your project characteristics:"
+    echo "- **Project Size**: $project_size"
+    echo "- **Project Domain**: $project_domain"
+    echo "- **Strategic Context**: $strategic_context"
+    echo "- **Stakeholder Complexity**: $stakeholder_complexity"
+    echo
+    
+    # Simple recommendation logic
+    if [[ "$strategic_context" == "startup" || "$project_size" == "individual" || "$project_size" == "small_team" ]]; then
+        echo "**Recommended Template**: startup-project"
+        echo "**Rationale**: Early-stage projects benefit from focus on market validation and rapid iteration"
+        echo
+        echo "**Alternative**: open-source-project (if building community-focused tool)"
+        
+    elif [[ "$project_domain" == "enterprise" || "$stakeholder_complexity" == "multi_stakeholder" || "$strategic_context" == "maturity" ]]; then
+        echo "**Recommended Template**: enterprise-project"
+        echo "**Rationale**: Complex organizational contexts require emphasis on compliance and integration"
+        echo
+        echo "**Alternative**: startup-project (if internal innovation project)"
+        
+    elif [[ "$project_domain" == "developer" || "$project_domain" == "platform" ]]; then
+        echo "**Recommended Template**: open-source-project"
+        echo "**Rationale**: Developer-focused projects benefit from community adoption strategies"
+        echo
+        echo "**Alternative**: enterprise-project (if internal developer platform)"
+        
+    else
+        echo "**Recommended Template**: startup-project"
+        echo "**Rationale**: General-purpose template suitable for most projects"
+        echo
+        echo "**Alternatives**:"
+        echo "- enterprise-project (for complex organizational requirements)"
+        echo "- open-source-project (for community-driven development)"
+    fi
+    
+    echo
+    echo "**Next Steps**:"
+    echo "1. Review recommended template: \`carl_preview_vision_template [template_name]\`"
+    echo "2. Create project vision: \`carl_create_vision_from_template [template_name]\`"
+    echo "3. Complete template with project-specific details"
+}
+
+carl_preview_vision_template() {
+    local template_name="$1"
+    local carl_root="$(carl_get_root)"
+    local template_file="$carl_root/.carl/templates/vision/${template_name}.vision.template.carl"
+    
+    if [ ! -f "$template_file" ]; then
+        echo "Template not found: $template_name"
+        return 1
+    fi
+    
+    echo "## Vision Template Preview: $template_name"
+    echo
+    
+    # Extract template metadata
+    local template_type=$(grep "template_type:" "$template_file" | head -1 | sed 's/.*template_type: *"\([^"]*\)".*/\1/')
+    local strategic_focus=$(grep "strategic_focus:" "$template_file" | head -1 | sed 's/.*strategic_focus: *\[\([^\]]*\)\].*/\1/' | sed 's/"//g')
+    local project_characteristics=$(grep "project_characteristics:" "$template_file" | head -1 | sed 's/.*project_characteristics: *\[\([^\]]*\)\].*/\1/' | sed 's/"//g')
+    
+    echo "**Template Type**: $template_type"
+    echo "**Strategic Focus**: $strategic_focus"
+    echo "**Project Characteristics**: $project_characteristics"
+    echo
+    
+    # Show template structure
+    echo "**Template Structure**:"
+    grep "^# \|^[a-z_]*:" "$template_file" | grep -v "^#.*Help:" | head -20
+    echo "... (see full template for complete structure)"
+    echo
+    
+    # Show completion guide
+    echo "**Completion Guide**:"
+    sed -n '/completion_guide:/,/template_notes:/p' "$template_file" | grep -A 10 "getting_started:" | head -10
+    echo
+    
+    echo "**To use this template**: \`carl_create_vision_from_template $template_name\`"
+}
+
+carl_create_vision_from_template() {
+    local template_name="$1"
+    local carl_root="$(carl_get_root)"
+    local template_file="$carl_root/.carl/templates/vision/${template_name}.vision.template.carl"
+    local target_file="$carl_root/.carl/project/vision.carl"
+    
+    if [ ! -f "$template_file" ]; then
+        echo "Template not found: $template_name"
+        echo "Available templates:"
+        carl_list_available_vision_templates
+        return 1
+    fi
+    
+    if [ -f "$target_file" ]; then
+        echo "Project vision file already exists: $target_file"
+        echo "Would you like to backup the existing file and create a new one? (y/N)"
+        read -r response
+        if [[ "$response" =~ ^[Yy]$ ]]; then
+            mv "$target_file" "$target_file.backup.$(date +%Y%m%d_%H%M%S)"
+            echo "Existing vision file backed up"
+        else
+            echo "Operation cancelled"
+            return 1
+        fi
+    fi
+    
+    # Copy template to project vision file
+    cp "$template_file" "$target_file"
+    
+    echo "## Vision Template Created Successfully"
+    echo
+    echo "**Template**: $template_name"
+    echo "**Location**: $target_file"
+    echo
+    echo "**Next Steps**:"
+    echo "1. **Edit the vision file**: Replace all [PLACEHOLDER] text with your project details"
+    echo "2. **Validate completeness**: Run \`carl_validate_vision_template\` to check for missing fields"
+    echo "3. **Test alignment**: Run \`carl_validate_feature_alignment \"test feature\" \` to test the alignment system"
+    echo
+    echo "**Important**: Focus on being specific rather than generic - avoid buzzwords and use measurable criteria"
+    
+    # Show immediate next actions
+    echo
+    echo "**Template Completion Checklist**:"
+    echo "- [ ] Replace project identity placeholders with specific details"
+    echo "- [ ] Define 3-5 strategic objectives with measurable success metrics"
+    echo "- [ ] Customize alignment criteria weights for your project context"
+    echo "- [ ] Specify target stakeholders and users"
+    echo "- [ ] Set realistic and measurable success criteria"
+    echo "- [ ] Complete risk assessment for your specific context"
+}
+
+carl_validate_vision_template() {
+    local carl_root="$(carl_get_root)"
+    local vision_file="$carl_root/.carl/project/vision.carl"
+    
+    if [ ! -f "$vision_file" ]; then
+        echo "No project vision file found at: $vision_file"
+        echo "Create one using: carl_create_vision_from_template [template_name]"
+        return 1
+    fi
+    
+    echo "## Vision Template Validation"
+    echo
+    
+    local validation_errors=0
+    local validation_warnings=0
+    
+    # Check for placeholder text
+    local placeholders=$(grep -n "\[.*\]" "$vision_file" | head -10)
+    if [ -n "$placeholders" ]; then
+        echo "**❌ Incomplete Fields Found**:"
+        echo "$placeholders"
+        echo
+        validation_errors=$((validation_errors + 1))
+    else
+        echo "**✅ All placeholder fields completed**"
+        echo
+    fi
+    
+    # Validate alignment criteria weights
+    local weight_validation=$(carl_validate_project_vision 2>/dev/null | grep -i "weight")
+    if echo "$weight_validation" | grep -q "must sum to 1.0"; then
+        echo "**❌ Alignment Criteria Weights Issue**:"
+        echo "$weight_validation"
+        echo
+        validation_errors=$((validation_errors + 1))
+    else
+        echo "**✅ Alignment criteria weights are valid**"
+        echo
+    fi
+    
+    # Check for required sections
+    local required_sections=("project_identity" "strategic_objectives" "alignment_criteria" "stakeholders" "success_criteria")
+    for section in "${required_sections[@]}"; do
+        if grep -q "^$section:" "$vision_file"; then
+            echo "**✅ Required section present**: $section"
+        else
+            echo "**❌ Missing required section**: $section"
+            validation_errors=$((validation_errors + 1))
+        fi
+    done
+    echo
+    
+    # Summary
+    if [ $validation_errors -eq 0 ]; then
+        echo "**🎉 Vision Template Validation Passed**"
+        echo "Your project vision is ready for use with the alignment system!"
+        echo
+        echo "**Test the alignment system**: \`carl_validate_feature_alignment \"sample feature description\"\`"
+    else
+        echo "**⚠️ Vision Template Validation Failed**"
+        echo "Found $validation_errors error(s) that need to be addressed."
+        echo
+        echo "**Next Steps**:"
+        echo "1. Address the validation errors listed above"
+        echo "2. Run validation again: \`carl_validate_vision_template\`"
+        echo "3. Once validation passes, test alignment: \`carl_validate_feature_alignment \"test feature\"\`"
+    fi
+    
+    return $validation_errors
 }
 
 # State management functions
@@ -539,20 +1216,16 @@ carl_generate_next_session_recommendations() {
     echo "• Use /analyze --sync to refresh CARL context if needed"
 }
 
-# Index management - DEPRECATED: Session data now handled separately
-# This function is kept for backward compatibility but no longer modifies index.carl
-carl_update_index_with_session_data() {
+# Session management - Modern session tracking via carl-session-manager.sh
+carl_update_session_data() {
     local carl_root="$(carl_get_root)"
     local session_manager="$carl_root/.carl/scripts/carl-session-manager.sh"
     
-    # Use new session manager instead of polluting index.carl
+    # Use session manager for proper session tracking
     if [ -f "$session_manager" ]; then
         source "$session_manager"
         carl_update_session_metrics
     fi
-    
-    # Legacy behavior disabled to prevent index.carl pollution
-    # Index.carl should only contain project structure and requirements
 }
 
 # Update session activity tracking
@@ -691,4 +1364,734 @@ carl_enforce_path_consistency() {
     fi
     
     return 0
+}
+
+# Project Vision File Processing Functions
+# AI-optimized vision file loading and alignment validation
+
+carl_load_project_vision() {
+    local carl_root="$(carl_get_root)"
+    local vision_file="$carl_root/.carl/project/vision.carl"
+    local cached_vision="/tmp/carl_vision_cache_$(basename "$carl_root")_$(stat -c %Y "$vision_file" 2>/dev/null || echo 0).json"
+    
+    # Return cached version if available and current
+    if [ -f "$cached_vision" ] && [ -f "$vision_file" ]; then
+        if [ "$cached_vision" -nt "$vision_file" ]; then
+            cat "$cached_vision"
+            return 0
+        fi
+    fi
+    
+    # Load and parse vision file if it exists
+    if [ ! -f "$vision_file" ]; then
+        echo "{\"error\": \"vision.carl not found\", \"path\": \"$vision_file\"}"
+        return 1
+    fi
+    
+    # Parse YAML to JSON for AI processing
+    if command -v python3 >/dev/null 2>&1; then
+        python3 -c "
+import yaml, json, sys
+try:
+    with open('$vision_file', 'r') as f:
+        data = yaml.safe_load(f)
+    json_output = json.dumps(data, indent=2)
+    print(json_output)
+    # Cache the result
+    with open('$cached_vision', 'w') as f:
+        f.write(json_output)
+except Exception as e:
+    print(json.dumps({'error': str(e), 'file': '$vision_file'}))
+    sys.exit(1)
+" 2>/dev/null
+    else
+        echo "{\"error\": \"Python3 required for YAML parsing\", \"file\": \"$vision_file\"}"
+        return 1
+    fi
+}
+
+carl_validate_project_vision() {
+    local vision_file="$1"
+    local carl_root="$(carl_get_root)"
+    
+    if [ -z "$vision_file" ]; then
+        vision_file="$carl_root/.carl/project/vision.carl"
+    fi
+    
+    if [ ! -f "$vision_file" ]; then
+        echo "{\"valid\": false, \"error\": \"Vision file not found\", \"path\": \"$vision_file\"}"
+        return 1
+    fi
+    
+    # Validate YAML structure and required fields
+    if command -v python3 >/dev/null 2>&1; then
+        python3 -c "
+import yaml, json, sys
+
+def validate_vision_file(file_path):
+    try:
+        with open(file_path, 'r') as f:
+            data = yaml.safe_load(f)
+    except Exception as e:
+        return {'valid': False, 'error': f'YAML parsing error: {str(e)}'}
+    
+    errors = []
+    warnings = []
+    
+    # Required sections validation
+    required_sections = ['metadata', 'project_identity', 'strategic_objectives', 'alignment_criteria', 'stakeholders', 'constraints']
+    for section in required_sections:
+        if section not in data:
+            errors.append(f'Missing required section: {section}')
+    
+    # Metadata validation
+    if 'metadata' in data:
+        required_metadata = ['id', 'version', 'created_date', 'last_updated']
+        for field in required_metadata:
+            if field not in data['metadata']:
+                errors.append(f'Missing required metadata field: {field}')
+    
+    # Project identity validation
+    if 'project_identity' in data:
+        required_identity = ['name', 'description', 'core_value_proposition']
+        for field in required_identity:
+            if field not in data['project_identity']:
+                errors.append(f'Missing required project_identity field: {field}')
+    
+    # Strategic objectives validation
+    if 'strategic_objectives' in data:
+        if not isinstance(data['strategic_objectives'], list) or len(data['strategic_objectives']) == 0:
+            errors.append('strategic_objectives must be a non-empty array')
+        else:
+            for i, obj in enumerate(data['strategic_objectives']):
+                required_obj_fields = ['objective_id', 'description', 'priority', 'success_metrics']
+                for field in required_obj_fields:
+                    if field not in obj:
+                        errors.append(f'strategic_objectives[{i}] missing required field: {field}')
+                
+                # Priority range validation
+                if 'priority' in obj and (not isinstance(obj['priority'], int) or obj['priority'] < 1 or obj['priority'] > 10):
+                    errors.append(f'strategic_objectives[{i}].priority must be integer 1-10')
+    
+    # Alignment criteria validation
+    if 'alignment_criteria' in data:
+        required_criteria = ['business_value', 'strategic_coherence', 'technical_architecture', 'resource_constraints', 'risk_factors']
+        total_weight = 0.0
+        
+        for criterion in required_criteria:
+            if criterion not in data['alignment_criteria']:
+                errors.append(f'Missing required alignment criterion: {criterion}')
+            else:
+                criterion_data = data['alignment_criteria'][criterion]
+                if 'weight' not in criterion_data:
+                    errors.append(f'alignment_criteria.{criterion} missing weight field')
+                else:
+                    weight = criterion_data['weight']
+                    if not isinstance(weight, (int, float)) or weight < 0.0 or weight > 1.0:
+                        errors.append(f'alignment_criteria.{criterion}.weight must be float 0.0-1.0')
+                    else:
+                        total_weight += weight
+                
+                if 'measurement_rules' not in criterion_data:
+                    errors.append(f'alignment_criteria.{criterion} missing measurement_rules field')
+                elif not isinstance(criterion_data['measurement_rules'], list) or len(criterion_data['measurement_rules']) == 0:
+                    errors.append(f'alignment_criteria.{criterion}.measurement_rules must be non-empty array')
+        
+        # Weight sum validation
+        if abs(total_weight - 1.0) > 0.01:
+            errors.append(f'Alignment criteria weights must sum to 1.0 (current sum: {total_weight:.3f})')
+    
+    # Stakeholders validation
+    if 'stakeholders' in data:
+        if 'primary_users' not in data['stakeholders']:
+            errors.append('stakeholders.primary_users is required')
+        elif not isinstance(data['stakeholders']['primary_users'], list) or len(data['stakeholders']['primary_users']) == 0:
+            errors.append('stakeholders.primary_users must be non-empty array')
+    
+    # Cross-reference validation
+    if 'cross_references' in data:
+        cross_refs = data['cross_references']
+        for ref_type, ref_path in cross_refs.items():
+            if ref_path and not ref_path.startswith('.carl/'):
+                warnings.append(f'cross_references.{ref_type} should reference CARL files (.carl/ path)')
+    
+    return {
+        'valid': len(errors) == 0,
+        'errors': errors,
+        'warnings': warnings,
+        'sections_found': list(data.keys()) if 'data' in locals() else []
+    }
+
+result = validate_vision_file('$vision_file')
+print(json.dumps(result, indent=2))
+" 2>/dev/null
+    else
+        echo "{\"valid\": false, \"error\": \"Python3 required for vision validation\"}"
+        return 1
+    fi
+}
+
+carl_validate_feature_alignment() {
+    local feature_description="$1"
+    local context_data="$2"
+    local carl_root="$(carl_get_root)"
+    local vision_file="$carl_root/.carl/project/vision.carl"
+    
+    if [ -z "$feature_description" ]; then
+        echo "{\"error\": \"Feature description required for alignment validation\"}"
+        return 1
+    fi
+    
+    # Load project vision
+    local vision_data=$(carl_load_project_vision)
+    if [ $? -ne 0 ]; then
+        echo "{\"error\": \"Could not load project vision for alignment validation\"}"
+        return 1
+    fi
+    
+    # AI-optimized alignment scoring
+    if command -v python3 >/dev/null 2>&1; then
+        python3 -c "
+import json, re, sys
+from datetime import datetime
+
+def calculate_alignment_score(feature_desc, vision_data):
+    try:
+        vision = json.loads('''$vision_data''')
+    except:
+        return {'error': 'Invalid vision data format'}
+    
+    if 'alignment_criteria' not in vision:
+        return {'error': 'No alignment criteria found in vision file'}
+    
+    criteria = vision['alignment_criteria']
+    feature_lower = '''$feature_description'''.lower()
+    
+    # AI-optimized keyword analysis for each dimension
+    dimension_scores = {}
+    
+    # Business Value Analysis
+    business_keywords = ['revenue', 'cost', 'user', 'customer', 'satisfaction', 'value', 'profit', 'roi', 'market', 'competitive']
+    business_score = sum(1 for kw in business_keywords if kw in feature_lower) / len(business_keywords)
+    dimension_scores['business_value'] = min(business_score * 2, 1.0)  # Scale to 0-1
+    
+    # Strategic Coherence Analysis
+    strategic_keywords = ['vision', 'mission', 'goal', 'strategy', 'objective', 'roadmap', 'direction', 'purpose']
+    strategic_score = sum(1 for kw in strategic_keywords if kw in feature_lower) / len(strategic_keywords)
+    dimension_scores['strategic_coherence'] = min(strategic_score * 2, 1.0)
+    
+    # Technical Architecture Analysis
+    technical_keywords = ['architecture', 'system', 'integration', 'scalable', 'performance', 'security', 'api', 'database']
+    technical_score = sum(1 for kw in technical_keywords if kw in feature_lower) / len(technical_keywords)
+    dimension_scores['technical_architecture'] = min(technical_score * 2, 1.0)
+    
+    # Resource Constraints Analysis
+    resource_keywords = ['time', 'budget', 'team', 'resource', 'capacity', 'timeline', 'effort', 'cost']
+    resource_score = sum(1 for kw in resource_keywords if kw in feature_lower) / len(resource_keywords)
+    dimension_scores['resource_constraints'] = min(resource_score * 2, 1.0)
+    
+    # Risk Factors Analysis
+    risk_keywords = ['risk', 'security', 'compliance', 'vulnerability', 'safe', 'audit', 'regulation']
+    risk_score = sum(1 for kw in risk_keywords if kw in feature_lower) / len(risk_keywords)
+    dimension_scores['risk_factors'] = min(risk_score * 2, 1.0)
+    
+    # Calculate weighted overall score
+    overall_score = 0.0
+    dimension_breakdown = {}
+    
+    for dimension, weight_data in criteria.items():
+        if dimension in dimension_scores:
+            weight = weight_data.get('weight', 0.2)  # Default equal weight
+            score = dimension_scores[dimension]
+            weighted_score = score * weight
+            overall_score += weighted_score
+            
+            dimension_breakdown[dimension] = {
+                'score': round(score, 3),
+                'weight': weight,
+                'weighted_score': round(weighted_score, 3),
+                'explanation': f'Keyword match analysis: {score:.1%} relevance'
+            }
+    
+    # AI recommendations based on score
+    recommendations = []
+    if overall_score < 0.3:
+        recommendations.append('Feature alignment is low - consider reviewing strategic fit')
+        recommendations.append('Clarify business value and strategic objectives')
+    elif overall_score < 0.7:
+        recommendations.append('Moderate alignment - consider strengthening strategic coherence')
+        recommendations.append('Review resource requirements and risk factors')
+    else:
+        recommendations.append('Strong alignment with project vision')
+        recommendations.append('Proceed with detailed planning and implementation')
+    
+    # Pivot detection
+    is_pivot = overall_score < 0.3 and any(score > 0.5 for score in dimension_scores.values())
+    
+    return {
+        'overall_alignment_score': round(overall_score, 3),
+        'dimension_breakdown': dimension_breakdown,
+        'ai_recommendations': recommendations,
+        'validation_metadata': {
+            'scoring_confidence': 0.8,  # AI keyword analysis confidence
+            'missing_context_flags': [],
+            'calibration_notes': 'Keyword-based scoring - requires human validation for complex features',
+            'is_potential_pivot': is_pivot,
+            'timestamp': datetime.now().isoformat()
+        }
+    }
+
+result = calculate_alignment_score('''$feature_description''', '''$vision_data''')
+print(json.dumps(result, indent=2))
+" 2>/dev/null
+    else
+        echo "{\"error\": \"Python3 required for alignment validation\"}"
+        return 1
+    fi
+}
+
+carl_validate_feature_alignment_with_guidance() {
+    local feature_description="$1"
+    local context_data="$2"
+    local user_role="${3:-developer}"
+    local guidance_format="${4:-detailed}"
+    
+    # Get basic alignment validation
+    local alignment_result=$(carl_validate_feature_alignment "$feature_description" "$context_data")
+    
+    if echo "$alignment_result" | grep -q '"error"'; then
+        echo "$alignment_result"
+        return 1
+    fi
+    
+    # Extract alignment scores for guidance generation
+    local alignment_scores=$(echo "$alignment_result" | python3 -c "
+import json, sys
+try:
+    data = json.load(sys.stdin)
+    scores = {}
+    if 'dimension_breakdown' in data:
+        for dim, details in data['dimension_breakdown'].items():
+            scores[dim] = details.get('score', 0) * 100  # Convert to 0-100 scale
+    print(json.dumps(scores))
+except:
+    print('{}')
+" 2>/dev/null)
+    
+    # Generate recommendations
+    local recommendations=$(carl_generate_alignment_recommendations "$feature_description" "$alignment_scores" "$user_role")
+    
+    # Format guidance output
+    local formatted_guidance=$(carl_format_guidance_output "$recommendations" "$guidance_format")
+    
+    # Combine alignment results with guidance
+    echo "$alignment_result" | python3 -c "
+import json, sys
+try:
+    data = json.load(sys.stdin)
+    guidance = '''$formatted_guidance'''
+    data['strategic_guidance'] = guidance
+    data['guidance_metadata'] = {
+        'user_role': '''$user_role''',
+        'format': '''$guidance_format''',
+        'generated_at': data.get('validation_metadata', {}).get('timestamp', '')
+    }
+    print(json.dumps(data, indent=2))
+except Exception as e:
+    print(json.dumps({'error': f'Guidance integration failed: {str(e)}'}))
+" 2>/dev/null || echo "$alignment_result"
+}
+
+carl_get_vision_context() {
+    local carl_root="$(carl_get_root)"
+    local vision_file="$carl_root/.carl/project/vision.carl"
+    
+    if [ ! -f "$vision_file" ]; then
+        return 0
+    fi
+    
+    # Extract core vision context for AI injection
+    local context=""
+    context+="## Project Vision Context\n"
+    
+    # Get project identity
+    local project_identity=$(grep -A 5 "project_identity:" "$vision_file" 2>/dev/null | grep -v "^--$")
+    if [ -n "$project_identity" ]; then
+        context+="### Project Identity\n"
+        context+="$project_identity\n\n"
+    fi
+    
+    # Get strategic objectives (first 3)
+    local objectives=$(grep -A 15 "strategic_objectives:" "$vision_file" 2>/dev/null | head -20)
+    if [ -n "$objectives" ]; then
+        context+="### Strategic Objectives\n"
+        context+="$objectives\n\n"
+    fi
+    
+    # Get alignment criteria weights
+    local criteria=$(grep -A 10 "alignment_criteria:" "$vision_file" 2>/dev/null | grep "weight:" | head -5)
+    if [ -n "$criteria" ]; then
+        context+="### Alignment Criteria Weights\n"
+        context+="$criteria\n\n"
+    fi
+    
+    echo -e "$context"
+}
+
+# Enhanced Alignment Validation Engine Functions
+# Comprehensive feature alignment validation with batch processing
+
+carl_validate_intent_alignment() {
+    local intent_file="$1"
+    local carl_root="$(carl_get_root)"
+    
+    if [ ! -f "$intent_file" ]; then
+        echo "{\"error\": \"Intent file not found\", \"path\": \"$intent_file\"}"
+        return 1
+    fi
+    
+    # Extract feature description from intent file
+    local feature_description=$(grep -A 5 "what:" "$intent_file" | grep -v "^--$" | tail -n +2 | tr '\n' ' ')
+    local feature_context=$(grep -A 10 "scope_definition:" "$intent_file" | head -15)
+    
+    # Validate using enhanced alignment function
+    carl_validate_feature_alignment "$feature_description" "$feature_context"
+}
+
+carl_batch_validate_features() {
+    local feature_list="$1"
+    local carl_root="$(carl_get_root)"
+    local batch_results="{"
+    local first_item=true
+    
+    if [ -z "$feature_list" ]; then
+        # Auto-discover intent files for batch validation
+        feature_list=$(find "$carl_root/.carl/project" -name "*.intent.carl" 2>/dev/null | head -10)
+    fi
+    
+    batch_results="\"batch_validation_results\": ["
+    
+    echo "$feature_list" | while IFS= read -r feature_path; do
+        if [ -f "$feature_path" ]; then
+            local feature_name=$(basename "$feature_path" .intent.carl)
+            local validation_result=$(carl_validate_intent_alignment "$feature_path")
+            
+            if [ "$first_item" = true ]; then
+                first_item=false
+            else
+                batch_results="$batch_results,"
+            fi
+            
+            batch_results="$batch_results{\"feature\": \"$feature_name\", \"path\": \"$feature_path\", \"validation\": $validation_result}"
+        fi
+    done
+    
+    batch_results="$batch_results], \"batch_metadata\": {\"timestamp\": \"$(date -Iseconds)\", \"total_features\": $(echo "$feature_list" | wc -l)}}"
+    echo "{$batch_results}"
+}
+
+carl_alignment_scoring_threshold_check() {
+    local alignment_score="$1"
+    local threshold_type="${2:-standard}"
+    
+    case "$threshold_type" in
+        "strict")
+            local threshold=0.8
+            ;;
+        "standard")
+            local threshold=0.7
+            ;;
+        "lenient")
+            local threshold=0.5
+            ;;
+        *)
+            local threshold=0.7
+            ;;
+    esac
+    
+    if command -v python3 >/dev/null 2>&1; then
+        python3 -c "
+import json
+score = float('$alignment_score')
+threshold = float('$threshold')
+passed = score >= threshold
+result = {
+    'score': score,
+    'threshold': threshold,
+    'threshold_type': '$threshold_type',
+    'passed': passed,
+    'recommendation': 'proceed' if passed else 'review_alignment',
+    'confidence_level': 'high' if score > 0.8 else 'medium' if score > 0.6 else 'low'
+}
+print(json.dumps(result, indent=2))
+"
+    else
+        echo "{\"error\": \"Python3 required for threshold evaluation\"}"
+        return 1
+    fi
+}
+
+carl_alignment_engine_performance_test() {
+    local test_feature="AI-optimized context system for strategic alignment validation with automated vision-based scoring and pivot detection"
+    local start_time=$(date +%s%N)
+    
+    # Run alignment validation
+    local result=$(carl_validate_feature_alignment "$test_feature")
+    
+    local end_time=$(date +%s%N)
+    local duration_ms=$(( (end_time - start_time) / 1000000 ))
+    
+    echo "{\"performance_test\": {\"duration_ms\": $duration_ms, \"target_ms\": 500, \"passed\": $([ $duration_ms -lt 500 ] && echo 'true' || echo 'false'), \"validation_result\": $result}}"
+}
+
+carl_get_alignment_engine_status() {
+    local carl_root="$(carl_get_root)"
+    local vision_file="$carl_root/.carl/project/vision.carl"
+    
+    # Check system readiness
+    local vision_available=$([ -f "$vision_file" ] && echo "true" || echo "false")
+    local python_available=$(command -v python3 >/dev/null 2>&1 && echo "true" || echo "false")
+    local yaml_available="false"
+    
+    if [ "$python_available" = "true" ]; then
+        yaml_available=$(python3 -c "import yaml; print('true')" 2>/dev/null || echo "false")
+    fi
+    
+    # Run performance test
+    local performance_result=$(carl_alignment_engine_performance_test 2>/dev/null)
+    
+    echo "{
+    \"alignment_engine_status\": {
+        \"vision_file_available\": $vision_available,
+        \"python3_available\": $python_available,
+        \"yaml_parsing_available\": $yaml_available,
+        \"system_ready\": $([ "$vision_available" = "true" ] && [ "$python_available" = "true" ] && [ "$yaml_available" = "true" ] && echo 'true' || echo 'false'),
+        \"performance_test\": $performance_result
+    }
+}"
+}
+
+# Pivot Detection System Functions
+# Intelligent system to distinguish strategic pivots from feature misalignment
+
+carl_detect_strategic_pivot() {
+    local feature_description="$1"
+    local context_data="$2"
+    local carl_root="$(carl_get_root)"
+    
+    # Get alignment validation first
+    local alignment_result=$(carl_validate_feature_alignment "$feature_description" "$context_data")
+    
+    if command -v python3 >/dev/null 2>&1; then
+        python3 -c "
+import json, re
+from datetime import datetime
+
+def analyze_pivot_indicators(feature_desc, alignment_data):
+    try:
+        alignment = json.loads('''$alignment_result''')
+    except:
+        return {'error': 'Invalid alignment data for pivot analysis'}
+    
+    if 'overall_alignment_score' not in alignment:
+        return {'error': 'Alignment score not found'}
+    
+    overall_score = alignment['overall_alignment_score']
+    dimension_breakdown = alignment.get('dimension_breakdown', {})
+    
+    # Pivot detection algorithm
+    pivot_indicators = {
+        'low_overall_alignment': overall_score < 0.3,
+        'high_strategic_coherence_despite_low_score': False,
+        'technical_architecture_mismatch': False,
+        'business_value_gap': False,
+        'resource_constraint_conflict': False
+    }
+    
+    # Analyze dimension patterns
+    if 'strategic_coherence' in dimension_breakdown:
+        strategic_score = dimension_breakdown['strategic_coherence']['score']
+        pivot_indicators['high_strategic_coherence_despite_low_score'] = strategic_score > 0.6 and overall_score < 0.4
+    
+    if 'technical_architecture' in dimension_breakdown:
+        tech_score = dimension_breakdown['technical_architecture']['score']
+        pivot_indicators['technical_architecture_mismatch'] = tech_score < 0.3
+    
+    if 'business_value' in dimension_breakdown:
+        business_score = dimension_breakdown['business_value']['score']
+        pivot_indicators['business_value_gap'] = business_score < 0.2
+    
+    # Pivot keywords analysis
+    feature_lower = '''$feature_description'''.lower()
+    pivot_keywords = ['pivot', 'direction', 'strategy', 'vision', 'transform', 'shift', 'change', 'new', 'different']
+    pivot_keyword_matches = sum(1 for kw in pivot_keywords if kw in feature_lower)
+    
+    # Calculate pivot probability
+    pivot_score = 0.0
+    
+    if pivot_indicators['low_overall_alignment']:
+        pivot_score += 0.3
+    
+    if pivot_indicators['high_strategic_coherence_despite_low_score']:
+        pivot_score += 0.4
+    
+    if pivot_keyword_matches > 0:
+        pivot_score += min(pivot_keyword_matches * 0.1, 0.3)
+    
+    # Technical architecture mismatch might indicate infrastructure pivot
+    if pivot_indicators['technical_architecture_mismatch']:
+        pivot_score += 0.2
+    
+    is_potential_pivot = pivot_score > 0.5
+    
+    # Generate pivot analysis
+    pivot_type = 'none'
+    if is_potential_pivot:
+        if pivot_indicators['high_strategic_coherence_despite_low_score']:
+            pivot_type = 'strategic_evolution'
+        elif pivot_indicators['technical_architecture_mismatch']:
+            pivot_type = 'technical_pivot'
+        elif pivot_indicators['business_value_gap']:
+            pivot_type = 'business_model_pivot'
+        else:
+            pivot_type = 'general_direction_change'
+    
+    recommendations = []
+    if is_potential_pivot:
+        recommendations.append('Potential strategic pivot detected - requires stakeholder review')
+        recommendations.append('Update project vision file if this represents intentional direction change')
+        recommendations.append('Consider broader impact on existing features and roadmap')
+    else:
+        recommendations.append('Feature appears misaligned rather than pivotal')
+        recommendations.append('Review alignment criteria and consider feature refinement')
+    
+    return {
+        'pivot_analysis': {
+            'is_potential_pivot': is_potential_pivot,
+            'pivot_probability': round(pivot_score, 3),
+            'pivot_type': pivot_type,
+            'pivot_indicators': pivot_indicators,
+            'pivot_keyword_matches': pivot_keyword_matches
+        },
+        'alignment_summary': {
+            'overall_score': overall_score,
+            'dimension_breakdown': dimension_breakdown
+        },
+        'recommendations': recommendations,
+        'metadata': {
+            'analysis_timestamp': datetime.now().isoformat(),
+            'detection_algorithm': 'keyword_and_pattern_analysis',
+            'confidence_level': 'medium'
+        }
+    }
+
+result = analyze_pivot_indicators('''$feature_description''', '''$alignment_result''')
+print(json.dumps(result, indent=2))
+"
+    else
+        echo "{\"error\": \"Python3 required for pivot detection analysis\"}"
+        return 1
+    fi
+}
+
+carl_analyze_project_pivot_trend() {
+    local carl_root="$(carl_get_root)"
+    local intent_files=$(find "$carl_root/.carl/project" -name "*.intent.carl" -type f 2>/dev/null | head -10)
+    
+    if [ -z "$intent_files" ]; then
+        echo "{\"error\": \"No intent files found for pivot trend analysis\"}"
+        return 1
+    fi
+    
+    local pivot_count=0
+    local total_features=0
+    local pivot_details="["
+    local first_item=true
+    
+    echo "$intent_files" | while IFS= read -r intent_file; do
+        if [ -f "$intent_file" ]; then
+            local feature_name=$(basename "$intent_file" .intent.carl)
+            local feature_description=$(grep -A 5 "what:" "$intent_file" | tail -n +2 | tr '\n' ' ')
+            
+            if [ -n "$feature_description" ]; then
+                local pivot_result=$(carl_detect_strategic_pivot "$feature_description")
+                local is_pivot=$(echo "$pivot_result" | python3 -c "import json, sys; data=json.load(sys.stdin); print(data.get('pivot_analysis', {}).get('is_potential_pivot', False))" 2>/dev/null)
+                
+                total_features=$((total_features + 1))
+                
+                if [ "$is_pivot" = "True" ]; then
+                    pivot_count=$((pivot_count + 1))
+                    
+                    if [ "$first_item" = true ]; then
+                        first_item=false
+                    else
+                        pivot_details="$pivot_details,"
+                    fi
+                    
+                    pivot_details="$pivot_details{\"feature\": \"$feature_name\", \"pivot_analysis\": $pivot_result}"
+                fi
+            fi
+        fi
+    done
+    
+    pivot_details="$pivot_details]"
+    
+    local pivot_percentage=0
+    if [ "$total_features" -gt 0 ]; then
+        pivot_percentage=$(( (pivot_count * 100) / total_features ))
+    fi
+    
+    echo "{
+    \"project_pivot_trend\": {
+        \"total_features_analyzed\": $total_features,
+        \"potential_pivots_detected\": $pivot_count,
+        \"pivot_percentage\": $pivot_percentage,
+        \"trend_assessment\": \"$([ $pivot_percentage -gt 30 ] && echo 'high_pivot_activity' || [ $pivot_percentage -gt 10 ] && echo 'moderate_pivot_activity' || echo 'stable_direction')\",
+        \"pivot_details\": $pivot_details,
+        \"analysis_timestamp\": \"$(date -Iseconds)\"
+    }
+}"
+}
+
+carl_pivot_threshold_evaluation() {
+    local pivot_probability="$1"
+    local context_importance="${2:-standard}"
+    
+    # Define thresholds based on context importance
+    case "$context_importance" in
+        "critical")
+            local pivot_threshold=0.3
+            ;;
+        "standard")  
+            local pivot_threshold=0.5
+            ;;
+        "exploratory")
+            local pivot_threshold=0.7
+            ;;
+        *)
+            local pivot_threshold=0.5
+            ;;
+    esac
+    
+    if command -v python3 >/dev/null 2>&1; then
+        python3 -c "
+import json
+probability = float('$pivot_probability')
+threshold = float('$pivot_threshold')
+is_pivot = probability >= threshold
+
+result = {
+    'pivot_probability': probability,
+    'threshold': threshold,
+    'context_importance': '$context_importance',
+    'is_strategic_pivot': is_pivot,
+    'confidence_level': 'high' if probability > 0.8 else 'medium' if probability > 0.5 else 'low',
+    'recommended_action': 'stakeholder_review' if is_pivot else 'feature_refinement'
+}
+print(json.dumps(result, indent=2))
+"
+    else
+        echo "{\"error\": \"Python3 required for pivot threshold evaluation\"}"
+        return 1
+    fi
 }

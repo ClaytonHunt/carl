@@ -14,7 +14,7 @@ workflow_sequence:
   2_context_loading:
     description: "load relevant CARL project context"
     required_files:
-      - ".carl/index.carl"
+      - ".carl/project/vision.carl"
       - ".carl/project/process.carl"
       - ".carl/project/active.work.carl"
     search_patterns: ["related existing intent files"]

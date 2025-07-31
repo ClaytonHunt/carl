@@ -23,8 +23,8 @@ recent_decisions: "Dual-layer architecture, Bash implementation, Claude Code hoo
 ## Strategic Context Files
 
 strategic_files:
-  mission: ".carl/mission.carl"
-  roadmap: ".carl/roadmap.carl" 
+  vision: ".carl/project/vision.carl"
+  roadmap: ".carl/project/roadmap.carl" 
   decisions: ".carl/decisions.carl"
 
 strategic_context:
@@ -147,8 +147,8 @@ analysis_artifacts:
   system_context: "system.context.carl"
   backend_context: "backend.context.carl" 
   requirements_context: "requirements.context.carl"
-  strategic_mission: ".carl/mission.carl"
-  development_roadmap: ".carl/roadmap.carl"
+  project_vision: ".carl/project/vision.carl"
+  development_roadmap: ".carl/project/roadmap.carl"
   decision_records: ".carl/decisions.carl"
 
 ## Integration Points

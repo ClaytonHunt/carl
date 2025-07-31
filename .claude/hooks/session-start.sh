@@ -14,7 +14,7 @@ source "$CARL_ROOT/.carl/scripts/carl-audio.sh"
 echo "🤖 Starting CARL (Context-Aware Requirements Language) system..."
 
 # Check if CARL is initialized in this project
-if [ ! -f "$CARL_ROOT/.carl/index.carl" ]; then
+if [ ! -d "$CARL_ROOT/.carl/project" ]; then
     echo "ℹ️  CARL not initialized in this project."
     echo "📋 Use /analyze to scan existing project or /plan to create new requirements."
     carl_play_audio "start" "Hi there! Looks like CARL hasn't been set up yet. Ready to analyze your project?"
@@ -24,11 +24,17 @@ fi
 # Load CARL context for AI
 echo "📊 Loading CARL project context..."
 
-# Read CARL index for quick AI reference
-if [ -f "$CARL_ROOT/.carl/index.carl" ]; then
+# Load CARL project context from modern structure
+if [ -f "$CARL_ROOT/.carl/project/vision.carl" ]; then
+    echo "🔍 CARL Project Vision Available:"
+    echo "----------------------------------------"
+    head -n 10 "$CARL_ROOT/.carl/project/vision.carl"
+    echo "----------------------------------------"
+    echo ""
+elif [ -f "$CARL_ROOT/.carl/project/roadmap.carl" ]; then
     echo "🔍 CARL Project Context Available:"
     echo "----------------------------------------"
-    cat "$CARL_ROOT/.carl/index.carl"
+    head -n 10 "$CARL_ROOT/.carl/project/roadmap.carl"
     echo "----------------------------------------"
     echo ""
 fi
@@ -47,20 +53,20 @@ fi
 echo "📈 CARL Project Health Summary:"
 echo "----------------------------------------"
 
-# Count CARL files for health assessment
-intent_count=$(find "$CARL_ROOT/.carl/intents" -name "*.intent" 2>/dev/null | wc -l || echo "0")
-state_count=$(find "$CARL_ROOT/.carl/states" -name "*.state" 2>/dev/null | wc -l || echo "0")
-context_count=$(find "$CARL_ROOT/.carl/contexts" -name "*.context" 2>/dev/null | wc -l || echo "0")
+# Count CARL files for health assessment using modern structure
+intent_count=$(find "$CARL_ROOT/.carl/project" -name "*.intent.carl" 2>/dev/null | wc -l || echo "0")
+state_count=$(find "$CARL_ROOT/.carl/project" -name "*.state.carl" 2>/dev/null | wc -l || echo "0")
+context_count=$(find "$CARL_ROOT/.carl/project" -name "*.context.carl" 2>/dev/null | wc -l || echo "0")
 
 echo "📋 Intent Files: $intent_count (Requirements and features)"
 echo "📊 State Files: $state_count (Implementation progress)"
 echo "🔗 Context Files: $context_count (System relationships)"
 
 # Check for recent activity
-recent_updates=$(find "$CARL_ROOT/.carl" -name "*.intent" -o -name "*.state" -o -name "*.context" -newer "$CARL_ROOT/.carl/index.carl" 2>/dev/null | wc -l || echo "0")
+recent_updates=$(find "$CARL_ROOT/.carl/project" -name "*.intent.carl" -o -name "*.state.carl" -o -name "*.context.carl" -newer "$CARL_ROOT/.carl/project" 2>/dev/null | wc -l || echo "0")
 if [ "$recent_updates" -gt 0 ]; then
-    echo "⚠️  $recent_updates CARL files have been updated since last index refresh"
-    echo "💡 Consider running /analyze --sync to update CARL context"
+    echo "⚠️  $recent_updates CARL files have been recently updated"
+    echo "💡 Project context is actively maintained"
 fi
 
 echo "----------------------------------------"
