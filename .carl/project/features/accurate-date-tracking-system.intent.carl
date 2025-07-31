@@ -103,7 +103,7 @@ technical_requirements:
     planning_layer_fields:
       - "estimated_start_date: ISO 8601 timestamp"
       - "estimated_completion_date: ISO 8601 timestamp" 
-      - "estimated_duration: human-readable with confidence level"
+      - "estimated_duration: AI-optimized with confidence level"
       - "planning_confidence: low/medium/high"
       
     actual_work_layer_fields:

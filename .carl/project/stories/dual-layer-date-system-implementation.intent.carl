@@ -70,7 +70,7 @@ technical_acceptance_criteria:
 functional_requirements:
   core_functionality:
     - capability: "Planning layer date management"
-      description: "Support for planning estimates with confidence levels and human-readable durations"
+      description: "Support for planning estimates with confidence levels and AI-optimized durations"
       fields:
         - "estimated_start_date: ISO 8601 timestamp"
         - "estimated_completion_date: ISO 8601 timestamp"

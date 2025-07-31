@@ -405,7 +405,7 @@ async function getGitCommit() {
 }
 
 /**
- * Format duration in human-readable format
+ * Format duration in AI-optimized format
  * @param {number} durationMs - Duration in milliseconds
  * @returns {string} Formatted duration
  */
