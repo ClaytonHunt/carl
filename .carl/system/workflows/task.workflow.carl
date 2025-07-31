@@ -99,10 +99,166 @@ context_loading_workflow:
     check_dependencies: "identify_affected_components_and_integration_points"
     assess_current_state: "load_implementation_progress_and_technical_debt_from_state_files"
 
+# === HIERARCHICAL EXECUTION LOGIC ===
+
+hierarchical_execution:
+  scope_detection_and_routing:
+    epic_execution: |
+      execute_epic_task(epic_intent) {
+          // Load epic and discover child features
+          child_features = discover_child_relationships(epic_intent)
+          
+          if (child_features.length == 0):
+              suggest_planning_breakdown("Epic has no associated features - requires breakdown")
+              return SUGGEST_PLANNING
+          
+          // Execute child features in dependency order
+          return execute_hierarchical_children(child_features, "feature")
+      }
+    
+    feature_execution: |
+      execute_feature_task(feature_intent) {
+          // Load feature and discover child stories/technical
+          child_stories = discover_child_relationships(feature_intent, "story")
+          child_technical = discover_child_relationships(feature_intent, "technical")
+          
+          if (child_stories.length == 0 && child_technical.length == 0):
+              suggest_planning_breakdown("Feature has no associated stories or technical tasks - requires breakdown")
+              return SUGGEST_PLANNING
+          
+          // Execute children in dependency order with parallelization
+          return execute_parallel_with_dependencies(child_stories, child_technical)
+      }
+    
+    story_execution: |
+      execute_story_task(story_intent) {
+          // Stories are implementation units - execute directly
+          return execute_implementation_task(story_intent)
+      }
+    
+    technical_execution: |
+      execute_technical_task(technical_intent) {
+          // Technical tasks are implementation units - execute directly  
+          return execute_implementation_task(technical_intent)
+      }
+
+  dependency_resolution:
+    discovery_algorithm: |
+      discover_child_relationships(intent_file, scope_filter = null) {
+          intent_data = parse_yaml(intent_file)
+          child_relationships = intent_data.relationships.child_relationships || []
+          
+          discovered_children = []
+          for (child_id in child_relationships):
+              child_file = find_intent_file_by_id(child_id)
+              if (child_file && matches_scope_filter(child_file, scope_filter)):
+                  discovered_children.push({
+                      id: child_id,
+                      file: child_file,
+                      state_file: derive_state_file_path(child_file),
+                      dependencies: get_dependencies(child_file)
+                  })
+          
+          return discovered_children
+      }
+    
+    parallel_execution_with_dependencies: |
+      execute_parallel_with_dependencies(stories, technical_tasks) {
+          // Combine all implementation tasks
+          all_tasks = [...technical_tasks, ...stories]
+          
+          // Build dependency graph
+          dependency_graph = build_dependency_graph(all_tasks)
+          
+          // Execute in topological order with parallelization
+          execution_batches = topological_sort_with_batching(dependency_graph)
+          
+          for (batch in execution_batches):
+              // Execute all tasks in batch concurrently (no inter-dependencies)
+              results = execute_concurrent_batch(batch)
+              
+              // Validate all succeeded before proceeding to next batch
+              if (!all_succeeded(results)):
+                  return handle_batch_failure(results)
+          
+          return SUCCESS
+      }
+
+  state_management_hierarchical:
+    child_state_creation: |
+      ensure_child_state_files(children) {
+          for (child in children):
+              if (!child.state_file_exists):
+                  create_state_file_from_template(child.intent_file)
+                  initialize_state_tracking(child.id)
+      }
+    
+    progress_propagation: |
+      update_hierarchical_progress(completed_child) {
+          // Update child completion
+          mark_child_complete(completed_child)
+          apply_completion_workflow(completed_child)
+          
+          // Check if parent should be updated
+          parent = get_parent_intent(completed_child)
+          if (all_children_complete(parent)):
+              mark_parent_complete(parent)
+              apply_completion_workflow(parent)
+              
+              // Recurse up hierarchy
+              update_hierarchical_progress(parent)
+      }
+
 # === WORKFLOW ENFORCEMENT AND VALIDATION ===
 
 workflow_enforcement:
   requirements_driven_enforcement: "validate_proper_requirements_before_task_execution"
+  
+  hierarchical_validation: |
+    validate_execution_readiness(intent_file) {
+        scope_type = detect_scope_type(intent_file)
+        
+        switch(scope_type):
+            case "epic":
+                return validate_epic_readiness(intent_file)
+            case "feature": 
+                return validate_feature_readiness(intent_file)
+            case "story":
+            case "technical":
+                return validate_implementation_readiness(intent_file)
+    }
+    
+    validate_epic_readiness(epic_intent) {
+        child_features = discover_child_relationships(epic_intent, "feature")
+        
+        if (child_features.length == 0):
+            return {
+                status: "REQUIRES_PLANNING",
+                message: "Epic has no associated features",
+                suggestion: "Run '/carl:plan --from-intent {epic_name}' to break down into features"
+            }
+        
+        return { status: "READY", execution_type: "HIERARCHICAL" }
+    }
+    
+    validate_feature_readiness(feature_intent) {
+        child_stories = discover_child_relationships(feature_intent, "story") 
+        child_technical = discover_child_relationships(feature_intent, "technical")
+        
+        if (child_stories.length == 0 && child_technical.length == 0):
+            return {
+                status: "REQUIRES_PLANNING", 
+                message: "Feature has no associated implementation tasks",
+                suggestion: "Run '/carl:plan --from-intent {feature_name}' to break down into stories"
+            }
+        
+        return { status: "READY", execution_type: "HIERARCHICAL" }
+    }
+    
+    validate_implementation_readiness(impl_intent) {
+        // Stories and technical tasks are ready for direct implementation
+        return { status: "READY", execution_type: "DIRECT" }
+    }
   
   validation_workflow: |
     carl_validate_requirements() {
@@ -111,6 +267,13 @@ workflow_enforcement:
             show_requirements_guidance()
             suggest_carl_plan_command()
             return BLOCKED
+        
+        // Validate hierarchical execution readiness
+        readiness = validate_execution_readiness(intent_file)
+        
+        if (readiness.status == "REQUIRES_PLANNING"):
+            show_planning_guidance(readiness.message, readiness.suggestion)
+            return BLOCKED_WITH_PLANNING_SUGGESTION
         
         // Validate work is properly planned
         if (implementation_work && !proper_planning):
