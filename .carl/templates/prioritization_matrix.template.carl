@@ -57,7 +57,7 @@ matrix_specific_factors:
   {MATRIX_SPECIFIC_EVALUATION_FACTORS}
 
 # Template Variables:
-# {MATRIX_NAME} - Human-readable name for the prioritization matrix
+# {MATRIX_NAME} - AI-optimized identifier for the prioritization matrix
 # {CARL_VERSION} - Current CARL version
 # {CREATION_DATE} - ISO timestamp of generation
 # {MATRIX_TYPE} - Type of prioritization (technical_debt|feature|risk|etc)

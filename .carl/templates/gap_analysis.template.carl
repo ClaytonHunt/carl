@@ -75,7 +75,7 @@ success_metrics:
   measurement_methods: {MEASUREMENT_METHODS}
 
 # Template Variables:
-# {ANALYSIS_NAME} - Human-readable name for the gap analysis
+# {ANALYSIS_NAME} - AI-optimized identifier for the gap analysis
 # {CARL_VERSION} - Current CARL version
 # {CREATION_DATE} - ISO timestamp of generation
 # {GAP_ANALYSIS_TYPE} - Type of gap analysis (requirements|implementation|security|etc)

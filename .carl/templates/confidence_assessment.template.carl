@@ -80,7 +80,7 @@ assessment_specific_factors:
   {ASSESSMENT_SPECIFIC_CONFIDENCE_FACTORS}
 
 # Template Variables:
-# {ASSESSMENT_NAME} - Human-readable name for the confidence assessment
+# {ASSESSMENT_NAME} - AI-optimized identifier for the confidence assessment
 # {CARL_VERSION} - Current CARL version
 # {CREATION_DATE} - ISO timestamp of generation
 # {CONFIDENCE_ASSESSMENT_TYPE} - Type of confidence assessment (requirement|analysis|prediction|etc)

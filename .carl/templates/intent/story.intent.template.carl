@@ -74,7 +74,7 @@ relationships:
   blocked_by: {STORIES_BLOCKING_THIS}
 
 # Template Variables:
-# {STORY_NAME} - Human-readable name for the story
+# {STORY_NAME} - AI-optimized identifier for the story
 # {CARL_VERSION} - Current CARL version
 # {CREATION_DATE} - ISO timestamp of generation
 # {STORY_SCOPE} - Brief story scope description

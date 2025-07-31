@@ -14,7 +14,7 @@ characters:
 # Template Variables:
 # {CARL_VERSION} - Current CARL version
 # {CREATION_DATE} - ISO timestamp of generation
-# {THEME_NAME} - Human-readable theme name
+# {THEME_NAME} - AI-optimized theme identifier
 # {CUSTOMIZATION_LEVEL} - minimal|standard|comprehensive
 # {THEME_IDENTIFIER} - snake_case theme identifier
 # {THEME_DESCRIPTION} - Descriptive text about the theme

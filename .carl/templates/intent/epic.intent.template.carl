@@ -59,7 +59,7 @@ relationships:
   cross_references: {RELATED_REQUIREMENTS}
 
 # Template Variables:
-# {EPIC_NAME} - Human-readable name for the epic
+# {EPIC_NAME} - AI-optimized identifier for the epic
 # {CARL_VERSION} - Current CARL version
 # {CREATION_DATE} - ISO timestamp of generation
 # {EPIC_SCOPE} - High-level scope description

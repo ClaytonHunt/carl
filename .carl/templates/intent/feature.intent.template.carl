@@ -64,7 +64,7 @@ relationships:
   cross_references: {RELATED_REQUIREMENTS}
 
 # Template Variables:
-# {FEATURE_NAME} - Human-readable name for the feature
+# {FEATURE_NAME} - AI-optimized identifier for the feature
 # {CARL_VERSION} - Current CARL version
 # {CREATION_DATE} - ISO timestamp of generation
 # {FEATURE_SCOPE} - Feature-level scope description

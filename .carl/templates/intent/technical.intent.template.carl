@@ -78,7 +78,7 @@ relationships:
   enables: {FEATURES_THIS_ENABLES}
 
 # Template Variables:
-# {TECHNICAL_NAME} - Human-readable name for the initiative
+# {TECHNICAL_NAME} - AI-optimized identifier for the initiative
 # {CARL_VERSION} - Current CARL version
 # {CREATION_DATE} - ISO timestamp of generation
 # {TECHNICAL_SCOPE} - Scope of technical changes

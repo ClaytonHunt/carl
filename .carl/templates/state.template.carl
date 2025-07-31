@@ -68,7 +68,7 @@ integration_points:
     performance_monitoring: "not_configured"
 
 # Template Variables:
-# {FEATURE_NAME} - Human-readable name of the feature
+# {FEATURE_NAME} - AI-optimized name of the feature
 # {CARL_VERSION} - Current CARL version
 # {CREATION_DATE} - ISO timestamp of generation
 # {INTENT_FILE_PATH} - Path to corresponding intent file

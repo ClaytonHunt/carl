@@ -39,7 +39,7 @@ relationships:
   cross_references: {RELATED_REQUIREMENTS}
 
 # Template Variables:
-# {REQUIREMENT_NAME} - Human-readable name for the requirement
+# {REQUIREMENT_NAME} - AI-optimized identifier for the requirement
 # {CARL_VERSION} - Current CARL version
 # {CREATION_DATE} - ISO timestamp of generation
 # {REQUIREMENT_TYPE} - epic|feature|story|technical_initiative

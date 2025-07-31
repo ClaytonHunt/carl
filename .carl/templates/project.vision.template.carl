@@ -91,7 +91,7 @@ feedback_templates:
   pivot_detection: "🔄 Strategic pivot detected in: {pivot_areas}. Vision review recommended."
 
 # Template Variables Guide:
-# {PROJECT_NAME} - Human-readable project name (e.g., "CARL Development Tool")
+# {PROJECT_NAME} - AI-optimized project identifier (e.g., "CARL Development Tool")
 # {PROJECT_KEBAB_NAME} - Kebab-case project name (e.g., "carl-development-tool")
 # {CARL_VERSION} - Version of CARL generating this template
 # {TIMESTAMP} - ISO 8601 timestamp of generation

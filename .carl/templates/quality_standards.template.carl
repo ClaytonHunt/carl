@@ -44,7 +44,7 @@ domain_specific_standards:
   {DOMAIN_SPECIFIC_QUALITY_STANDARDS}
 
 # Template Variables:
-# {DOMAIN_NAME} - Human-readable name for the analysis domain
+# {DOMAIN_NAME} - AI-optimized identifier for the analysis domain
 # {CARL_VERSION} - Current CARL version
 # {CREATION_DATE} - ISO timestamp of generation
 # {ANALYSIS_DOMAIN} - Technical domain (architecture|backend|frontend|requirements|debt|etc)

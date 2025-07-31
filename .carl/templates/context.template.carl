@@ -51,7 +51,7 @@ context_analysis:
   optimization_opportunities: {OPTIMIZATION_AREAS}
 
 # Template Variables:
-# {CONTEXT_NAME} - Human-readable name for this architectural context
+# {CONTEXT_NAME} - AI-optimized identifier for this architectural context
 # {CARL_VERSION} - Current CARL version
 # {CREATION_DATE} - ISO timestamp of generation
 # {ANALYSIS_METHOD} - code_analysis|manual_documentation|hybrid
