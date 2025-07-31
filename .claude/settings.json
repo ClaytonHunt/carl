@@ -22,7 +22,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.carl/hooks/session-start.sh"
+            "command": "$CLAUDE_PROJECT_DIR/.carl/hooks/session-start.js"
           }
         ]
       }
@@ -33,7 +33,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.carl/hooks/session-end.sh"
+            "command": "$CLAUDE_PROJECT_DIR/.carl/hooks/session-end.js"
           }
         ]
       }
@@ -44,7 +44,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.carl/hooks/user-prompt-submit.sh"
+            "command": "$CLAUDE_PROJECT_DIR/.carl/hooks/user-prompt-submit.js"
           }
         ]
       }
@@ -55,7 +55,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.carl/hooks/tool-call.sh pre"
+            "command": "$CLAUDE_PROJECT_DIR/.carl/hooks/tool-call.js pre"
           }
         ]
       }
@@ -66,7 +66,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.carl/hooks/tool-call.sh post"
+            "command": "$CLAUDE_PROJECT_DIR/.carl/hooks/tool-call.js post"
           }
         ]
       }
