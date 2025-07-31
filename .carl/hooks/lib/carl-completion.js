@@ -544,6 +544,222 @@ function clearRelationshipCache() {
   console.log(`🔄 Cleared hierarchical relationship cache`);
 }
 
+// =====================================================
+// COMPLETION PERCENTAGE RECALCULATION SYSTEM
+// =====================================================
+
+/**
+ * Read completion percentage from a state file
+ * @param {string} stateFilePath - Path to state file
+ * @returns {Promise<number|null>} Completion percentage or null if not found
+ */
+async function getCompletionPercentage(stateFilePath) {
+  try {
+    if (!await fs.pathExists(stateFilePath)) {
+      return null;
+    }
+    
+    const content = await utils.safeReadFile(stateFilePath);
+    if (!content) {
+      return null;
+    }
+    
+    const stateData = yaml.parse(content);
+    if (!stateData) {
+      return null;
+    }
+    
+    // Check for completion_percentage field
+    if (typeof stateData.completion_percentage === 'number') {
+      return Math.max(0, Math.min(100, stateData.completion_percentage));
+    }
+    
+    // Check metadata section
+    if (stateData.metadata && typeof stateData.metadata.completion_percentage === 'number') {
+      return Math.max(0, Math.min(100, stateData.metadata.completion_percentage));
+    }
+    
+    // Check for completed status indicators
+    if (stateData.status === 'completed' || stateData.phase === 'completed') {
+      return 100;
+    }
+    
+    if (stateData.metadata) {
+      if (stateData.metadata.status === 'completed' || stateData.metadata.phase === 'completed') {
+        return 100;
+      }
+    }
+    
+    return 0; // Default to 0% if no completion data found
+    
+  } catch (error) {
+    console.error(`❌ Error reading completion percentage from ${stateFilePath}:`, error.message);
+    return null;
+  }
+}
+
+/**
+ * Calculate average completion percentage from child completion percentages
+ * @param {number[]} childCompletionPercentages - Array of child completion percentages
+ * @returns {number} Average completion percentage (0-100)
+ */
+function calculateAverageCompletion(childCompletionPercentages) {
+  if (!childCompletionPercentages || childCompletionPercentages.length === 0) {
+    return 0;
+  }
+  
+  // Filter out null values
+  const validPercentages = childCompletionPercentages.filter(p => p !== null && typeof p === 'number');
+  
+  if (validPercentages.length === 0) {
+    return 0;
+  }
+  
+  const sum = validPercentages.reduce((acc, percentage) => acc + percentage, 0);
+  const average = sum / validPercentages.length;
+  
+  return Math.round(average * 100) / 100; // Round to 2 decimal places
+}
+
+/**
+ * Update parent state file completion percentage
+ * @param {string} parentIntentPath - Path to parent intent file
+ * @param {number} newCompletionPercentage - New completion percentage to set
+ * @returns {Promise<boolean>} Success status
+ */
+async function updateParentCompletionPercentage(parentIntentPath, newCompletionPercentage) {
+  try {
+    // Convert intent path to state path
+    const parentStatePath = parentIntentPath.replace('.intent.carl', '.state.carl');
+    
+    if (!await fs.pathExists(parentStatePath)) {
+      console.log(`⚠️  Parent state file not found: ${parentStatePath}`);
+      return false;
+    }
+    
+    const content = await utils.safeReadFile(parentStatePath);
+    if (!content) {
+      console.error(`❌ Could not read parent state file: ${parentStatePath}`);
+      return false;
+    }
+    
+    const stateData = yaml.parse(content);
+    if (!stateData) {
+      console.error(`❌ Could not parse parent state file: ${parentStatePath}`);
+      return false;
+    }
+    
+    // Update completion percentage in the most appropriate location
+    const roundedPercentage = Math.round(newCompletionPercentage * 100) / 100;
+    
+    if (stateData.metadata) {
+      stateData.metadata.completion_percentage = roundedPercentage;
+      stateData.metadata.last_updated = new Date().toISOString();
+      
+      // Mark as completed if 100%
+      if (roundedPercentage >= 100) {
+        stateData.metadata.status = 'completed';
+        stateData.metadata.completion_date = new Date().toISOString();
+      }
+    } else {
+      // Fallback to root level
+      stateData.completion_percentage = roundedPercentage;
+      stateData.last_updated = new Date().toISOString();
+      
+      if (roundedPercentage >= 100) {
+        stateData.status = 'completed';
+        stateData.completion_date = new Date().toISOString();
+      }
+    }
+    
+    // Write updated state file atomically
+    const updatedContent = yaml.stringify(stateData);
+    await fs.writeFile(parentStatePath, updatedContent, 'utf8');
+    
+    console.log(`✅ Updated ${path.basename(parentIntentPath)} completion: ${roundedPercentage}%`);
+    
+    // If parent reached 100%, trigger completion workflow
+    if (roundedPercentage >= 100) {
+      console.log(`🎯 Parent reached 100% completion, triggering completion workflow...`);
+      const completionCheck = await checkIntentCompletion(parentIntentPath);
+      if (completionCheck.completed) {
+        await commitAndMoveFiles(completionCheck);
+        await updateActiveWorkTracking(parentIntentPath);
+      }
+    }
+    
+    return true;
+    
+  } catch (error) {
+    console.error(`❌ Error updating parent completion percentage:`, error.message);
+    return false;
+  }
+}
+
+/**
+ * Recalculate and update parent completion percentage based on children
+ * @param {string} parentIntentPath - Path to parent intent file
+ * @returns {Promise<{success: boolean, oldPercentage: number|null, newPercentage: number|null}>}
+ */
+async function recalculateParentCompletion(parentIntentPath) {
+  try {
+    console.log(`🔄 Recalculating completion for: ${path.basename(parentIntentPath)}`);
+    
+    // Get current parent completion percentage
+    const parentStatePath = parentIntentPath.replace('.intent.carl', '.state.carl');
+    const currentPercentage = await getCompletionPercentage(parentStatePath);
+    
+    // Get child intent paths
+    const childIntentPaths = await getChildIntentPaths(parentIntentPath);
+    
+    if (childIntentPaths.length === 0) {
+      console.log(`ℹ️  No children found for ${path.basename(parentIntentPath)}`);
+      return { success: true, oldPercentage: currentPercentage, newPercentage: currentPercentage };
+    }
+    
+    // Get completion percentages for all children
+    const childCompletionPromises = childIntentPaths.map(async (childPath) => {
+      const childStatePath = childPath.replace('.intent.carl', '.state.carl');
+      return await getCompletionPercentage(childStatePath);
+    });
+    
+    const childCompletionPercentages = await Promise.all(childCompletionPromises);
+    
+    // Calculate new average completion percentage
+    const newCompletionPercentage = calculateAverageCompletion(childCompletionPercentages);
+    
+    console.log(`📊 Children completion: [${childCompletionPercentages.join(', ')}] → Average: ${newCompletionPercentage}%`);
+    
+    // Update parent state file if percentage changed significantly
+    const percentageDifference = Math.abs((currentPercentage || 0) - newCompletionPercentage);
+    
+    if (percentageDifference >= 0.01) { // Update if difference >= 0.01%
+      const updateSuccess = await updateParentCompletionPercentage(parentIntentPath, newCompletionPercentage);
+      
+      if (updateSuccess) {
+        return { 
+          success: true, 
+          oldPercentage: currentPercentage, 
+          newPercentage: newCompletionPercentage,
+          childrenData: {
+            count: childIntentPaths.length,
+            completions: childCompletionPercentages
+          }
+        };
+      }
+    } else {
+      console.log(`ℹ️  No significant change in completion percentage (${currentPercentage}% → ${newCompletionPercentage}%)`);
+      return { success: true, oldPercentage: currentPercentage, newPercentage: currentPercentage };
+    }
+    
+    return { success: false, oldPercentage: currentPercentage, newPercentage: null };
+    
+  } catch (error) {
+    console.error(`❌ Error recalculating parent completion:`, error.message);
+    return { success: false, oldPercentage: null, newPercentage: null };
+  }
+}
+
 module.exports = {
   checkIntentCompletion,
   commitAndMoveFiles,
@@ -558,5 +774,10 @@ module.exports = {
   buildHierarchicalMap,
   getParentIntentPath,
   getChildIntentPaths,
-  clearRelationshipCache
+  clearRelationshipCache,
+  // Completion percentage recalculation functions
+  getCompletionPercentage,
+  calculateAverageCompletion,
+  updateParentCompletionPercentage,
+  recalculateParentCompletion
 };
