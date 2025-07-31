@@ -1,0 +1,37 @@
+{
+  "name": "carl-hooks",
+  "version": "1.0.0",
+  "description": "Node.js implementation of CARL hooks system",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+  },
+  "keywords": ["carl", "hooks", "session-management", "context-injection"],
+  "author": "CARL Team",
+  "license": "MIT",
+  "dependencies": {
+    "fs-extra": "^11.2.0",
+    "yaml": "^2.3.4"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "@jest/globals": "^29.7.0",
+    "jest-extended": "^4.0.2"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "coverageThreshold": {
+      "global": {
+        "branches": 85,
+        "functions": 90,
+        "lines": 85,
+        "statements": 85
+      }
+    },
+    "testMatch": ["**/__tests__/**/*.test.js"],
+    "coveragePathIgnorePatterns": ["/node_modules/", "/tests/"],
+    "setupFilesAfterEnv": ["jest-extended/all"]
+  }
+}
