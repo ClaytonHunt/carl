@@ -150,7 +150,7 @@ data_requirements:
     - "Velocity dashboard metrics for /carl:status integration"
     - "CSV export for external analysis tools"
     - "JSON API format for programmatic access"
-    - "Human-readable reports for team retrospectives"
+    - "AI-optimized reports for team retrospectives"
 
 testing_strategy:
   test_scenarios:

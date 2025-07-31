@@ -20,7 +20,7 @@ required_sections:
   strategic_phases:
     phase_definition:
       - phase_id: "unique_phase_identifier"
-      - phase_name: "human_readable_phase_name"
+      - phase_name: "ai_optimized_phase_name"
       - timeline: "start_and_end_dates_or_duration"
       - strategic_goal: "what_this_phase_achieves"
       - success_criteria: "measurable_outcomes_for_phase"

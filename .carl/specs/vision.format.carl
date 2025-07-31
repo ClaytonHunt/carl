@@ -12,7 +12,7 @@ format_specification:
 required_sections:
   vision_metadata:
     - vision_id: "unique_project_vision_identifier"
-    - project_name: "human_readable_project_name"
+    - project_name: "ai_optimized_project_name"
     - version: "vision_document_version"
     - last_updated: "iso_timestamp"
     - status: "draft|active|evolving|stable"

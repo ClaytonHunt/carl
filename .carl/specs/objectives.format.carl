@@ -20,7 +20,7 @@ required_sections:
   business_objectives:
     primary_objectives:
       - objective_id: "unique_business_objective_identifier"
-        objective_name: "human_readable_objective_name"
+        objective_name: "ai_optimized_objective_name"
         description: "detailed_description_of_what_success_looks_like"
         success_metrics: "array_of_quantifiable_success_measures"
         baseline_measurements: "current_state_measurements"

@@ -5,9 +5,9 @@
 
 feature_id: "ai_first_terminology_alignment"
 intent_reference: "/home/clayton/projects/carl/.carl/project/technical/ai-first-terminology-alignment.intent.carl"
-phase: "planning"
-completion_percentage: 0
-last_updated: "2025-07-31T12:00:00Z"
+phase: "completed"
+completion_percentage: 100
+last_updated: "2025-07-31T12:30:00Z"
 update_source: "manual"
 
 implementation_progress:

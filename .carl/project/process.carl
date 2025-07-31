@@ -81,7 +81,7 @@ carl_specific_workflow:
   context_optimization_rules:
     - "ai_context_under_1500_tokens_per_file"
     - "structured_yaml_for_machine_readability"
-    - "human_readable_comments_and_descriptions"
+    - "ai_optimized_comments_and_descriptions"
     - "cross_reference_related_requirements"
   
   session_management:

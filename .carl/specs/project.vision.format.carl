@@ -26,7 +26,7 @@ structure:
         description: "Unique identifier for this project vision"
       project_name:
         type: "string"
-        description: "Human-readable project name"
+        description: "AI-optimized project name"
       version:
         type: "string"
         format: "semantic_version"

@@ -13,7 +13,7 @@ required_sections:
   personality_system:
     - version: "semantic_version"
     - theme: "theme_identifier"
-    - description: "human_readable_theme_description"
+    - description: "ai_optimized_theme_description"
     
   characters:
     character_definition:
