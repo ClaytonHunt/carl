@@ -11,6 +11,7 @@ const utils = require('./lib/utils');
 const carlHelpers = require('./lib/carl-helpers');
 const carlSession = require('./lib/carl-session');
 const carlAudio = require('./lib/carl-audio');
+const carlCompletion = require('./lib/carl-completion');
 
 /**
  * Read JSON input from stdin
@@ -97,6 +98,64 @@ async function checkAndCelebrateMilestones() {
     // For now, just a placeholder
   } catch (error) {
     // Don't fail hook on milestone check errors
+  }
+}
+
+/**
+ * Handle task tool completion detection
+ * @param {Object} jsonData - Tool call data
+ * @param {string} toolOutput - Tool output
+ */
+async function handleTaskCompletion(jsonData, toolOutput) {
+  try {
+    // Extract task parameters to understand what intents were worked on
+    const taskPrompt = jsonData.parameters?.prompt || '';
+    const taskDescription = jsonData.parameters?.description || '';
+    
+    // Track active intents from session if possible
+    const activeIntents = await getActiveSessionIntents();
+    
+    // Check for completion detection in task arguments
+    if (taskPrompt.includes('--review') || taskDescription.includes('task review')) {
+      console.log('🔍 Task review mode detected - running full project completion scan');
+      const completions = await carlCompletion.fullProjectReview();
+      
+      if (completions > 0) {
+        await carlAudio.playAudio('success', `Awesome! Found and organized ${completions} completed items!`);
+        await logMilestone('bulk_completion_processed', `Processed ${completions} completions`);
+      }
+    } else if (activeIntents.length > 0) {
+      // Standard task execution - check active intents for completion
+      console.log(`🔍 Checking ${activeIntents.length} active intents for completion`);
+      const completions = await carlCompletion.detectAndProcessCompletions(activeIntents);
+      
+      if (completions > 0) {
+        await carlAudio.playAudio('success', `Great work! Automatically organized ${completions} completed items!`);
+        await logMilestone('automatic_completion_processed', `Processed ${completions} completions`);
+        await updateProgressMetrics();
+      }
+    }
+    
+    await logActivity('task_completion_check_completed', 'Task');
+    
+  } catch (error) {
+    console.error('Error in task completion detection:', error.message);
+    // Don't fail hard on completion detection errors
+  }
+}
+
+/**
+ * Get active intents from current session
+ * @returns {Promise<string[]>} Array of intent file paths
+ */
+async function getActiveSessionIntents() {
+  try {
+    // This would integrate with session management to track active intents
+    // For now, return empty array - will be enhanced in future iterations
+    return [];
+  } catch (error) {
+    console.error('Error getting active session intents:', error.message);
+    return [];
   }
 }
 
@@ -204,6 +263,11 @@ async function main() {
         case 'Grep':
           // Track analysis activities but don't spam audio
           await logActivity('code_analysis_completed', tool);
+          break;
+          
+        case 'Task':
+          // Handle Task tool completion detection
+          await handleTaskCompletion(jsonData, toolOutput);
           break;
       }
       
