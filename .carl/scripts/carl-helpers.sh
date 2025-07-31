@@ -1871,6 +1871,194 @@ carl_get_alignment_engine_status() {
 }"
 }
 
+# Cross-platform formatting utilities for consistent output
+# Implements environment-aware line break handling for CARL task command responses
+
+carl_detect_platform_line_break_standard() {
+    # Cache the platform detection result in session variable
+    if [ -n "$CARL_LINE_BREAK_STANDARD" ]; then
+        echo "$CARL_LINE_BREAK_STANDARD"
+        return 0
+    fi
+    
+    # Primary: Check OS environment variable
+    if [ -n "$OS" ] && echo "$OS" | grep -qi "windows"; then
+        export CARL_LINE_BREAK_STANDARD="CRLF"
+        echo "CRLF"
+        return 0
+    fi
+    
+    # Secondary: Use uname command output analysis
+    if command -v uname >/dev/null 2>&1; then
+        local system_type=$(uname -s)
+        case "$system_type" in
+            CYGWIN*|MINGW*|MSYS*)
+                export CARL_LINE_BREAK_STANDARD="CRLF"
+                echo "CRLF"
+                return 0
+                ;;
+            *)
+                export CARL_LINE_BREAK_STANDARD="LF"
+                echo "LF"
+                return 0
+                ;;
+        esac
+    fi
+    
+    # Fallback: Assume Unix LF standard
+    export CARL_LINE_BREAK_STANDARD="LF"
+    echo "LF"
+}
+
+carl_get_line_break_char() {
+    local platform_standard=$(carl_detect_platform_line_break_standard)
+    
+    case "$platform_standard" in
+        "CRLF")
+            printf "\r\n"
+            ;;
+        "LF"|*)
+            printf "\n"
+            ;;
+    esac
+}
+
+carl_format_output_with_proper_line_breaks() {
+    local input_text="$1"
+    local preserve_formatting="${2:-false}"
+    
+    if [ -z "$input_text" ]; then
+        return 0
+    fi
+    
+    # Get the appropriate line break character for the platform
+    local line_break_char=$(carl_get_line_break_char)
+    
+    if [ "$preserve_formatting" = "true" ]; then
+        # Preserve existing formatting but ensure consistent line breaks
+        echo "$input_text" | sed "s/\r\n/\n/g" | sed "s/\n/$line_break_char/g"
+    else
+        # Apply standard formatting with proper line breaks
+        echo "$input_text" | sed "s/\r\n/\n/g" | sed "s/\n/$line_break_char/g"
+    fi
+}
+
+carl_ensure_readable_text_formatting() {
+    local input_text="$1"
+    local format_type="${2:-standard}"
+    
+    if [ -z "$input_text" ]; then
+        return 0
+    fi
+    
+    local platform_standard=$(carl_detect_platform_line_break_standard)
+    
+    case "$format_type" in
+        "task_suggestions")
+            # Format task suggestion template with proper spacing
+            if [ "$platform_standard" = "CRLF" ]; then
+                echo "$input_text" | \
+                    sed 's/🔥 Continue Current Work:/\r\n🔥 Continue Current Work:/g' | \
+                    sed 's/⚡ Next Logical Tasks:/\r\n⚡ Next Logical Tasks:/g' | \
+                    sed 's/📋 Available from Queue:/\r\n📋 Available from Queue:/g' | \
+                    sed 's/🚀 Quick Wins:/\r\n🚀 Quick Wins:/g' | \
+                    sed 's/Which task would you like to work on?/\r\n\r\nWhich task would you like to work on?/g'
+            else
+                echo "$input_text" | \
+                    sed 's/🔥 Continue Current Work:/\n🔥 Continue Current Work:/g' | \
+                    sed 's/⚡ Next Logical Tasks:/\n⚡ Next Logical Tasks:/g' | \
+                    sed 's/📋 Available from Queue:/\n📋 Available from Queue:/g' | \
+                    sed 's/🚀 Quick Wins:/\n🚀 Quick Wins:/g' | \
+                    sed 's/Which task would you like to work on?/\n\nWhich task would you like to work on?/g'
+            fi
+            ;;
+        "task_execution")
+            # Format task execution output with clear section breaks
+            if [ "$platform_standard" = "CRLF" ]; then
+                echo "$input_text" | \
+                    sed 's/## /\r\n\r\n## /g' | \
+                    sed 's/### /\r\n### /g' | \
+                    sed 's/\*\*Next Steps\*\*:/\r\n**Next Steps**:/g' | \
+                    sed 's/\*\*Implementation Points\*\*:/\r\n**Implementation Points**:/g'
+            else
+                echo "$input_text" | \
+                    sed 's/## /\n\n## /g' | \
+                    sed 's/### /\n### /g' | \
+                    sed 's/\*\*Next Steps\*\*:/\n**Next Steps**:/g' | \
+                    sed 's/\*\*Implementation Points\*\*:/\n**Implementation Points**:/g'
+            fi
+            ;;
+        "error_guidance")
+            # Format error messages and guidance with clear separation
+            if [ "$platform_standard" = "CRLF" ]; then
+                echo "$input_text" | \
+                    sed 's/❌ ERROR:/\r\n❌ ERROR:/g' | \
+                    sed 's/✅ Suggested path:/\r\n✅ Suggested path:/g' | \
+                    sed 's/🔧 CARL Process:/\r\n🔧 CARL Process:/g'
+            else
+                echo "$input_text" | \
+                    sed 's/❌ ERROR:/\n❌ ERROR:/g' | \
+                    sed 's/✅ Suggested path:/\n✅ Suggested path:/g' | \
+                    sed 's/🔧 CARL Process:/\n🔧 CARL Process:/g'
+            fi
+            ;;
+        "standard"|*)
+            # Standard formatting with consistent line breaks
+            carl_format_output_with_proper_line_breaks "$input_text" false
+            ;;
+    esac
+}
+
+carl_print_formatted() {
+    local text="$1"
+    local format_type="${2:-standard}"
+    
+    # Use printf instead of echo for better cross-platform compatibility
+    local formatted_text=$(carl_ensure_readable_text_formatting "$text" "$format_type")
+    printf "%s" "$formatted_text"
+}
+
+carl_print_section_header() {
+    local header_text="$1"
+    local level="${2:-2}"
+    
+    local line_break_char=$(carl_get_line_break_char)
+    local header_prefix=""
+    
+    case "$level" in
+        1) header_prefix="# " ;;
+        2) header_prefix="## " ;;
+        3) header_prefix="### " ;;
+        *) header_prefix="## " ;;
+    esac
+    
+    printf "%s%s%s%s%s" "$line_break_char" "$header_prefix" "$header_text" "$line_break_char" "$line_break_char"
+}
+
+carl_print_list_item() {
+    local item_text="$1"
+    local list_type="${2:-bullet}"
+    local item_number="${3:-1}"
+    
+    local line_break_char=$(carl_get_line_break_char)
+    local item_prefix=""
+    
+    case "$list_type" in
+        "numbered") item_prefix="${item_number}. " ;;
+        "bullet") item_prefix="- " ;;
+        "checkbox") item_prefix="- [ ] " ;;
+        "checked") item_prefix="- [x] " ;;
+        *) item_prefix="- " ;;
+    esac
+    
+    printf "%s%s%s" "$item_prefix" "$item_text" "$line_break_char"
+}
+
+carl_reset_formatting_cache() {
+    # Reset cached platform detection for new sessions
+    unset CARL_LINE_BREAK_STANDARD
+}
+
 # Pivot Detection System Functions
 # Intelligent system to distinguish strategic pivots from feature misalignment
 
