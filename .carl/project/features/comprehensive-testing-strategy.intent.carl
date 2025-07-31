@@ -1,0 +1,384 @@
+# Comprehensive Testing Strategy - Feature Intent
+# Created: 2025-07-31T14:00:37-04:00
+# Parent Epic: carl-infrastructure-modernization
+# Scope: Feature
+
+metadata:
+  id: "comprehensive_testing_strategy"
+  scope_level: "feature"
+  created_date: "2025-07-31T14:00:37-04:00"
+  created_by: "carl_plan_command"
+  parent_epic: "carl_infrastructure_modernization"
+  priority: "critical"
+  complexity: "high"
+  estimated_effort: "2 weeks"
+
+feature_definition:
+  name: "Comprehensive Testing Strategy"
+  description: "Two-phase testing approach: golden path comparison for migration validation, then comprehensive unit tests for refactoring safety"
+  
+  problem_statement: |
+    Migration requires exact behavior matching validated through comparison tests, but future 
+    refactoring needs comprehensive unit tests covering all scenarios, edge cases, and error 
+    conditions. Need testing strategy that supports both immediate migration validation and 
+    long-term maintenance confidence.
+  
+  solution_approach: |
+    Phase 1: Golden path comparison tests ensure Node.js scripts match bash behavior exactly.
+    Phase 2: Comprehensive unit test suite with mocking, fixtures, and full scenario coverage
+    enables safe refactoring and feature additions while preventing regression.
+
+business_value:
+  primary_stakeholders:
+    - name: "CARL maintainer"
+      value: "Confidence to refactor and improve code without breaking functionality"
+    - name: "Future contributors"
+      value: "Clear test examples showing expected behavior for all scenarios"
+    - name: "CARL users"
+      value: "Stable system with regression prevention"
+  
+  success_metrics:
+    - metric: "Migration validation"
+      target: "100% output match between bash and Node.js"
+      measurement: "Golden path test results"
+    - metric: "Test coverage"
+      target: "95% code coverage with all scenarios"
+      measurement: "Jest coverage reports"
+    - metric: "Regression prevention"
+      target: "Zero regressions during refactoring"
+      measurement: "Test suite catching all breaking changes"
+  
+  strategic_alignment_score: 9.5
+  business_value_score: 9.0
+  implementation_complexity_score: 7.0
+
+functional_requirements:
+  phase_1_golden_path_testing:
+    - capability: "Side-by-side comparison framework"
+      description: "Run bash and Node.js scripts with identical inputs and compare outputs"
+      acceptance_criteria:
+        - "Capture stdout, stderr, and exit codes from both versions"
+        - "Compare outputs character-by-character"
+        - "Verify file operations produce identical results"
+        - "Test with real CARL project data"
+        
+    - capability: "Golden path test scenarios"
+      description: "Critical user journeys that must work identically"
+      test_cases:
+        - "Fresh CARL installation session start"
+        - "Existing project with active work session start"
+        - "Context injection for various prompt types"
+        - "Tool tracking for Edit, Write, Bash operations"
+        - "Session end with various work patterns"
+        - "Error conditions (missing files, invalid JSON)"
+    
+  phase_2_comprehensive_unit_testing:
+    - capability: "Modular unit test architecture"
+      description: "Test each function and module in isolation with full scenario coverage"
+      test_structure:
+        - "Helper function tests with mocked file system"
+        - "Hook script tests with mocked Claude Code inputs"
+        - "Integration tests for module interactions"
+        - "Error handling and edge case coverage"
+        
+    - capability: "Test fixture system"
+      description: "Comprehensive test data representing all CARL scenarios"
+      fixtures:
+        - "Various CARL project structures (empty, small, large)"
+        - "Different session states and histories"
+        - "All possible Claude Code event payloads"
+        - "Edge cases (corrupted files, unicode, special chars)"
+        
+    - capability: "Mocking infrastructure"
+      description: "Mock all external dependencies for isolated testing"
+      mocks:
+        - "File system operations (fs-extra)"
+        - "Child process for audio playback"
+        - "Date/time for consistent timestamps"
+        - "Git operations for session metrics"
+        - "Claude Code environment variables"
+
+technical_requirements:
+  testing_framework_setup:
+    test_runner: "Jest with Node.js configuration"
+    structure: |
+      /tests
+        /golden-path           # Phase 1: Comparison tests
+          /fixtures
+            /bash-outputs      # Captured bash script outputs
+            /test-projects     # Sample CARL projects
+          /scenarios
+            session-start.test.js
+            session-end.test.js
+            user-prompt.test.js
+            tool-call.test.js
+        /unit                  # Phase 2: Comprehensive tests
+          /helpers
+            carl-helpers.test.js
+            carl-session.test.js
+            carl-audio.test.js
+          /hooks
+            session-start.test.js
+            session-end.test.js
+            user-prompt-submit.test.js
+            tool-call.test.js
+          /integration
+            context-injection.test.js
+            session-lifecycle.test.js
+            activity-tracking.test.js
+        /fixtures              # Shared test data
+        /mocks                 # Mock implementations
+        /utils                 # Test utilities
+    
+  golden_path_implementation:
+    comparison_harness: |
+      class GoldenPathTester {
+        async runComparison(scriptName, input, options = {}) {
+          const bashResult = await this.runBashScript(scriptName, input);
+          const nodeResult = await this.runNodeScript(scriptName, input);
+          
+          return {
+            matchesStdout: bashResult.stdout === nodeResult.stdout,
+            matchesStderr: bashResult.stderr === nodeResult.stderr,
+            matchesExitCode: bashResult.exitCode === nodeResult.exitCode,
+            filesMatch: await this.compareFileOperations(bashResult, nodeResult),
+            differences: this.generateDiffReport(bashResult, nodeResult)
+          };
+        }
+      }
+    
+    test_scenarios: |
+      describe('Golden Path: session-start', () => {
+        it('should match bash output for fresh installation', async () => {
+          const result = await tester.runComparison('session-start', {
+            event: 'SessionStart',
+            session_id: 'test-123'
+          });
+          
+          expect(result.matchesStdout).toBe(true);
+          expect(result.filesMatch).toBe(true);
+        });
+        
+        it('should match bash output for existing project', async () => {
+          // Setup test project with CARL files
+          await setupTestProject('existing-project');
+          
+          const result = await tester.runComparison('session-start', {
+            event: 'SessionStart',
+            session_id: 'test-456'
+          });
+          
+          expect(result.matchesStdout).toBe(true);
+          expect(result.filesMatch).toBe(true);
+        });
+      });
+  
+  comprehensive_unit_tests:
+    helper_module_tests: |
+      describe('carl-helpers', () => {
+        let helpers;
+        let mockFs;
+        
+        beforeEach(() => {
+          mockFs = createMockFileSystem();
+          helpers = createHelpers({ fs: mockFs });
+        });
+        
+        describe('carl_get_active_context', () => {
+          it('should return formatted context from active-work.carl', () => {
+            mockFs.setFile('.carl/active-work.carl', activeWorkFixture);
+            const context = helpers.getActiveContext();
+            expect(context).toMatchSnapshot();
+          });
+          
+          it('should handle missing active-work.carl gracefully', () => {
+            const context = helpers.getActiveContext();
+            expect(context).toBe('');
+          });
+          
+          it('should handle malformed YAML in active-work.carl', () => {
+            mockFs.setFile('.carl/active-work.carl', 'invalid: yaml: content:');
+            const context = helpers.getActiveContext();
+            expect(context).toContain('error');
+          });
+        });
+        
+        describe('carl_get_setting', () => {
+          it('should check settings in correct precedence order', () => {
+            mockFs.setFile('.carl/settings/user.conf', 'audio_enabled: false');
+            mockFs.setFile('.carl/settings/global.conf', 'audio_enabled: true');
+            
+            const setting = helpers.getSetting('audio_enabled');
+            expect(setting).toBe('false'); // User overrides global
+          });
+          
+          it('should return default when setting not found', () => {
+            const setting = helpers.getSetting('unknown_setting', 'default');
+            expect(setting).toBe('default');
+          });
+        });
+      });
+    
+    hook_script_tests: |
+      describe('Hooks: user-prompt-submit', () => {
+        let hook;
+        let mockHelpers;
+        
+        beforeEach(() => {
+          mockHelpers = createMockHelpers();
+          hook = createUserPromptHook({ helpers: mockHelpers });
+        });
+        
+        describe('context injection', () => {
+          it('should inject context for /carl: commands', async () => {
+            const input = { prompt: '/carl:task implement feature' };
+            const output = await hook.process(input);
+            
+            expect(output).toContain('<carl-context>');
+            expect(mockHelpers.getActiveContext).toHaveBeenCalled();
+          });
+          
+          it('should not inject context for unrelated prompts', async () => {
+            const input = { prompt: 'what is the weather today?' };
+            const output = await hook.process(input);
+            
+            expect(output).not.toContain('<carl-context>');
+            expect(output).toBe(input.prompt);
+          });
+          
+          it('should handle malformed JSON gracefully', async () => {
+            const input = '{"prompt": "test", invalid json';
+            const output = await hook.processRaw(input);
+            
+            expect(output).toBe(input); // Fallback to original
+          });
+        });
+        
+        describe('personality system', () => {
+          it('should inject personality when enabled', async () => {
+            mockHelpers.getSetting.mockImplementation((key) => {
+              if (key === 'carl_persona') return 'true';
+              if (key === 'personality_theme') return 'jimmy_neutron';
+              return null;
+            });
+            
+            const input = { prompt: 'implement feature' };
+            const output = await hook.process(input);
+            
+            expect(output).toContain('<carl-personality-mode>');
+          });
+        });
+      });
+    
+    edge_case_coverage: |
+      describe('Edge Cases and Error Handling', () => {
+        describe('Unicode and special characters', () => {
+          it('should handle unicode in prompts', async () => {
+            const input = { prompt: 'implement 日本語 feature' };
+            const output = await hook.process(input);
+            expect(output).toContain('日本語');
+          });
+          
+          it('should handle escaped quotes in JSON', async () => {
+            const input = { prompt: 'implement \\"quoted\\" feature' };
+            const output = await hook.process(input);
+            expect(output).toContain('implement "quoted" feature');
+          });
+        });
+        
+        describe('Concurrent operations', () => {
+          it('should handle concurrent session writes safely', async () => {
+            const promises = Array(10).fill(null).map((_, i) => 
+              helpers.updateSession({ id: `session-${i}` })
+            );
+            
+            await expect(Promise.all(promises)).resolves.not.toThrow();
+          });
+        });
+        
+        describe('Platform differences', () => {
+          it('should handle Windows paths correctly', async () => {
+            mockPlatform('win32');
+            const path = helpers.resolvePath('.carl\\settings\\test.conf');
+            expect(path).toMatch(/\.carl[\\\/]settings[\\\/]test\.conf/);
+          });
+        });
+      });
+
+testing_best_practices:
+  test_organization:
+    - "Group tests by module/functionality"
+    - "Use descriptive test names explaining the scenario"
+    - "One assertion per test when possible"
+    - "Use beforeEach/afterEach for consistent setup"
+    
+  mock_strategy:
+    - "Mock at module boundaries"
+    - "Use real implementations for unit under test"
+    - "Provide realistic mock responses"
+    - "Verify mock interactions when relevant"
+    
+  fixture_management:
+    - "Use snapshots for complex output validation"
+    - "Keep fixtures minimal but representative"
+    - "Version fixtures with schema changes"
+    - "Document fixture purpose and structure"
+    
+  continuous_improvement:
+    - "Add tests for every bug found"
+    - "Update tests when requirements change"
+    - "Refactor tests to stay DRY"
+    - "Monitor and improve test performance"
+
+implementation_timeline:
+  week_1_golden_path:
+    - "Set up comparison test framework"
+    - "Capture bash outputs for all scenarios"
+    - "Implement comparison test suite"
+    - "Validate migration accuracy"
+    
+  week_2_unit_tests:
+    - "Create comprehensive test fixtures"
+    - "Implement helper module tests"
+    - "Implement hook script tests"
+    - "Add edge case coverage"
+    - "Achieve 95% code coverage"
+
+success_definition:
+  phase_1_criteria:
+    - "All golden path tests passing"
+    - "100% output match with bash scripts"
+    - "File operations verified identical"
+    - "Migration confidence achieved"
+    
+  phase_2_criteria:
+    - "95% code coverage reached"
+    - "All edge cases covered"
+    - "Mock infrastructure complete"
+    - "Tests run in < 30 seconds"
+    - "Refactoring safety net established"
+
+dependencies:
+  internal_dependencies:
+    - dependency: "Node.js hook scripts"
+      status: "in_development"
+      requirement: "Scripts must exist to test"
+      
+    - dependency: "Helper modules"
+      status: "in_development"
+      requirement: "Modules must be implemented"
+      
+  external_dependencies:
+    - dependency: "Jest testing framework"
+      status: "available"
+      requirement: "Test runner and assertions"
+      
+    - dependency: "Testing utilities"
+      packages: ["jest", "jest-extended", "@jest/globals"]
+      purpose: "Enhanced testing capabilities"
+
+next_actions:
+  immediate: "Set up Jest configuration and test structure"
+  phase_1: "Implement golden path comparison tests"
+  phase_2: "Build comprehensive unit test suite"
+  ongoing: "Maintain tests with code changes"

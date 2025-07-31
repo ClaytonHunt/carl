@@ -2059,6 +2059,489 @@ carl_reset_formatting_cache() {
     unset CARL_LINE_BREAK_STANDARD
 }
 
+# Completed Intent Organization System Functions
+# Automatic detection and organization of completed CARL intent files
+
+carl_detect_completed_intent() {
+    local intent_file="$1"
+    
+    if [ ! -f "$intent_file" ]; then
+        return 1
+    fi
+    
+    # Check if intent file has status: "completed"
+    local intent_status=$(grep "^status:" "$intent_file" 2>/dev/null | cut -d':' -f2 | tr -d ' "')
+    
+    if [ "$intent_status" = "completed" ]; then
+        echo "intent_completed"
+        return 0
+    fi
+    
+    return 1
+}
+
+carl_detect_completed_state() {
+    local state_file="$1"
+    
+    if [ ! -f "$state_file" ]; then
+        return 1
+    fi
+    
+    # Check for overall_status: "completed" OR (completion_percentage: 100 AND phase: "completed")
+    local overall_status=$(grep "^overall_status:" "$state_file" 2>/dev/null | cut -d':' -f2 | tr -d ' "')
+    local completion_percentage=$(grep "^overall_completion:" "$state_file" 2>/dev/null | cut -d':' -f2 | tr -d ' ')
+    
+    # Primary check: overall_status completed
+    if [ "$overall_status" = "completed" ]; then
+        echo "state_completed"
+        return 0
+    fi
+    
+    # Secondary check: 100% completion
+    if [ "$completion_percentage" = "100" ]; then
+        echo "state_completed_100_percent"
+        return 0
+    fi
+    
+    return 1
+}
+
+carl_validate_completion_alignment() {
+    local intent_file="$1"
+    local state_file="$2"
+    
+    # Validate both intent and state alignment for completion
+    local intent_result=$(carl_detect_completed_intent "$intent_file" 2>/dev/null)
+    local state_result=$(carl_detect_completed_state "$state_file" 2>/dev/null)
+    
+    if [ -n "$intent_result" ] && [ -n "$state_result" ]; then
+        echo "aligned_completion"
+        return 0
+    elif [ -n "$intent_result" ] || [ -n "$state_result" ]; then
+        echo "partial_completion"
+        return 2
+    else
+        echo "not_completed"
+        return 1
+    fi
+}
+
+carl_find_completed_files() {
+    local carl_root="$(carl_get_root)"
+    local scan_type="${1:-all}"
+    
+    # Find all intent files and check completion status
+    local completed_files=""
+    
+    case "$scan_type" in
+        "epics")
+            local search_path="$carl_root/.carl/project/epics"
+            ;;
+        "features")
+            local search_path="$carl_root/.carl/project/features"
+            ;;
+        "stories")
+            local search_path="$carl_root/.carl/project/stories"
+            ;;
+        "technical")
+            local search_path="$carl_root/.carl/project/technical"
+            ;;
+        "all"|*)
+            local search_path="$carl_root/.carl/project"
+            ;;
+    esac
+    
+    # Find intent files in the specified path
+    find "$search_path" -name "*.intent.carl" -type f 2>/dev/null | while read intent_file; do
+        if [ -f "$intent_file" ]; then
+            local base_name=$(basename "$intent_file" .intent.carl)
+            local dir_name=$(dirname "$intent_file")
+            local state_file="$dir_name/$base_name.state.carl"
+            
+            local completion_status=$(carl_validate_completion_alignment "$intent_file" "$state_file")
+            
+            if [ "$completion_status" = "aligned_completion" ]; then
+                echo "$intent_file|$state_file|aligned_completion"
+            elif [ "$completion_status" = "partial_completion" ]; then
+                echo "$intent_file|$state_file|partial_completion"
+            fi
+        fi
+    done
+}
+
+carl_create_completed_directory() {
+    local intent_type_dir="$1"
+    
+    if [ ! -d "$intent_type_dir" ]; then
+        echo "❌ Error: Intent type directory does not exist: $intent_type_dir"
+        return 1
+    fi
+    
+    local completed_dir="$intent_type_dir/completed"
+    
+    # Check if completed directory already exists
+    if [ -d "$completed_dir" ]; then
+        return 0  # Already exists, success
+    fi
+    
+    # Create completed directory with same permissions as parent
+    local parent_perms=$(stat -c %a "$intent_type_dir" 2>/dev/null)
+    
+    if mkdir "$completed_dir" 2>/dev/null; then
+        # Preserve permissions if we can determine them
+        if [ -n "$parent_perms" ]; then
+            chmod "$parent_perms" "$completed_dir" 2>/dev/null
+        fi
+        echo "✅ Created completed directory: $completed_dir"
+        return 0
+    else
+        echo "❌ Error: Failed to create completed directory: $completed_dir"
+        return 1
+    fi
+}
+
+carl_ensure_completed_directories() {
+    local carl_root="$(carl_get_root)"
+    local created_count=0
+    
+    # Ensure completed directories exist in all intent type directories
+    local intent_types=("epics" "features" "stories" "technical")
+    
+    for intent_type in "${intent_types[@]}"; do
+        local type_dir="$carl_root/.carl/project/$intent_type"
+        if [ -d "$type_dir" ]; then
+            if carl_create_completed_directory "$type_dir"; then
+                created_count=$((created_count + 1))
+            fi
+        fi
+    done
+    
+    echo "Completed directory check: $created_count directories processed"
+    return 0
+}
+
+carl_scan_for_completed_work() {
+    local carl_root="$(carl_get_root)"
+    local scan_results_file="/tmp/carl_completed_scan_$(date +%s).tmp"
+    
+    echo "## CARL Completion Detection Scan Results"
+    echo "Timestamp: $(date -Iseconds)"
+    echo
+    
+    # Ensure completed directories exist first
+    carl_ensure_completed_directories
+    echo
+    
+    # Scan for completed files
+    local completed_found=0
+    local partially_completed=0
+    
+    echo "### Scanning for Completed Work..."
+    
+    carl_find_completed_files "all" > "$scan_results_file"
+    
+    if [ -s "$scan_results_file" ]; then
+        while IFS='|' read -r intent_file state_file completion_status; do
+            local base_name=$(basename "$intent_file" .intent.carl)
+            local intent_type=$(basename "$(dirname "$intent_file")")
+            
+            if [ "$completion_status" = "aligned_completion" ]; then
+                echo "✅ **Ready for Organization**: $intent_type/$base_name"
+                completed_found=$((completed_found + 1))
+            elif [ "$completion_status" = "partial_completion" ]; then
+                echo "⚠️  **Partial Completion**: $intent_type/$base_name"
+                partially_completed=$((partially_completed + 1))
+            fi
+        done < "$scan_results_file"
+    fi
+    
+    # Clean up temp file
+    rm -f "$scan_results_file" 2>/dev/null
+    
+    echo
+    echo "### Summary"
+    echo "- **Ready for Organization**: $completed_found items"
+    echo "- **Partially Completed**: $partially_completed items"
+    echo "- **Completed Directories**: All ensured to exist"
+    
+    if [ $completed_found -gt 0 ]; then
+        echo
+        echo "**Next Steps**: Items ready for organization can be processed by file movement system"
+        return 0
+    else
+        echo
+        echo "**Status**: No completed items detected requiring organization"
+        return 1
+    fi
+}
+
+# Safe File Movement Functions with Git History Preservation
+
+carl_validate_git_repository() {
+    local carl_root="$(carl_get_root)"
+    
+    # Check if we're in a git repository
+    if ! git -C "$carl_root" rev-parse --git-dir >/dev/null 2>&1; then
+        echo "not_git_repository"
+        return 1
+    fi
+    
+    # Check if git status is clean (no uncommitted changes)
+    if ! git -C "$carl_root" diff-index --quiet HEAD 2>/dev/null; then
+        echo "dirty_working_tree"
+        return 2
+    fi
+    
+    echo "clean_git_repository"
+    return 0
+}
+
+carl_safe_git_mv() {
+    local source_file="$1"
+    local target_file="$2"
+    local carl_root="$(carl_get_root)"
+    
+    # Validation checks
+    if [ ! -f "$source_file" ]; then
+        echo "❌ Error: Source file does not exist: $source_file"
+        return 1
+    fi
+    
+    local target_dir=$(dirname "$target_file")
+    if [ ! -d "$target_dir" ]; then
+        echo "❌ Error: Target directory does not exist: $target_dir"
+        return 1
+    fi
+    
+    # Check if target file already exists
+    if [ -f "$target_file" ]; then
+        echo "❌ Error: Target file already exists: $target_file"
+        return 1
+    fi
+    
+    # Validate git repository status
+    local git_status=$(carl_validate_git_repository)
+    
+    if [ "$git_status" = "not_git_repository" ]; then
+        echo "⚠️  Warning: Not in git repository, using regular mv"
+        if mv "$source_file" "$target_file" 2>/dev/null; then
+            echo "✅ Moved: $source_file → $target_file (regular mv)"
+            return 0
+        else
+            echo "❌ Error: Failed to move file"
+            return 1
+        fi
+    elif [ "$git_status" = "dirty_working_tree" ]; then
+        echo "⚠️  Warning: Git working tree is dirty, using regular mv"
+        if mv "$source_file" "$target_file" 2>/dev/null; then
+            echo "✅ Moved: $source_file → $target_file (regular mv)"
+            return 0
+        else
+            echo "❌ Error: Failed to move file"
+            return 1
+        fi
+    fi
+    
+    # Use git mv to preserve history
+    if git -C "$carl_root" mv "$source_file" "$target_file" 2>/dev/null; then
+        echo "✅ Moved: $source_file → $target_file (git mv)"
+        return 0
+    else
+        echo "❌ Error: Git mv failed, attempting fallback"
+        # Fallback to regular mv
+        if mv "$source_file" "$target_file" 2>/dev/null; then
+            echo "✅ Moved: $source_file → $target_file (fallback mv)"
+            return 0
+        else
+            echo "❌ Error: Both git mv and regular mv failed"
+            return 1
+        fi
+    fi
+}
+
+carl_move_completed_file_pair() {
+    local intent_file="$1"
+    local state_file="$2"
+    local carl_root="$(carl_get_root)"
+    
+    # Validate completion status first
+    local completion_status=$(carl_validate_completion_alignment "$intent_file" "$state_file")
+    if [ "$completion_status" != "aligned_completion" ]; then
+        echo "❌ Error: Files are not aligned for completion: $completion_status"
+        return 1
+    fi
+    
+    # Determine target paths
+    local intent_dir=$(dirname "$intent_file")
+    local intent_type=$(basename "$intent_dir")
+    local base_name=$(basename "$intent_file" .intent.carl)
+    
+    local target_intent_dir="$intent_dir/completed"
+    local target_state_dir="$target_intent_dir"
+    
+    local target_intent_file="$target_intent_dir/$base_name.intent.carl"
+    local target_state_file="$target_state_dir/$base_name.state.carl"
+    
+    # Ensure target directory exists
+    if ! carl_create_completed_directory "$intent_dir" >/dev/null; then
+        echo "❌ Error: Failed to create completed directory"
+        return 1
+    fi
+    
+    # Create temporary backup state for rollback
+    local backup_dir="/tmp/carl_backup_$(date +%s)"
+    mkdir -p "$backup_dir"
+    
+    cp "$intent_file" "$backup_dir/" 2>/dev/null
+    if [ -f "$state_file" ]; then
+        cp "$state_file" "$backup_dir/" 2>/dev/null
+    fi
+    
+    # Atomic operation: move both files
+    local intent_moved=false
+    local state_moved=false
+    
+    # Move intent file
+    if carl_safe_git_mv "$intent_file" "$target_intent_file"; then
+        intent_moved=true
+    else
+        echo "❌ Error: Failed to move intent file"
+        rm -rf "$backup_dir" 2>/dev/null
+        return 1
+    fi
+    
+    # Move state file if it exists
+    if [ -f "$state_file" ]; then
+        if carl_safe_git_mv "$state_file" "$target_state_file"; then
+            state_moved=true
+        else
+            echo "❌ Error: Failed to move state file, rolling back intent file"
+            # Rollback intent file
+            carl_safe_git_mv "$target_intent_file" "$intent_file" >/dev/null
+            rm -rf "$backup_dir" 2>/dev/null
+            return 1
+        fi
+    fi
+    
+    # Validate successful movement
+    if [ -f "$target_intent_file" ] && ([ ! -f "$state_file" ] || [ -f "$target_state_file" ]); then
+        echo "✅ Successfully moved completed file pair:"
+        echo "   Intent: $intent_file → $target_intent_file"
+        if [ "$state_moved" = true ]; then
+            echo "   State:  $state_file → $target_state_file"
+        fi
+        
+        # Clean up backup
+        rm -rf "$backup_dir" 2>/dev/null
+        return 0
+    else
+        echo "❌ Error: Movement validation failed, attempting rollback"
+        # Attempt rollback
+        carl_rollback_file_movement "$backup_dir" "$intent_file" "$state_file"
+        return 1
+    fi
+}
+
+carl_rollback_file_movement() {
+    local backup_dir="$1"
+    local original_intent="$2"  
+    local original_state="$3"
+    
+    echo "🔄 Attempting rollback from backup: $backup_dir"
+    
+    if [ -d "$backup_dir" ]; then
+        local backup_intent="$backup_dir/$(basename "$original_intent")"
+        local backup_state="$backup_dir/$(basename "$original_state")"
+        
+        local rollback_success=true
+        
+        # Restore intent file
+        if [ -f "$backup_intent" ]; then
+            if ! cp "$backup_intent" "$original_intent" 2>/dev/null; then
+                rollback_success=false
+            fi
+        fi
+        
+        # Restore state file
+        if [ -f "$backup_state" ]; then
+            if ! cp "$backup_state" "$original_state" 2>/dev/null; then
+                rollback_success=false
+            fi
+        fi
+        
+        # Clean up backup
+        rm -rf "$backup_dir" 2>/dev/null
+        
+        if [ "$rollback_success" = true ]; then
+            echo "✅ Rollback successful"
+            return 0
+        else
+            echo "❌ Rollback failed - manual intervention required"
+            return 1
+        fi
+    else
+        echo "❌ No backup directory found for rollback"
+        return 1
+    fi
+}
+
+carl_organize_completed_files() {
+    local carl_root="$(carl_get_root)"
+    local scan_results_file="/tmp/carl_organize_$(date +%s).tmp"
+    
+    echo "## CARL File Organization - Completed Items"
+    echo "Timestamp: $(date -Iseconds)"
+    echo
+    
+    # Scan for completed files ready for organization
+    carl_find_completed_files "all" > "$scan_results_file"
+    
+    local organized_count=0
+    local failed_count=0
+    
+    if [ -s "$scan_results_file" ]; then
+        echo "### Processing Completed Files..."
+        
+        while IFS='|' read -r intent_file state_file completion_status; do
+            if [ "$completion_status" = "aligned_completion" ]; then
+                local base_name=$(basename "$intent_file" .intent.carl)
+                local intent_type=$(basename "$(dirname "$intent_file")")
+                
+                echo
+                echo "**Processing**: $intent_type/$base_name"
+                
+                if carl_move_completed_file_pair "$intent_file" "$state_file"; then
+                    organized_count=$((organized_count + 1))
+                else
+                    failed_count=$((failed_count + 1))
+                fi
+            fi
+        done < "$scan_results_file"
+    fi
+    
+    # Clean up temp file
+    rm -f "$scan_results_file" 2>/dev/null
+    
+    echo
+    echo "### Organization Summary"
+    echo "- **Successfully Organized**: $organized_count items"
+    echo "- **Failed**: $failed_count items"
+    
+    if [ $organized_count -gt 0 ]; then
+        echo
+        echo "**Next Steps**: Reference integrity system can now update file references"
+        return 0
+    elif [ $failed_count -gt 0 ]; then
+        echo
+        echo "**Status**: Some files failed to organize - manual intervention may be required"
+        return 1
+    else
+        echo
+        echo "**Status**: No completed files found requiring organization"
+        return 2
+    fi
+}
+
 # Pivot Detection System Functions
 # Intelligent system to distinguish strategic pivots from feature misalignment
 
@@ -2282,4 +2765,633 @@ print(json.dumps(result, indent=2))
         echo "{\"error\": \"Python3 required for pivot threshold evaluation\"}"
         return 1
     fi
+}
+
+# ==========================================
+# Story 3: Reference Integrity and Update System
+# ==========================================
+
+# Validate all references are intact after updates
+carl_validate_reference_integrity() {
+    local carl_root="$(carl_get_root)"
+    local broken_refs=0
+    local checked_refs=0
+    
+    echo "Validating reference integrity across CARL project..." >&2
+    
+    # Check active.work.carl references
+    if [ -f "$carl_root/.carl/project/active.work.carl" ]; then
+        echo "Checking active.work.carl references..." >&2
+        while IFS= read -r line; do
+            if echo "$line" | grep -q '\.intent\.carl\|\.state\.carl' 2>/dev/null; then
+                # Extract potential file paths
+                local potential_paths=$(echo "$line" | grep -o '[^[:space:]]*\.carl' 2>/dev/null || true)
+                for path in $potential_paths; do
+                    checked_refs=$((checked_refs + 1))
+                    # Check if file exists (try both absolute and relative from CARL root)
+                    if [ ! -f "$path" ] && [ ! -f "$carl_root/$path" ]; then
+                        echo "ERROR: Broken reference in active.work.carl: $path" >&2
+                        broken_refs=$((broken_refs + 1))
+                    fi
+                done
+            fi
+        done < "$carl_root/.carl/project/active.work.carl"
+    fi
+    
+    # Check state file references
+    find "$carl_root" -name "*.state.carl" -type f | while IFS= read -r state_file; do
+        if grep -q 'intent_file:' "$state_file" 2>/dev/null; then
+            local intent_ref=$(grep 'intent_file:' "$state_file" | head -1 | sed 's/.*intent_file:[[:space:]]*"//' | sed 's/".*$//')
+            if [ -n "$intent_ref" ]; then
+                checked_refs=$((checked_refs + 1))
+                # Check if referenced intent file exists
+                if [ ! -f "$carl_root/$intent_ref" ] && [ ! -f "$intent_ref" ]; then
+                    echo "ERROR: Broken intent reference in $(basename "$state_file"): $intent_ref" >&2
+                    broken_refs=$((broken_refs + 1))
+                fi
+            fi
+        fi
+    done
+    
+    echo "Reference validation complete: $checked_refs checked, $broken_refs broken" >&2
+    
+    if [ "$broken_refs" -eq 0 ]; then
+        echo "SUCCESS: All references are intact"
+        return 0
+    else
+        echo "ERROR: Found $broken_refs broken references"
+        return 1
+    fi
+}
+
+# Update references in active.work.carl to remove completed items
+carl_update_active_work_references() {
+    local intent_file="$1"
+    local carl_root="$(carl_get_root)"
+    local active_work="$carl_root/.carl/project/active.work.carl"
+    local backup_file="/tmp/active_work_backup_$(date +%s).carl"
+    
+    if [ -z "$intent_file" ]; then
+        echo "ERROR: Intent file path required"
+        return 1
+    fi
+    
+    if [ ! -f "$active_work" ]; then
+        echo "WARNING: active.work.carl not found - no updates needed"
+        return 0
+    fi
+    
+    # Create backup
+    if ! cp "$active_work" "$backup_file"; then
+        echo "ERROR: Failed to create backup of active.work.carl"
+        return 1
+    fi
+    
+    # Get the relative path and base name
+    local rel_path
+    if [[ "$intent_file" == "$carl_root"* ]]; then
+        rel_path="${intent_file#$carl_root/}"
+    else
+        rel_path="$intent_file"
+    fi
+    local base_name=$(basename "$intent_file" .intent.carl)
+    
+    # Remove references to the completed intent file
+    local temp_file="/tmp/active_work_update_$(date +%s).tmp"
+    local updated=false
+    
+    # Process the file line by line to preserve formatting
+    while IFS= read -r line; do
+        # Skip lines that reference the completed intent
+        if echo "$line" | grep -q "$rel_path\|$base_name" 2>/dev/null; then
+            echo "Removing reference: $line" >&2
+            updated=true
+            continue
+        fi
+        echo "$line"
+    done < "$active_work" > "$temp_file"
+    
+    if [ "$updated" = true ]; then
+        if mv "$temp_file" "$active_work"; then
+            echo "SUCCESS: Updated active.work.carl - removed completed item references"
+            rm -f "$backup_file" 2>/dev/null
+            return 0
+        else
+            echo "ERROR: Failed to update active.work.carl - restoring backup"
+            cp "$backup_file" "$active_work" 2>/dev/null
+            rm -f "$temp_file" "$backup_file" 2>/dev/null
+            return 1
+        fi
+    else
+        echo "INFO: No references found in active.work.carl - no updates needed"
+        rm -f "$temp_file" "$backup_file" 2>/dev/null
+        return 0
+    fi
+}
+
+# Update path references in state files
+carl_update_state_file_references() {
+    local old_path="$1"
+    local new_path="$2"
+    local carl_root="$(carl_get_root)"
+    local updated_files=0
+    local failed_files=0
+    
+    if [ -z "$old_path" ] || [ -z "$new_path" ]; then
+        echo "ERROR: Both old and new paths required"
+        return 1
+    fi
+    
+    # Convert to relative paths for consistency
+    local old_rel new_rel
+    if [[ "$old_path" == "$carl_root"* ]]; then
+        old_rel="${old_path#$carl_root/}"
+    else
+        old_rel="$old_path"
+    fi
+    
+    if [[ "$new_path" == "$carl_root"* ]]; then
+        new_rel="${new_path#$carl_root/}"
+    else
+        new_rel="$new_path"
+    fi
+    
+    echo "Updating state file references: $old_rel -> $new_rel" >&2
+    
+    # Find all state files that might contain references
+    find "$carl_root" -name "*.state.carl" -type f | while IFS= read -r state_file; do
+        if grep -q "$old_rel" "$state_file" 2>/dev/null; then
+            local backup_file="/tmp/state_backup_$(basename "$state_file")_$(date +%s).carl"
+            
+            # Create backup
+            if cp "$state_file" "$backup_file"; then
+                # Update references preserving formatting
+                if sed -i.tmp "s|$old_rel|$new_rel|g" "$state_file" 2>/dev/null; then
+                    echo "SUCCESS: Updated references in $(basename "$state_file")"
+                    updated_files=$((updated_files + 1))
+                    rm -f "$backup_file" "${state_file}.tmp" 2>/dev/null
+                else
+                    echo "ERROR: Failed to update $(basename "$state_file") - restoring backup"
+                    cp "$backup_file" "$state_file" 2>/dev/null
+                    failed_files=$((failed_files + 1))
+                    rm -f "$backup_file" "${state_file}.tmp" 2>/dev/null
+                fi
+            else
+                echo "ERROR: Failed to backup $(basename "$state_file")"
+                failed_files=$((failed_files + 1))
+            fi
+        fi
+    done
+    
+    echo "State file updates: $updated_files successful, $failed_files failed" >&2
+    
+    if [ "$failed_files" -gt 0 ]; then
+        return 1
+    else
+        return 0
+    fi
+}
+
+# Update cross-references in other intent files
+carl_update_intent_cross_references() {
+    local old_path="$1"
+    local new_path="$2"
+    local carl_root="$(carl_get_root)"
+    local updated_files=0
+    local failed_files=0
+    
+    if [ -z "$old_path" ] || [ -z "$new_path" ]; then
+        echo "ERROR: Both old and new paths required"
+        return 1
+    fi
+    
+    # Convert to relative paths
+    local old_rel new_rel
+    if [[ "$old_path" == "$carl_root"* ]]; then
+        old_rel="${old_path#$carl_root/}"
+    else
+        old_rel="$old_path"
+    fi
+    
+    if [[ "$new_path" == "$carl_root"* ]]; then
+        new_rel="${new_path#$carl_root/}"
+    else
+        new_rel="$new_path"
+    fi
+    
+    echo "Updating intent cross-references: $old_rel -> $new_rel" >&2
+    
+    # Find all intent files that might contain cross-references
+    find "$carl_root" -name "*.intent.carl" -type f | while IFS= read -r intent_file; do
+        if grep -q "$old_rel\|$(basename "$old_path" .intent.carl)" "$intent_file" 2>/dev/null; then
+            local backup_file="/tmp/intent_backup_$(basename "$intent_file")_$(date +%s).carl"
+            
+            # Create backup
+            if cp "$intent_file" "$backup_file"; then
+                # Update cross-references preserving formatting
+                local temp_file="/tmp/intent_update_$(basename "$intent_file")_$(date +%s).tmp"
+                local updated=false
+                
+                while IFS= read -r line; do
+                    # Update various reference patterns
+                    if echo "$line" | grep -q "$old_rel" 2>/dev/null; then
+                        echo "${line//$old_rel/$new_rel}"
+                        updated=true
+                    elif echo "$line" | grep -q "$(basename "$old_path" .intent.carl)" 2>/dev/null; then
+                        echo "${line//$(basename "$old_path" .intent.carl)/$(basename "$new_path" .intent.carl)}"
+                        updated=true
+                    else
+                        echo "$line"
+                    fi
+                done < "$intent_file" > "$temp_file"
+                
+                if [ "$updated" = true ]; then
+                    if mv "$temp_file" "$intent_file"; then
+                        echo "SUCCESS: Updated cross-references in $(basename "$intent_file")"
+                        updated_files=$((updated_files + 1))
+                        rm -f "$backup_file" 2>/dev/null
+                    else
+                        echo "ERROR: Failed to update $(basename "$intent_file") - restoring backup"
+                        cp "$backup_file" "$intent_file" 2>/dev/null
+                        failed_files=$((failed_files + 1))
+                        rm -f "$backup_file" "$temp_file" 2>/dev/null
+                    fi
+                else
+                    rm -f "$temp_file" "$backup_file" 2>/dev/null
+                fi
+            else
+                echo "ERROR: Failed to backup $(basename "$intent_file")"
+                failed_files=$((failed_files + 1))
+            fi
+        fi
+    done
+    
+    echo "Intent cross-reference updates: $updated_files successful, $failed_files failed" >&2
+    
+    if [ "$failed_files" -gt 0 ]; then
+        return 1
+    else
+        return 0
+    fi
+}
+
+# Scan for references to a specific file across the CARL project
+carl_scan_file_references() {
+    local target_file="$1"
+    local carl_root="$(carl_get_root)"
+    local references_file="/tmp/carl_references_$(date +%s).tmp"
+    
+    if [ -z "$target_file" ]; then
+        echo "ERROR: Target file path required"
+        return 1
+    fi
+    
+    # Convert to relative path from CARL root for consistency
+    local rel_path
+    if [[ "$target_file" == "$carl_root"* ]]; then
+        rel_path="${target_file#$carl_root/}"
+    else
+        rel_path="$target_file"
+    fi
+    
+    echo "Scanning for references to: $rel_path" >&2
+    
+    # Scan various file types for references
+    {
+        # Scan .carl files for path references
+        find "$carl_root" -name "*.carl" -type f -exec grep -l "$rel_path\|$(basename "$target_file")" {} \; 2>/dev/null || true
+        
+        # Scan active.work.carl specifically
+        if [ -f "$carl_root/.carl/project/active.work.carl" ]; then
+            if grep -q "$rel_path\|$(basename "$target_file")" "$carl_root/.carl/project/active.work.carl" 2>/dev/null; then
+                echo "$carl_root/.carl/project/active.work.carl"
+            fi
+        fi
+    } | sort -u > "$references_file"
+    
+    cat "$references_file"
+    rm -f "$references_file" 2>/dev/null
+}
+
+# Main orchestration function for reference integrity updates
+carl_update_all_references() {
+    local old_intent_path="$1"
+    local new_intent_path="$2"
+    local old_state_path="$3"
+    local new_state_path="$4"
+    local carl_root="$(carl_get_root)"
+    
+    if [ -z "$old_intent_path" ] || [ -z "$new_intent_path" ]; then
+        echo "ERROR: Old and new intent paths required"
+        return 1
+    fi
+    
+    echo "## CARL Reference Integrity Update"
+    echo "Timestamp: $(date -Iseconds)"
+    echo "Intent: $old_intent_path -> $new_intent_path"
+    if [ -n "$old_state_path" ] && [ -n "$new_state_path" ]; then
+        echo "State: $old_state_path -> $new_state_path"
+    fi
+    echo
+    
+    local update_success=true
+    
+    # Update active.work.carl references
+    echo "### Updating active.work.carl..."
+    if ! carl_update_active_work_references "$old_intent_path"; then
+        update_success=false
+    fi
+    echo
+    
+    # Update state file references if state file was moved
+    if [ -n "$old_state_path" ] && [ -n "$new_state_path" ]; then
+        echo "### Updating state file references..."
+        if ! carl_update_state_file_references "$old_intent_path" "$new_intent_path"; then
+            update_success=false
+        fi
+        echo
+    fi
+    
+    # Update intent cross-references
+    echo "### Updating intent cross-references..."
+    if ! carl_update_intent_cross_references "$old_intent_path" "$new_intent_path"; then
+        update_success=false
+    fi
+    echo
+    
+    # Validate reference integrity
+    echo "### Validating reference integrity..."
+    if ! carl_validate_reference_integrity; then
+        update_success=false
+    fi
+    echo
+    
+    if [ "$update_success" = true ]; then
+        echo "SUCCESS: Reference integrity update completed successfully"
+        return 0
+    else
+        echo "ERROR: Reference integrity update encountered errors"
+        return 1
+    fi
+}
+
+# ==========================================
+# Story 4: Workflow Integration and Session Management
+# ==========================================
+
+# Trigger organization check during task completion workflow
+carl_workflow_trigger_organization() {
+    local task_context="${1:-}"
+    local operation_type="${2:-task_completion}"
+    local carl_root="$(carl_get_root)"
+    
+    echo "## CARL Workflow Organization Trigger"
+    echo "Operation: $operation_type"
+    echo "Context: ${task_context:-automatic}"
+    echo "Timestamp: $(date -Iseconds)"
+    echo
+    
+    local organization_success=true
+    local organized_count=0
+    local error_count=0
+    
+    # Check if organization system is available
+    if ! command -v carl_scan_for_completed_work >/dev/null 2>&1; then
+        echo "WARNING: Organization system not available - skipping"
+        return 0
+    fi
+    
+    # Execute organization workflow with timeout protection
+    echo "### Scanning for completed work..."
+    local scan_results_file="/tmp/workflow_org_$(date +%s).tmp"
+    
+    if timeout 30s carl_find_completed_files "all" > "$scan_results_file" 2>&1; then
+        if [ -s "$scan_results_file" ]; then
+            echo "Found completed items for organization"
+            
+            # Process completed items
+            while IFS='|' read -r intent_file state_file completion_status; do
+                if [ "$completion_status" = "aligned_completion" ]; then
+                    echo "Processing: $(basename "$intent_file")"
+                    
+                    # Move file pair
+                    if carl_move_completed_file_pair "$intent_file" "$state_file"; then
+                        # Update references
+                        local old_intent="$intent_file"
+                        local new_intent="${intent_file/\/stories\//\/stories\/completed\/}"
+                        new_intent="${new_intent/\/features\//\/features\/completed\/}"
+                        new_intent="${new_intent/\/epics\//\/epics\/completed\/}"
+                        new_intent="${new_intent/\/technical\//\/technical\/completed\/}"
+                        
+                        local old_state="$state_file"
+                        local new_state="${state_file/\/stories\//\/stories\/completed\/}"
+                        new_state="${new_state/\/features\//\/features\/completed\/}"
+                        new_state="${new_state/\/epics\//\/epics\/completed\/}"
+                        new_state="${new_state/\/technical\//\/technical\/completed\/}"
+                        
+                        if carl_update_all_references "$old_intent" "$new_intent" "$old_state" "$new_state" >/dev/null 2>&1; then
+                            organized_count=$((organized_count + 1))
+                            echo "SUCCESS: Organized $(basename "$intent_file")"
+                        else
+                            echo "WARNING: Reference update failed for $(basename "$intent_file")"
+                            error_count=$((error_count + 1))
+                            organization_success=false
+                        fi
+                    else
+                        echo "WARNING: File movement failed for $(basename "$intent_file")"
+                        error_count=$((error_count + 1))
+                        organization_success=false
+                    fi
+                fi
+            done < "$scan_results_file"
+        else
+            echo "No completed items found - organization not needed"
+        fi
+    else
+        echo "WARNING: Organization scan timed out or failed"
+        organization_success=false
+        error_count=$((error_count + 1))
+    fi
+    
+    # Cleanup
+    rm -f "$scan_results_file" 2>/dev/null
+    
+    # Report results
+    echo
+    echo "### Organization Summary:"
+    echo "- Items organized: $organized_count"
+    echo "- Errors encountered: $error_count"
+    echo "- Overall status: $([ "$organization_success" = true ] && echo "SUCCESS" || echo "PARTIAL SUCCESS")"
+    
+    # Log operation summary (no static file update needed - status is now dynamic)
+    
+    # Always return success to avoid disrupting workflow
+    return 0
+}
+
+# Session end organization cleanup
+carl_session_end_organization() {
+    local session_context="${1:-session_cleanup}"
+    local carl_root="$(carl_get_root)"
+    
+    echo "## CARL Session End Organization Cleanup"
+    echo "Session: $session_context"
+    echo "Timestamp: $(date -Iseconds)"
+    echo
+    
+    # Perform final organization sweep
+    echo "### Final organization sweep..."
+    carl_workflow_trigger_organization "$session_context" "session_end"
+    
+    # Cleanup temporary files
+    echo "### Cleaning up organization temporary files..."
+    find /tmp -name "carl_*$(date +%Y%m%d)*" -type f -mmin +60 -delete 2>/dev/null || true
+    find /tmp -name "*_backup_*$(date +%Y%m%d)*" -type f -mmin +60 -delete 2>/dev/null || true
+    
+    # Validate final state
+    echo "### Validating final reference integrity..."
+    if carl_validate_reference_integrity >/dev/null 2>&1; then
+        echo "SUCCESS: Reference integrity maintained"
+    else
+        echo "WARNING: Reference integrity issues detected - manual review recommended"
+    fi
+    
+    echo "Session end organization cleanup completed"
+    return 0
+}
+
+# Get dynamic organization status (replaces static status file)
+carl_get_organization_status() {
+    local carl_root="$(carl_get_root)"
+    local timestamp=$(date -Iseconds)
+    
+    # Count completed items dynamically
+    local completed_stories=$(find "$carl_root/.carl/project/stories/completed" -name "*.intent.carl" 2>/dev/null | wc -l)
+    local completed_features=$(find "$carl_root/.carl/project/features/completed" -name "*.intent.carl" 2>/dev/null | wc -l)
+    local completed_epics=$(find "$carl_root/.carl/project/epics/completed" -name "*.intent.carl" 2>/dev/null | wc -l)
+    local completed_technical=$(find "$carl_root/.carl/project/technical/completed" -name "*.intent.carl" 2>/dev/null | wc -l)
+    local total_completed=$((completed_stories + completed_features + completed_epics + completed_technical))
+    local total_files=$(find "$carl_root/.carl/project"/*/completed -name "*.carl" 2>/dev/null | wc -l)
+    
+    # Check system operational status
+    local system_status="operational"
+    if [ ! -d "$carl_root/.carl/project/stories/completed" ]; then
+        system_status="not_configured"
+    fi
+    
+    # Get last organization time from newest file in completed directories
+    local last_organization="unknown"
+    local newest_file=$(find "$carl_root/.carl/project"/*/completed -name "*.carl" -printf '%T@ %p\n' 2>/dev/null | sort -n | tail -1 | cut -d' ' -f2-)
+    if [ -n "$newest_file" ]; then
+        last_organization=$(stat -c '%y' "$newest_file" 2>/dev/null || echo "unknown")
+    fi
+    
+    # Output dynamic status
+    cat << EOF
+## CARL Organization Status (Dynamic)
+Generated: $timestamp
+
+organization_summary:
+  completed_stories: $completed_stories
+  completed_features: $completed_features  
+  completed_epics: $completed_epics
+  completed_technical: $completed_technical
+  total_completed_items: $total_completed
+  total_files_in_completed: $total_files
+
+system_health:
+  organization_system: "$system_status"
+  completed_directories_exist: $([ -d "$carl_root/.carl/project/stories/completed" ] && echo "true" || echo "false")
+  last_organization_activity: "$last_organization"
+
+workflow_integration:
+  status: "active"
+  performance_impact: "minimal"
+  error_handling: "graceful_degradation"
+EOF
+}
+
+# Check if organization is needed and safe to perform
+carl_check_organization_readiness() {
+    local carl_root="$(carl_get_root)"
+    local readiness_issues=0
+    
+    # Check if CARL root is accessible
+    if [ ! -d "$carl_root" ]; then
+        echo "ERROR: CARL root directory not accessible"
+        return 1
+    fi
+    
+    # Check if required functions are available
+    local required_functions=("carl_find_completed_files" "carl_move_completed_file_pair" "carl_update_all_references")
+    for func in "${required_functions[@]}"; do
+        if ! command -v "$func" >/dev/null 2>&1; then
+            echo "WARNING: Required function $func not available"
+            readiness_issues=$((readiness_issues + 1))
+        fi
+    done
+    
+    # Check system load (avoid organization during high load)
+    if command -v uptime >/dev/null 2>&1; then
+        local load_avg=$(uptime | grep -o 'load average:.*' | cut -d: -f2 | cut -d, -f1 | tr -d ' ')
+        if [ -n "$load_avg" ] && [ "$(echo "$load_avg > 2.0" | bc 2>/dev/null || echo 0)" -eq 1 ]; then
+            echo "WARNING: High system load ($load_avg) - deferring organization"
+            readiness_issues=$((readiness_issues + 1))
+        fi
+    fi
+    
+    # Check disk space
+    local disk_usage=$(df "$carl_root" | tail -1 | awk '{print $5}' | sed 's/%//')
+    if [ "$disk_usage" -gt 90 ]; then
+        echo "WARNING: Low disk space (${disk_usage}% used) - deferring organization"
+        readiness_issues=$((readiness_issues + 1))
+    fi
+    
+    if [ "$readiness_issues" -eq 0 ]; then
+        echo "Organization readiness: READY"
+        return 0
+    else
+        echo "Organization readiness: NOT READY ($readiness_issues issues)"
+        return 1
+    fi
+}
+
+# Integrate organization trigger into existing workflows
+carl_integrate_workflow_organization() {
+    local integration_type="${1:-auto}"
+    local carl_root="$(carl_get_root)"
+    
+    echo "## CARL Workflow Organization Integration"
+    echo "Integration type: $integration_type"
+    echo "Timestamp: $(date -Iseconds)"
+    echo
+    
+    # Check readiness
+    if ! carl_check_organization_readiness; then
+        echo "Organization not ready - skipping integration"
+        return 0
+    fi
+    
+    # Trigger organization based on integration type
+    case "$integration_type" in
+        "task_completion"|"auto")
+            echo "### Task completion integration..."
+            carl_workflow_trigger_organization "task_workflow" "task_completion"
+            ;;
+        "session_end")
+            echo "### Session end integration..."
+            carl_session_end_organization "workflow_integration"
+            ;;
+        "periodic")
+            echo "### Periodic integration..."
+            carl_workflow_trigger_organization "periodic_check" "periodic"
+            ;;
+        *)
+            echo "### Default integration..."
+            carl_workflow_trigger_organization "$integration_type" "default"
+            ;;
+    esac
+    
+    echo "Workflow organization integration completed"
+    return 0
 }

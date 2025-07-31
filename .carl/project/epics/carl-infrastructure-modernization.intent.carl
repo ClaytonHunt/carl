@@ -1,0 +1,281 @@
+# CARL Infrastructure Modernization - Epic Intent
+# Created: 2025-07-31T13:22:18-04:00
+# Scope: Epic
+# Strategic Objective: Technical foundation modernization for scalable CARL system
+
+metadata:
+  id: "carl_infrastructure_modernization"
+  scope_level: "epic"
+  created_date: "2025-07-31T13:22:18-04:00"
+  created_by: "carl_plan_command"
+  project_phase: "foundation_consolidation"
+  strategic_alignment: "ai_context_optimization"
+  priority: "high"
+  complexity: "high"
+  estimated_effort: "3-4 weeks"
+
+epic_definition:
+  name: "CARL Infrastructure Modernization"
+  description: "Migrate CARL's bash-based scripts to well-architected, testable Node.js while maintaining exact functionality"
+  
+  problem_statement: |
+    Current CARL infrastructure relies on bash scripts that are difficult to maintain, test, and extend.
+    The bash-based Claude Code hook scripts and helper functions lack proper error handling, testing 
+    capabilities, and sophisticated data processing needed for advanced features like velocity measurement 
+    and stagnation detection. Need to migrate to Node.js for better maintainability while preserving 
+    all existing functionality.
+  
+  solution_vision: |
+    Migrate CARL to modern Node.js infrastructure with:
+    - Direct migration of bash hook scripts to Node.js (maintaining exact functionality)
+    - Well-architected, modular codebase with clear separation of concerns
+    - Comprehensive unit testing and integration testing
+    - Sophisticated data processing capabilities for analytics and measurement
+    - Robust error handling and logging system
+    - Foundation for future advanced features like AI context optimization and velocity analytics
+
+business_value:
+  primary_stakeholders:
+    - name: "CARL maintainer (solo developer)"
+      value: "Dramatically improved code maintainability, debugging, and feature development velocity"
+    - name: "CARL users and development teams"
+      value: "More reliable system with advanced features and better error handling"
+    - name: "Future contributors"
+      value: "Modern, testable codebase enabling community contributions and ecosystem growth"
+  
+  success_metrics:
+    - metric: "Code maintainability improvement"
+      target: "90% reduction in debugging time for infrastructure issues"
+      measurement: "Time to diagnose and fix system issues vs. current bash implementation"
+    - metric: "Feature development velocity"
+      target: "50% faster implementation of new CARL features"
+      measurement: "Development time for equivalent features in Node.js vs. bash"
+    - metric: "System reliability"
+      target: "99% uptime for CARL operations with proper error handling"
+      measurement: "Failure rate reduction and graceful error recovery"
+    - metric: "Test coverage"
+      target: "85% unit test coverage for all infrastructure components"
+      measurement: "Automated test coverage reporting"
+  
+  strategic_alignment_score: 9.5
+  business_value_score: 9.0
+  implementation_complexity_score: 8.0
+
+epic_scope:
+  core_transformation_areas:
+    - area: "Hook System Modernization"
+      description: "Convert bash-based Claude Code hooks to Node.js with proper architecture"
+      impact: "Foundation for accurate timestamp capture and advanced session tracking"
+      
+    - area: "CARL File Processing Engine"
+      description: "Sophisticated YAML/file processing with validation and transformation"
+      impact: "Enables dual-layer date system and complex data analytics"
+      
+    - area: "Session Management System"
+      description: "Robust session tracking with state persistence and correlation"
+      impact: "Critical for velocity measurement and work timing accuracy"
+      
+    - area: "Analytics and Measurement Infrastructure"
+      description: "Data processing pipeline for velocity, stagnation, and performance analytics"
+      impact: "Enables advanced project management features and AI context optimization"
+      
+    - area: "Configuration Management System"
+      description: "Centralized, validated configuration with environment-specific overrides"
+      impact: "Supports cross-platform deployment and team customization"
+      
+    - area: "Logging and Monitoring Framework"
+      description: "Comprehensive logging, error tracking, and performance monitoring"
+      impact: "Improved debugging, system reliability, and performance optimization"
+
+functional_requirements:
+  modernization_capabilities:
+    - capability: "Node.js-based hook system"
+      description: "Replace bash hooks with well-architected Node.js modules"
+      acceptance_criteria:
+        - "All Claude Code hooks (SessionStart, UserPromptSubmit, Stop) implemented in Node.js"
+        - "Modular architecture with clear separation of concerns"
+        - "Comprehensive error handling with graceful degradation"
+        - "Performance equivalent or superior to bash implementation"
+        
+    - capability: "Unit testing and quality assurance"
+      description: "Complete test suite with automated testing pipeline"
+      acceptance_criteria:
+        - "85% unit test coverage for all infrastructure components"
+        - "Integration tests for end-to-end CARL workflows"
+        - "Automated testing pipeline with CI/CD integration"
+        - "Performance regression testing"
+        
+    - capability: "Advanced data processing"
+      description: "Sophisticated CARL file processing with analytics capabilities"
+      acceptance_criteria:
+        - "YAML parsing and validation with detailed error reporting"
+        - "Data transformation pipelines for analytics and reporting"
+        - "Historical data analysis and trend calculation"
+        - "Export capabilities for external tools and reporting"
+        
+    - capability: "Configuration and environment management"
+      description: "Centralized configuration with validation and environment support"
+      acceptance_criteria:
+        - "JSON Schema validation for all configuration files"
+        - "Environment-specific configuration overrides"
+        - "Runtime configuration validation and error reporting"
+        - "Migration utilities for configuration updates"
+
+technical_requirements:
+  architecture_principles:
+    - principle: "Modular Design"
+      description: "Clear module boundaries with single responsibility principle"
+      implementation: "ES6 modules with well-defined interfaces and dependency injection"
+      
+    - principle: "Testability"
+      description: "All components designed for unit and integration testing"
+      implementation: "Jest testing framework with comprehensive mocking and fixtures"
+      
+    - principle: "Error Resilience"
+      description: "Graceful failure handling without breaking Claude Code workflows"
+      implementation: "Try-catch blocks, circuit breakers, and fallback mechanisms"
+      
+    - principle: "Performance"
+      description: "Maintain or improve current sub-100ms performance targets"
+      implementation: "Async/await patterns, caching, and performance monitoring"
+  
+  technology_stack:
+    runtime: "Node.js (guaranteed available via Claude Code installation)"
+    language: "JavaScript (ES2022) with optional TypeScript for complex modules"
+    testing: "Jest testing framework with coverage reporting"
+    file_processing: "js-yaml for YAML parsing, fs-extra for file operations"
+    configuration: "Joi or JSON Schema for configuration validation"
+    logging: "Winston or similar structured logging framework"
+    monitoring: "Built-in performance timing and metrics collection"
+  
+  backwards_compatibility:
+    approach: "Parallel implementation with gradual migration"
+    transition_strategy: "Feature flag system allowing selective Node.js adoption"
+    legacy_support: "Bash scripts maintained during transition period"
+    migration_timeline: "Phased rollout over 2-3 sprints with rollback capability"
+
+implementation_strategy:
+  development_phases:
+    phase_1: "Core Infrastructure Foundation (Week 1-2)"
+    phase_2: "Hook System Migration and Testing (Week 2-3)"
+    phase_3: "Advanced Features and Analytics Pipeline (Week 3-4)"
+    phase_4: "Performance Optimization and Documentation (Week 4)"
+  
+  risk_mitigation:
+    - risk: "Breaking existing CARL workflows during migration"
+      mitigation: "Parallel implementation with comprehensive testing before cutover"
+      
+    - risk: "Performance regression from bash to Node.js"
+      mitigation: "Performance benchmarking and optimization with rollback plan"
+      
+    - risk: "Increased complexity overwhelming solo maintainer"
+      mitigation: "Incremental implementation with clear module boundaries and documentation"
+      
+    - risk: "Node.js dependency issues across platforms"
+      mitigation: "Leverage Claude Code's Node.js installation and version management"
+
+epic_features:
+  planned_features:
+    - feature: "Node.js Hook System Architecture"
+      description: "Modern hook system replacing bash scripts"
+      priority: "critical"
+      estimated_effort: "1-2 weeks"
+      
+    - feature: "CARL File Processing Engine"
+      description: "Advanced YAML processing with validation and transformation"
+      priority: "high"
+      estimated_effort: "1 week"
+      
+    - feature: "Session Management and State Persistence"
+      description: "Robust session tracking with correlation and persistence"
+      priority: "high"
+      estimated_effort: "1 week"
+      
+    - feature: "Analytics and Measurement Infrastructure"
+      description: "Data processing pipeline for velocity and performance analytics"
+      priority: "medium"
+      estimated_effort: "1-2 weeks"
+      
+    - feature: "Configuration Management System"
+      description: "Centralized configuration with validation and environment support"
+      priority: "medium"
+      estimated_effort: "0.5-1 week"
+      
+    - feature: "Testing and Quality Assurance Framework"
+      description: "Comprehensive testing pipeline with coverage reporting"
+      priority: "high"
+      estimated_effort: "1 week (distributed across features)"
+
+dependencies:
+  internal_dependencies:
+    - dependency: "Current bash-based CARL system"
+      status: "operational"
+      requirement: "Maintain functionality during parallel implementation"
+      
+    - dependency: "Claude Code hook system"
+      status: "operational"
+      requirement: "Node.js hook execution support"
+      
+    - dependency: "CARL file format specifications"
+      status: "stable"
+      requirement: "Consistent file processing during migration"
+  
+  external_dependencies:
+    - dependency: "Node.js runtime (via Claude Code)"
+      status: "guaranteed"
+      requirement: "Node.js 16+ with ES6 module support"
+      
+    - dependency: "npm package ecosystem"
+      status: "available"
+      requirement: "Access to testing, YAML processing, and utility packages"
+
+success_definition:
+  completion_criteria:
+    - "All CARL infrastructure components migrated to Node.js with equivalent functionality"
+    - "85% unit test coverage achieved with automated testing pipeline"
+    - "Performance benchmarks meet or exceed current bash implementation"
+    - "Advanced features enabled: accurate date tracking, velocity measurement, stagnation detection"
+    - "Comprehensive documentation and migration guides completed"
+    - "Zero breaking changes to existing CARL user workflows"
+  
+  validation_approach:
+    - "Parallel testing: Node.js vs. bash implementation comparison"
+    - "Performance benchmarking with realistic CARL workloads"
+    - "User acceptance testing with existing CARL workflows"
+    - "Integration testing with Claude Code hook system"
+    - "Cross-platform compatibility validation (macOS, Linux, Windows)"
+
+business_impact:
+  immediate_benefits:
+    - "Improved maintainability and debugging capabilities"
+    - "Foundation for advanced features like velocity measurement"
+    - "Better error handling and system reliability"
+    - "Enhanced testing and quality assurance"
+  
+  long_term_strategic_value:
+    - "Enables AI context optimization features requiring sophisticated data processing"
+    - "Supports community contributions through modern, testable codebase"
+    - "Foundation for CARL ecosystem growth and plugin architecture"
+    - "Positions CARL as professional-grade development tool"
+  
+  alignment_with_strategic_objectives:
+    ai_context_optimization: "Modern infrastructure enables sub-100ms performance and 95% accuracy targets"
+    developer_adoption: "Improved reliability and advanced features drive user satisfaction and adoption"
+    platform_integration: "Professional codebase supports native Claude Code integration and ecosystem growth"
+
+related_intents:
+  enables_features:
+    - "accurate_date_tracking_system"
+    - "velocity_measurement_and_analytics" 
+    - "ai_context_optimization_engine"
+    - "community_template_ecosystem"
+  
+  strategic_dependencies:
+    - epic: "requirements_driven_workflow"
+      relationship: "builds_upon"
+      description: "Leverages workflow foundation for advanced infrastructure"
+
+next_actions:
+  immediate: "Plan Node.js hook system architecture and testing framework"
+  short_term: "Implement core infrastructure modules with comprehensive testing"
+  long_term: "Enable advanced features through modern, maintainable infrastructure foundation"

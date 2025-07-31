@@ -1,0 +1,243 @@
+# Golden Path Comparison Testing - Story Intent
+# Created: 2025-07-31T14:00:37-04:00
+# Parent Feature: comprehensive-testing-strategy
+# Scope: User Story
+
+metadata:
+  id: "golden_path_comparison_testing"
+  scope_level: "story"
+  created_date: "2025-07-31T14:00:37-04:00"
+  created_by: "carl_plan_command"
+  parent_feature: "comprehensive_testing_strategy"
+  priority: "critical"
+  complexity: "medium"
+  estimated_effort: "1 week"
+
+story_definition:
+  name: "Golden Path Comparison Testing"
+  description: "Validate Node.js scripts produce identical output to bash scripts for migration confidence"
+  
+  user_story: |
+    As a CARL maintainer migrating from bash to Node.js,
+    I want to verify that Node.js scripts produce identical outputs to bash scripts,
+    So that I can confidently migrate without breaking existing functionality.
+  
+  problem_statement: |
+    Migration requires absolute confidence that Node.js scripts behave identically to bash 
+    scripts. Need automated comparison testing that validates outputs, side effects, and 
+    error handling match exactly between implementations.
+
+acceptance_criteria:
+  primary_scenarios:
+    - scenario: "Stdout comparison for all hooks"
+      given: "Both bash and Node.js versions of a hook script"
+      when: "Executing with identical inputs"
+      then: "Stdout output matches character-for-character"
+      
+    - scenario: "File operation validation"
+      given: "Scripts that create or modify files"
+      when: "Comparing file system changes"
+      then: "Created files have identical content and permissions"
+      
+    - scenario: "Error handling comparison"
+      given: "Error conditions like missing files"
+      when: "Both scripts handle the error"
+      then: "Error messages and exit codes match exactly"
+
+technical_acceptance_criteria:
+  comparison_framework:
+    - "Capture and compare stdout, stderr, exit codes"
+    - "Track and compare file system modifications"
+    - "Test with real CARL project structures"
+    - "Generate detailed diff reports for mismatches"
+    
+  test_scenarios:
+    - "Fresh CARL installation"
+    - "Existing project with history"
+    - "Various prompt types and contexts"
+    - "All tool types and phases"
+    - "Error conditions and edge cases"
+
+gherkin_scenarios:
+  session_start_comparison: |
+    Feature: Session Start Hook Comparison
+      Background:
+        Given bash script at ".claude/hooks/session-start.sh"
+        And Node.js script at ".claude/hooks/session-start.js"
+        And comparison test framework is ready
+
+      Scenario: Fresh installation comparison
+        Given a directory with no CARL installation
+        When running both scripts with SessionStart event
+        Then stdout should match exactly including:
+          | CARL not initialized message |
+          | Command suggestions         |
+          | Audio playback calls       |
+        And no session files should be created
+        And exit codes should both be 0
+
+      Scenario: Existing project comparison
+        Given a CARL project with:
+          | 5 intent files  |
+          | 3 state files   |
+          | 2 context files |
+          | vision.carl     |
+        When running both scripts with SessionStart event
+        Then stdout should match including:
+          | Project vision first 10 lines |
+          | Health summary counts        |
+          | Session ID format           |
+        And session files should be identical
+        And symlink should point to same session
+
+      Scenario: Error condition comparison
+        Given corrupted CARL project files
+        When running both scripts
+        Then both should handle errors gracefully
+        And error messages should match
+        And Claude Code should not be affected
+
+  user_prompt_comparison: |
+    Feature: User Prompt Submit Hook Comparison
+      Background:
+        Given both versions of user-prompt-submit hook
+        And various test prompts
+
+      Scenario Outline: Context injection comparison
+        Given prompt: "<prompt>"
+        When processing through both hooks
+        Then output should be: "<expected>"
+        And context injection should be: "<context_injected>"
+
+        Examples:
+          | prompt                        | context_injected | expected                    |
+          | /carl:task implement feature  | yes             | prompt + carl context       |
+          | implement user authentication | yes             | prompt + targeted context   |
+          | what is the weather          | no              | original prompt only        |
+          | /plan new feature            | yes             | prompt + strategic context  |
+
+      Scenario: Personality injection comparison
+        Given personality system enabled
+        And personality theme is "jimmy_neutron"
+        When processing prompt "implement feature"
+        Then both outputs should contain personality instructions
+        And formatting should match exactly
+
+  tool_call_comparison: |
+    Feature: Tool Call Hook Comparison
+      Background:
+        Given both versions of tool-call hook
+        And various tool events
+
+      Scenario: Edit tool pre-phase comparison
+        Given Edit tool PreToolUse event
+        When processing through both hooks
+        Then both should play "work" audio
+        And both should log "code_editing_started"
+        And output format should match
+
+      Scenario: Test success detection comparison
+        Given Bash tool PostToolUse event
+        And output contains "all tests pass"
+        When processing through both hooks
+        Then both should play "success" audio
+        And both should log milestone "tests_passing"
+        And celebration behavior should match
+
+implementation_approach:
+  test_harness_design: |
+    class ComparisonTestHarness {
+      constructor() {
+        this.tempDir = null;
+        this.bashPath = '.claude/hooks';
+        this.nodePath = '.claude/hooks';
+      }
+      
+      async setup(scenario) {
+        this.tempDir = await createTempProject(scenario);
+        process.env.CARL_ROOT = this.tempDir;
+      }
+      
+      async runBash(script, input) {
+        const result = await exec(`bash ${script}`, {
+          input: JSON.stringify(input),
+          cwd: this.tempDir
+        });
+        return this.captureResult(result);
+      }
+      
+      async runNode(script, input) {
+        const result = await exec(`node ${script}`, {
+          input: JSON.stringify(input),
+          cwd: this.tempDir
+        });
+        return this.captureResult(result);
+      }
+      
+      async compare(bashResult, nodeResult) {
+        return {
+          stdout: bashResult.stdout === nodeResult.stdout,
+          stderr: bashResult.stderr === nodeResult.stderr,
+          exitCode: bashResult.exitCode === nodeResult.exitCode,
+          files: await this.compareFiles(),
+          diff: this.generateDiff(bashResult, nodeResult)
+        };
+      }
+    }
+
+  test_data_capture:
+    - "Record bash outputs for each scenario"
+    - "Create fixture files from real CARL projects"
+    - "Document expected behaviors"
+    - "Build regression test suite"
+
+test_fixtures:
+  project_structures:
+    empty_project: "No CARL files"
+    small_project: "5-10 CARL files"
+    large_project: "50+ CARL files"
+    corrupted_project: "Invalid YAML files"
+    
+  event_payloads:
+    session_start: '{"event": "SessionStart", "session_id": "test-123"}'
+    user_prompt: '{"prompt": "test prompt"}'
+    tool_pre: '{"tool": "Edit", "phase": "pre"}'
+    tool_post: '{"tool": "Edit", "phase": "post", "result": "success"}'
+
+validation_criteria:
+  exact_match_requirements:
+    - "Character-for-character stdout matching"
+    - "Identical file contents and structure"
+    - "Same error messages and codes"
+    - "Matching timing and order of operations"
+    
+  acceptable_differences:
+    - "Timestamps (use fixed time in tests)"
+    - "Temp file paths (normalize in comparison)"
+    - "Process IDs (filter from output)"
+
+success_definition:
+  completion_criteria:
+    - "All golden path scenarios passing"
+    - "100% output matching achieved"
+    - "File operations verified identical"
+    - "Error handling confirmed equivalent"
+    - "Performance within acceptable bounds"
+    
+  deliverables:
+    - "Comparison test suite"
+    - "Bash output fixtures"
+    - "Diff reports for any mismatches"
+    - "Migration confidence report"
+
+dependencies:
+  requires:
+    - "Bash hook scripts (existing)"
+    - "Node.js hook scripts (implemented)"
+    - "Test project fixtures"
+    - "Comparison framework"
+
+next_actions:
+  immediate: "Set up comparison test framework"
+  implementation: "Capture bash outputs for all scenarios"
+  validation: "Run comparison tests and fix mismatches"

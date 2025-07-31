@@ -10,7 +10,7 @@ complexity: "medium"
 priority: "P0"
 estimated_duration: "4 hours"
 created_date: "2025-07-30T18:50:00-04:00"
-status: "planning"
+status: "completed"
 
 intent_definition:
   what: "Streamline /carl:task command to match the simplified architecture of /carl:plan with external workflow files"

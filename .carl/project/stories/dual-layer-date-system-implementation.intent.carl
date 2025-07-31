@@ -1,0 +1,196 @@
+# Dual-Layer Date System Implementation - Story Intent
+# Created: 2025-07-31T12:49:33-04:00
+# Parent Feature: accurate-date-tracking-system
+# Scope: User Story
+
+metadata:
+  id: "dual_layer_date_system_implementation"
+  scope_level: "story"
+  created_date: "2025-07-31T12:49:33-04:00"
+  created_by: "carl_plan_command"
+  parent_feature: "accurate_date_tracking_system"
+  priority: "high"
+  complexity: "medium"
+  estimated_effort: "2-3 days"
+
+story_definition:
+  name: "Dual-Layer Date System Implementation"
+  description: "Implement separate date fields for planning estimates vs. actual work timestamps in all CARL file types"
+  
+  user_story: |
+    As a project manager using CARL for planning and tracking,
+    I want to maintain planning estimates while also tracking actual work timing,
+    So that I can improve future estimates while measuring real delivery performance.
+  
+  problem_statement: |
+    Current CARL files mix planning estimates with fictional "actual" timing data, making it 
+    impossible to distinguish between planned vs. actual work timing. Need separate layers
+    to preserve planning capabilities while enabling real performance measurement.
+
+acceptance_criteria:
+  primary_scenarios:
+    - scenario: "Planning layer date preservation"
+      given: "CARL file created during planning phase"
+      when: "Planning estimates are defined for work timing"
+      then: "Estimated dates are preserved in separate planning layer fields"
+      
+    - scenario: "Actual work layer population"
+      given: "Work begins on a CARL intent with planning estimates"
+      when: "Real work sessions occur with timestamp capture"
+      then: "Actual timing data is populated without overwriting planning estimates"
+      
+    - scenario: "Dual-layer date display and analysis"
+      given: "CARL file contains both planning and actual timing data"
+      when: "Status or analysis commands are executed"
+      then: "Both planned vs. actual timing is displayed for comparison"
+      
+    - scenario: "Backwards compatibility preservation"
+      given: "Existing CARL files with current date fields"
+      when: "Dual-layer system is deployed"
+      then: "Existing files continue to work without modification"
+
+technical_acceptance_criteria:
+  file_format_requirements:
+    - "All CARL file templates support dual-layer date fields"
+    - "Planning layer fields: estimated_start_date, estimated_completion_date, estimated_duration"
+    - "Actual work layer fields: actual_work_started, actual_work_completed, actual_duration_hours"
+    - "Backwards compatibility maintained for existing single-layer date fields"
+  
+  template_system_requirements:
+    - "state.template.carl updated with dual-layer date section"
+    - "intent.template.carl updated with planning layer date fields"
+    - "Template variable substitution supports both planning and actual timestamps"
+    - "Default values for actual fields when work hasn't started (null/pending)"
+  
+  integration_requirements:
+    - "CARL command system recognizes both date layers"
+    - "Status dashboard displays planned vs. actual timing comparison"
+    - "Planning commands populate estimate layer, work commands populate actual layer"
+
+functional_requirements:
+  core_functionality:
+    - capability: "Planning layer date management"
+      description: "Support for planning estimates with confidence levels and human-readable durations"
+      fields:
+        - "estimated_start_date: ISO 8601 timestamp"
+        - "estimated_completion_date: ISO 8601 timestamp"
+        - "estimated_duration: '5 days, medium confidence'"
+        - "planning_confidence: low/medium/high"
+      
+    - capability: "Actual work layer data capture"
+      description: "Real timestamp fields populated by work session tracking"
+      fields:
+        - "actual_work_started: ISO 8601 timestamp"
+        - "actual_work_completed: ISO 8601 timestamp"
+        - "actual_duration_hours: decimal hours calculated"
+        - "work_session_count: number of discrete sessions"
+      
+    - capability: "Comparative analysis support"
+      description: "Enable comparison between planned and actual timing for accuracy improvement"
+      derived_fields:
+        - "estimate_accuracy_percentage: (estimated vs actual) * 100"
+        - "variance_trend: ahead_of_schedule/on_schedule/behind_schedule"
+        - "completion_confidence_validation: planning accuracy track record"
+
+implementation_approach:
+  development_tasks:
+    - task: "Update CARL file format specifications"
+      description: "Define dual-layer date field schema and backwards compatibility rules"
+      effort: "0.5 days"
+      
+    - task: "Enhance state.template.carl with dual-layer dates"
+      description: "Add planning and actual work date sections to state file template"
+      effort: "0.5 days"
+      
+    - task: "Update intent.template.carl with planning layer"
+      description: "Add planning estimate fields to intent file template"
+      effort: "0.5 days"
+      
+    - task: "Implement template variable substitution"
+      description: "Support dual-layer date variables in CARL file generation"
+      effort: "1 day"
+      
+    - task: "Update CARL command parsing and display"
+      description: "Modify commands to recognize and display both date layers appropriately"
+      effort: "1 day"
+
+testing_strategy:
+  test_scenarios:
+    - "New CARL file creation with dual-layer date system"
+    - "Existing CARL file backwards compatibility validation"
+    - "Planning vs. actual date comparison accuracy"
+    - "Template system date variable substitution"
+    - "Cross-platform date format consistency"
+
+file_format_specification:
+  planning_layer_section: |
+    planning_estimates:
+      estimated_start_date: "2025-08-15T09:00:00-05:00"
+      estimated_completion_date: "2025-08-20T17:00:00-05:00"  
+      estimated_duration: "5 days, medium confidence"
+      planning_confidence: "medium"
+      planning_notes: "Based on similar feature complexity from previous sprint"
+  
+  actual_work_layer_section: |
+    actual_work_timing:
+      actual_work_started: "2025-08-16T14:23:15-05:00"
+      actual_work_completed: null  # populated when work completes
+      actual_duration_hours: null  # calculated from session data
+      work_session_count: 1
+      last_activity_timestamp: "2025-08-16T14:23:15-05:00"
+  
+  comparative_analysis_section: |
+    timing_analysis:
+      estimate_accuracy_percentage: null  # calculated when work completes
+      schedule_variance: "1_day_behind_estimate"
+      completion_trend: "on_track"  # updated as work progresses
+
+dependencies:
+  internal:
+    - dependency: "CARL file format specifications"
+      status: "needs_update"
+      requirement: "Define dual-layer schema and backwards compatibility"
+      
+    - dependency: "Template system functionality"
+      status: "operational"
+      requirement: "Variable substitution for dual-layer dates"
+      
+  external:
+    - dependency: "ISO 8601 date format standards"
+      status: "adopted"
+      requirement: "Consistent timestamp format across both layers"
+
+migration_strategy:
+  existing_file_handling:
+    approach: "Additive fields with preservation of existing data"
+    compatibility: "Existing single-layer dates remain functional"
+    migration_utility: "Optional conversion tool for teams wanting historical analysis"
+  
+  gradual_adoption:
+    phase_1: "New files use dual-layer system by default"
+    phase_2: "Existing files optionally converted via migration utility"
+    phase_3: "Full ecosystem standardization on dual-layer approach"
+
+success_definition:
+  completion_criteria:
+    - "All CARL file templates support dual-layer date fields"
+    - "New CARL files created with separate planning and actual timing sections"
+    - "Existing CARL files continue to function without modification"
+    - "Template system supports dual-layer date variable substitution"
+    - "Commands display appropriate date layer based on context"
+  
+  validation_approach:
+    - "Template generation testing with dual-layer dates"
+    - "Backwards compatibility testing with existing CARL files"
+    - "Date format consistency validation across platforms"
+
+related_intents:
+  parent_feature: "accurate_date_tracking_system"
+  sibling_stories:
+    - "real_time_work_timestamp_capture"
+    - "velocity_measurement_and_analytics"
+    - "backlog_stagnation_detection_system"
+  
+next_actions:
+  immediate: "Update CARL file format specifications for dual-layer date schema"
+  implementation: "Enhance state.template.carl and intent.template.carl with new date sections"

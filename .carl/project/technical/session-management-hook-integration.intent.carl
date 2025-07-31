@@ -1,0 +1,276 @@
+# Session Management Hook Integration - Technical Intent
+# Created: 2025-07-31T12:49:33-04:00
+# Parent Feature: accurate-date-tracking-system
+# Scope: Technical Implementation
+
+metadata:
+  id: "session_management_hook_integration"
+  scope_level: "technical"
+  created_date: "2025-07-31T12:49:33-04:00"
+  created_by: "carl_plan_command"
+  parent_feature: "accurate_date_tracking_system"
+  priority: "high"
+  complexity: "medium"
+  estimated_effort: "2-3 days"
+
+technical_definition:
+  name: "Session Management Hook Integration"
+  description: "Integrate CARL work timestamp capture with Claude Code hooks system for automatic session tracking"
+  
+  problem_statement: |
+    Need reliable automatic timestamp capture during CARL work sessions without manual intervention.
+    Claude Code hooks system provides the infrastructure for session event detection, but requires
+    integration with CARL's work tracking and state management systems.
+  
+  solution_approach: |
+    Leverage Claude Code hooks (SessionStart, UserPromptSubmit, Stop) to automatically capture
+    work session timestamps and integrate with CARL context detection to identify when work
+    is being performed on specific CARL intents. Update state files with real timestamps.
+
+technical_requirements:
+  claude_code_integration:
+    - requirement: "Hook script registration for session lifecycle events"
+      specification: "Configure SessionStart, UserPromptSubmit, and Stop hooks in settings.json"
+      
+    - requirement: "CARL context detection during sessions"
+      specification: "Identify when session work is related to specific CARL intents"
+      
+    - requirement: "Automatic timestamp capture without user intervention"  
+      specification: "Capture ISO 8601 timestamps during hook execution"
+      
+    - requirement: "State file updates via hook system"
+      specification: "Update corresponding .state.carl files with real work timestamps"
+  
+  hook_implementation_strategy:
+    session_start_hook:
+      purpose: "Capture work session initiation timestamp"
+      trigger: "SessionStart hook when Claude Code session begins"
+      action: "Detect CARL context and record actual_work_started timestamp"
+      
+    user_prompt_submit_hook:
+      purpose: "Update last activity timestamp during ongoing work"
+      trigger: "UserPromptSubmit hook on each user interaction"
+      action: "Update last_activity_timestamp for active CARL work items"
+      
+    session_stop_hook:
+      purpose: "Capture work session completion timestamp"
+      trigger: "Stop hook when agent finishes responding or session ends"
+      action: "Calculate session duration and update actual work timing data"
+
+implementation_architecture:
+  hook_script_structure:
+    base_script: ".claude/hooks/carl-timestamp-tracking.py"
+    configuration: ".claude/settings.json (hooks section)"
+    utilities: ".carl/scripts/timestamp-utilities.sh"
+    state_management: ".carl/scripts/state-file-updater.sh"
+  
+  hook_configuration_example: |
+    {
+      "hooks": {
+        "SessionStart": [
+          {
+            "hooks": [
+              {
+                "type": "command",
+                "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/carl-session-start.py"
+              }
+            ]
+          }
+        ],
+        "UserPromptSubmit": [
+          {
+            "hooks": [
+              {
+                "type": "command", 
+                "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/carl-activity-update.py"
+              }
+            ]
+          }
+        ],
+        "Stop": [
+          {
+            "hooks": [
+              {
+                "type": "command",
+                "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/carl-session-end.py"
+              }
+            ]
+          }
+        ]
+      }
+    }
+
+hook_script_specifications:
+  carl_session_start_script:
+    file_path: ".claude/hooks/carl-session-start.py"
+    inputs: "JSON session metadata from Claude Code"
+    processing: |
+      1. Parse session JSON for project context and working directory
+      2. Check for active CARL work context (via carl_get_active_context)
+      3. If CARL work detected, capture actual_work_started timestamp
+      4. Update corresponding .state.carl file with session start data
+      5. Initialize session tracking for work duration calculation
+    outputs: "Updated state file with real work start timestamp"
+    
+  carl_activity_update_script:
+    file_path: ".claude/hooks/carl-activity-update.py"
+    inputs: "User prompt and session context from Claude Code"
+    processing: |
+      1. Detect if prompt relates to active CARL work (keywords: /carl:task, file mentions)
+      2. Update last_activity_timestamp for relevant CARL items
+      3. Increment activity counter for session tracking
+      4. Log meaningful activity vs. superficial interactions
+    outputs: "Updated state files with last activity timestamps"
+    
+  carl_session_end_script:
+    file_path: ".claude/hooks/carl-session-end.py"
+    inputs: "Session completion metadata from Claude Code"
+    processing: |
+      1. Calculate total session duration from start to end
+      2. Determine if meaningful work was completed during session
+      3. Update actual_work_completed if work item finished
+      4. Calculate actual_duration_hours and increment work_session_count
+      5. Clean up temporary session tracking data
+    outputs: "Final state file updates with work completion data"
+
+carl_context_detection:
+  active_work_identification:
+    method: "Integration with existing carl_get_active_context() function"
+    indicators: |
+      - Active work queue items from .carl/active-work.carl
+      - Recent /carl:task command execution context
+      - File system activity in CARL project directories
+      - User prompts mentioning specific CARL intent names
+    
+  work_relevance_classification:
+    high_relevance: |
+      - Direct /carl:task execution on specific intents
+      - File modifications in CARL project directories
+      - Commits with CARL-related messages
+    medium_relevance: |
+      - General development work in project with active CARL context
+      - Planning or analysis activities related to CARL items
+    low_relevance: |
+      - Unrelated development work
+      - System administration or documentation tasks
+
+timestamp_capture_implementation:
+  timestamp_format: "ISO 8601 with timezone (date -Iseconds)"
+  storage_locations:
+    - "state_files: .carl/project/{scope}/*.state.carl"
+    - "session_logs: .carl/.tmp/session-tracking/*.json"
+    - "activity_history: .carl/analytics/activity-log.csv"
+    
+  data_persistence_strategy:
+    immediate_updates: "State file updates during hook execution"
+    session_correlation: "Temporary tracking files for session duration calculation"
+    historical_archival: "Long-term activity logs for velocity analysis"
+
+error_handling_and_reliability:
+  hook_failure_resilience:
+    - "Graceful degradation if hook scripts fail (no impact on Claude Code operation)"
+    - "Retry logic for state file update failures"
+    - "Fallback to manual timestamp capture if automatic system unavailable"
+    
+  data_consistency:
+    - "Atomic state file updates to prevent corruption during concurrent access"
+    - "Validation of timestamp format and chronological ordering"
+    - "Recovery procedures for incomplete session tracking data"
+    
+  cross_platform_compatibility:
+    - "Python-based hook scripts for cross-platform consistency"
+    - "Bash utility integration for CARL-specific operations"
+    - "Path normalization for Windows/macOS/Linux compatibility"
+
+testing_strategy:
+  hook_integration_testing:
+    - "Mock Claude Code session events to test hook script execution"
+    - "Validate timestamp capture accuracy and format consistency"
+    - "Test CARL context detection with various session scenarios"
+    - "Verify state file updates occur correctly during hook execution"
+    
+  end_to_end_workflow_testing:
+    - "Complete work session simulation from start to completion"
+    - "Multi-session work tracking validation"
+    - "Cross-platform hook execution consistency"
+    - "Performance impact measurement on Claude Code session startup"
+
+development_tasks:
+  task_breakdown:
+    - task: "Implement Python hook scripts for session lifecycle tracking"
+      description: "Create carl-session-start.py, carl-activity-update.py, carl-session-end.py"
+      effort: "1.5 days"
+      
+    - task: "Enhance CARL context detection for hook integration"
+      description: "Modify carl_get_active_context() to support hook-based work identification"
+      effort: "0.5 days"
+      
+    - task: "Implement state file update utilities for hook system"
+      description: "Atomic state file update functions callable from Python hooks"
+      effort: "0.5 days"
+      
+    - task: "Configure Claude Code hooks integration"
+      description: "Update .claude/settings.json with hook registration and test configuration"
+      effort: "0.5 days"
+      
+    - task: "Cross-platform testing and validation"
+      description: "Test hook execution across macOS, Linux, Windows environments"
+      effort: "1 day"
+
+performance_considerations:
+  hook_execution_overhead:
+    target: "<50ms additional overhead per session start/end"
+    optimization: "Efficient CARL context detection and minimal file I/O operations"
+    
+  session_impact:
+    goal: "No noticeable impact on Claude Code session responsiveness"
+    monitoring: "Performance metrics collection during hook execution"
+    
+  scalability:
+    consideration: "Hook performance with large numbers of CARL files and long sessions"
+    approach: "Lazy loading and caching strategies for CARL context data"
+
+dependencies:
+  internal:
+    - dependency: "CARL session management system (carl-helpers.sh)"
+      status: "operational"
+      requirement: "Active work context detection and state file management"
+      
+    - dependency: "Dual-layer date system implementation"
+      status: "planned"
+      requirement: "State file format supporting actual work timing fields"
+      
+  external:
+    - dependency: "Claude Code hooks system"
+      status: "operational"  
+      requirement: "SessionStart, UserPromptSubmit, and Stop hook functionality"
+      
+    - dependency: "Python runtime environment"
+      status: "assumed_available"
+      requirement: "Python interpreter for hook script execution"
+
+success_definition:
+  completion_criteria:
+    - "Claude Code hooks configured to capture CARL work session timestamps"
+    - "Automatic work start timestamp capture on session initiation with CARL context"
+    - "Activity timestamp updates during ongoing work sessions"
+    - "Work completion timestamp capture and duration calculation"
+    - "Cross-platform compatibility verified for hook execution"
+  
+  validation_approach:
+    - "End-to-end session tracking validation with real CARL work scenarios"
+    - "Hook execution performance testing"
+    - "State file update accuracy verification"
+    - "Cross-platform hook functionality testing"
+
+related_intents:
+  parent_feature: "accurate_date_tracking_system"
+  supports_stories:
+    - "real_time_work_timestamp_capture"
+    - "dual_layer_date_system_implementation"
+    - "velocity_measurement_and_analytics"
+    - "backlog_stagnation_detection_system"
+  
+next_actions:
+  immediate: "Implement Python hook scripts for session lifecycle tracking"
+  integration: "Configure Claude Code hooks and test with CARL context detection"
