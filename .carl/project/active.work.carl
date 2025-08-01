@@ -1,12 +1,12 @@
 active_intent:
-  id: epics/requirements-driven-workflow
-  path: .carl/project/epics/requirements-driven-workflow.intent.carl
-  state_path: .carl/project/epics/requirements-driven-workflow.state.carl
-  started: 2025-07-30T11:20:00-04:00
-  last_activity: 2025-07-30T11:25:00-04:00
-  completion: 85
-  current_phase: command_updates
-  current_substep: command_updates_phase_complete
+  id: system/codebase-analysis-sync
+  path: .carl/project/technical/codebase-analysis-sync.intent.carl
+  state_path: .carl/project/technical/codebase-analysis-sync.state.carl
+  started: 2025-08-01T07:56:00-04:00
+  last_activity: 2025-08-01T08:00:00-04:00
+  completion: 75
+  current_phase: analysis_and_update
+  current_substep: carl_files_sync_in_progress
 work_queue:
   in_progress:
     - id: epics/requirements-driven-workflow
