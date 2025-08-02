@@ -1,7 +1,7 @@
 ---
 name: carl-mcp-configurator
 description: Use proactively for detecting MCP opportunities during project analysis, researching suitable MCPs for technology stacks, generating .mcp.json configurations, and integrating MCP capabilities into CARL workflows. Specialist for analyzing projects to identify both core CARL MCPs and project-specific MCP needs.
-tools: Read, Write, Glob, Grep, WebSearch, WebFetch, Bash
+tools: [Read, Write, Glob, Grep, WebSearch, WebFetch, Bash]
 ---
 
 # Purpose

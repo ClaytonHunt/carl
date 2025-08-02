@@ -524,9 +524,10 @@ CARL operates through Claude Code's hook system with minimal, focused shell scri
 - **Zero Dependencies**: Pure bash scripts, no external packages
 - **Single Responsibility**: Each hook script has one clear responsibility
 - **Multiple Hooks Per Type**: Use multiple focused scripts rather than monolithic hooks
-- **Sequential Execution**: PostToolUse hooks execute in order (validation → progress → quality → completion → extraction)
+- **Blocking vs Non-blocking**: Gate hooks run synchronously, informational hooks run async with `&`
+- **Performance Optimized**: Async execution for non-critical operations to stay under 60-second timeout
 - **Token Efficient**: Minimal context injection, maximum value
-- **Fast Execution**: Well under 60-second timeout per hook
+- **Built-in Logging**: Leverage Claude Code's native JSON logging capabilities for metrics
 
 #### **Core Hooks (Minimal Set)**
 1. **SessionStart Hook**
@@ -541,13 +542,13 @@ CARL operates through Claude Code's hook system with minimal, focused shell scri
    - Minimal context: Just active work and relevant scope files
    - ~25 lines of intelligent context loading
 
-3. **PostToolUse Hooks** (Write/Edit tools only - Multiple focused scripts)
-   - **Schema Validation Hook**: Validate CARL files against `.carl/schemas/` definitions
-   - **Progress Tracking Hook**: Update progress tracking in daily session files  
-   - **Quality Gate Hook**: Conditional TDD gate enforcement (when TDD enabled)
-   - **Completion Handler Hook**: Move completed items to `completed/` subdirectory
-   - **Tech Debt Extraction Hook**: Extract TODO/FIXME/HACK comments to `tech-debt.carl`
-   - Each hook: ~15-20 lines with single responsibility
+3. **PostToolUse Hooks** (Write/Edit tools only - Async-optimized execution)
+   - **Schema Validation Hook**: Validate CARL files against `.carl/schemas/` definitions (BLOCKING)
+   - **Quality Gate Hook**: Conditional TDD gate enforcement when TDD enabled (BLOCKING)
+   - **Progress Tracking Hook**: Update progress tracking in daily session files (ASYNC)
+   - **Completion Handler Hook**: Move completed items to `completed/` subdirectory (ASYNC)
+   - **Tech Debt Extraction Hook**: Extract TODO/FIXME/HACK comments to `tech-debt.carl` (ASYNC)
+   - **Hook Execution Pattern**: Blocking hooks → Async hooks with `&` → `wait` for completion
 
 4. **Stop Hook**
    - Log completed work to daily session file
@@ -602,23 +603,7 @@ Single sourced file with core utilities:
       "hooks": [
         {
           "type": "command", 
-          "command": "bash ${CLAUDE_PROJECT_DIR}/.carl/hooks/schema-validate.sh"
-        },
-        {
-          "type": "command",
-          "command": "bash ${CLAUDE_PROJECT_DIR}/.carl/hooks/progress-track.sh"
-        },
-        {
-          "type": "command",
-          "command": "bash ${CLAUDE_PROJECT_DIR}/.carl/hooks/quality-gate.sh"
-        },
-        {
-          "type": "command",
-          "command": "bash ${CLAUDE_PROJECT_DIR}/.carl/hooks/completion-handler.sh"
-        },
-        {
-          "type": "command",
-          "command": "bash ${CLAUDE_PROJECT_DIR}/.carl/hooks/tech-debt-extract.sh"
+          "command": "bash ${CLAUDE_PROJECT_DIR}/.carl/hooks/post-tool-orchestrator.sh"
         }
       ]
     }],
@@ -639,6 +624,36 @@ Single sourced file with core utilities:
   }
 }
 ```
+
+#### **Hook Execution Patterns**
+
+**Async Hook Orchestration** (`post-tool-orchestrator.sh`)
+- **Purpose**: Single entry point for PostToolUse processing with optimized async execution
+- **Pattern**: Blocking hooks execute first, async hooks run in parallel, `wait` ensures completion
+- **Implementation**:
+  ```bash
+  #!/bin/bash
+  # Blocking hooks (must complete before continuing)
+  bash ${CLAUDE_PROJECT_DIR}/.carl/hooks/schema-validate.sh
+  if [[ $? -ne 0 ]]; then exit 1; fi  # Block on validation failure
+  
+  bash ${CLAUDE_PROJECT_DIR}/.carl/hooks/quality-gate.sh
+  if [[ $? -ne 0 ]]; then exit 1; fi  # Block on quality failure
+  
+  # Async hooks (can run in parallel)
+  bash ${CLAUDE_PROJECT_DIR}/.carl/hooks/progress-track.sh &
+  bash ${CLAUDE_PROJECT_DIR}/.carl/hooks/completion-handler.sh &
+  bash ${CLAUDE_PROJECT_DIR}/.carl/hooks/tech-debt-extract.sh &
+  
+  # Wait for all async hooks to complete
+  wait
+  ```
+
+**Performance Logging Integration**
+- **Agent Performance**: Session files capture agent invocation times and success rates
+- **Hook Execution**: Claude Code's built-in JSON logging captures hook performance automatically
+- **Command Metrics**: Session files track `/carl:plan`, `/carl:task`, `/carl:status` execution patterns
+- **Access Pattern**: Use `jq` to parse hook execution logs for performance analysis
 
 #### **Key Hook Implementations**
 
@@ -985,6 +1000,32 @@ work_periods:
     context: "Email template integration"
     commits: ["ghi789h"]
 
+agent_performance:
+  - agent: "carl-requirements-analyst"
+    invocation_time: "08:32:15Z"
+    duration: "2.3s"
+    task: "scope classification for user-auth feature"
+    success: true
+    context_tokens: 1200
+    
+  - agent: "project-nodejs"
+    invocation_time: "14:15:30Z"
+    duration: "5.1s"
+    task: "JWT implementation guidance"
+    success: true
+    context_tokens: 800
+
+command_metrics:
+  - command: "/carl:plan user-authentication"
+    execution_time: "14.2s"
+    success: true
+    agents_used: ["carl-requirements-analyst", "project-nodejs"]
+    
+  - command: "/carl:task jwt-validation.story.carl"
+    execution_time: "145.8s"
+    success: true
+    agents_used: ["project-nodejs", "project-security"]
+
 active_context_carryover:
   # Context preserved for next day's session
   
@@ -1283,17 +1324,19 @@ applications:
 ## Agent Architecture & Recommendations
 
 ### Core CARL System Agents (Required)
-1. **`carl-agent-builder`** ✅ - Dynamic agent generation based on project needs
-2. **`carl-requirements-analyst`** ✅ - Requirements gathering and scope analysis for /carl:plan
-3. **`carl-session-analyst`** 📋 - Session data analysis and reporting for /carl:status
-4. **`carl-mcp-configurator`** 🔌 - MCP detection and configuration for enhanced capabilities
+1. **`carl-agent-builder`** ✅ - Pure agent file generation from descriptions and specifications
+2. **`carl-agent-manager`** 📋 - Agent lifecycle management, cleanup, and dependency analysis  
+3. **`carl-requirements-analyst`** ✅ - Requirements gathering, scope analysis, and agent gap detection for /carl:plan
+4. **`carl-session-analyst`** 📋 - Session data analysis, performance metrics, and reporting for /carl:status
+5. **`carl-mcp-configurator`** 🔌 - MCP detection and configuration for enhanced capabilities
 
 ### Agent Architecture Overview
 ```
 Core CARL Agents (Built-in):
-├── carl-agent-builder (creates project agents)
-├── carl-requirements-analyst (planning support)
-├── carl-session-analyst (reporting support)
+├── carl-agent-builder (pure agent file generation)
+├── carl-agent-manager (lifecycle management, cleanup)
+├── carl-requirements-analyst (planning, scope analysis, gap detection)
+├── carl-session-analyst (metrics, performance reporting)
 └── carl-mcp-configurator (MCP integration)
 
 Project Agents (Generated with project- prefix):
@@ -1307,6 +1350,65 @@ Project Agents (Generated with project- prefix):
 - **React Frontend**: `project-react`, `project-typescript`, `project-frontend`
 - **Node.js Backend**: `project-nodejs`, `project-express`, `project-database`
 
+### Agent Responsibilities & Interaction Patterns
+
+**Core Agent Responsibilities:**
+
+**carl-agent-builder** (Pure Generation):
+- Generate new sub-agent configuration files from descriptions
+- Follow Claude Code sub-agent format standards (.md files in `.claude/agents/`)
+- Focus exclusively on file creation, no lifecycle management
+- Tools: `Read, Write, Glob, Grep, MultiEdit, WebFetch` (for documentation updates)
+
+**carl-agent-manager** (Lifecycle Management):
+- Delete temporary/research agents after planning decisions
+- Classify agents as permanent vs temporary during creation
+- Manage agent dependencies and collaboration patterns
+- Clean up unneeded agent definitions to prevent clutter
+- Tools: `Read, Write, Glob, Grep, Bash` (for file deletion)
+
+**carl-requirements-analyst** (Planning & Gap Detection):
+- Interactive requirements gathering for `/carl:plan` command
+- Scope classification (Epic/Feature/Story/Technical) based on complexity
+- Agent gap detection during planning phases
+- Coordinate with carl-agent-builder to create missing specialists
+- Determine specialist agents needed for specific domains/technologies
+- Tools: `Read, Write, Glob, Grep, MultiEdit` (for CARL file creation)
+
+**carl-session-analyst** (Metrics & Reporting):
+- Parse session files for `/carl:status` reporting
+- Generate performance metrics and velocity reports
+- Track agent usage patterns and effectiveness
+- Identify optimization opportunities in workflows
+- Aggregate metrics across session compaction periods
+- Tools: `Read, Glob, Grep, LS` (read-only analysis)
+
+**Agent Interaction Workflows:**
+
+**Planning Workflow** (`/carl:plan`):
+```
+1. carl-requirements-analyst → Gather requirements, detect gaps
+2. carl-requirements-analyst → Call carl-agent-builder for missing agents
+3. carl-requirements-analyst → Call specialist agents for domain expertise
+4. carl-agent-manager → Clean up temporary research agents if not needed
+```
+
+**Status Workflow** (`/carl:status`):
+```
+1. carl-session-analyst → Parse session files and metrics
+2. carl-session-analyst → Generate performance reports
+3. carl-session-analyst → Provide agent usage recommendations
+```
+
+**Agent Creation Workflow**:
+```
+1. [Any agent] → Detect need for specialist agent
+2. [Any agent] → Call carl-agent-builder with agent specifications
+3. carl-agent-builder → Generate new agent file
+4. [Requesting agent] → Immediately use new specialist agent
+5. carl-agent-manager → Later cleanup if agent was temporary
+```
+
 ### Integration Strategy
 
 **Claude Code Sub-Agent Architecture:**
@@ -1318,10 +1420,10 @@ Project Agents (Generated with project- prefix):
 
 **Agent Integration Flow:**
 ```
-/carl:plan → carl-requirements-analyst + project-[domain] agents
-/carl:task → project-[technology] + project-[domain] agents  
-/carl:analyze → carl-analyze-specialist + generated project agents
-/carl:status → carl-session-analyst
+/carl:plan → carl-requirements-analyst + project-[domain] agents + carl-agent-builder (gaps) + carl-agent-manager (cleanup)
+/carl:task → project-[technology] + project-[domain] agents + execution specialists
+/carl:analyze → carl-mcp-configurator + project specialists + carl-agent-builder (new stack agents)
+/carl:status → carl-session-analyst + performance analysis
 ```
 
 **CARL File Interaction Protocol:**
