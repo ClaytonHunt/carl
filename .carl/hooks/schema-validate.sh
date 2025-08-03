@@ -133,6 +133,63 @@ auto_fix_carl_file() {
     return 0
 }
 
+# Provide specific guidance to Claude Code for fixing validation errors
+provide_claude_code_guidance() {
+    local file_path="$1"
+    local validation_output="$2"
+    
+    echo "  📋 Claude Code Action Required:"
+    echo "  File: $file_path"
+    echo "  Schema: $(basename "$(dirname "$file_path")")/*.schema.yaml"
+    
+    # Parse common YAML errors and provide specific guidance
+    if echo "$validation_output" | grep -q "YAML syntax error"; then
+        echo "  Issue: YAML syntax error detected"
+        echo "  Fix: Check for unbalanced quotes, incorrect indentation, or invalid YAML structure"
+        
+        # Check for specific syntax issues
+        if echo "$validation_output" | grep -q "unbalanced"; then
+            echo "  Specific: Look for unmatched quotes or brackets"
+        fi
+        if echo "$validation_output" | grep -q "indentation"; then
+            echo "  Specific: Use consistent 2-space indentation, no tabs"
+        fi
+    fi
+    
+    # Check for missing required fields
+    if echo "$validation_output" | grep -q "Missing required field"; then
+        local missing_field
+        missing_field=$(echo "$validation_output" | grep "Missing required field" | cut -d':' -f2 | tr -d ' ')
+        echo "  Issue: Missing required field: $missing_field"
+        echo "  Fix: Add the required field '$missing_field' to the CARL file"
+        
+        # Provide field-specific guidance
+        case "$missing_field" in
+            id)
+                echo "  Example: id: \"unique_identifier_here\""
+                ;;
+            title)
+                echo "  Example: title: \"Descriptive title here\""
+                ;;
+            description)
+                echo "  Example: description: \"Detailed description here\""
+                ;;
+            status)
+                echo "  Example: status: not_started  # or active, completed, blocked, cancelled"
+                ;;
+        esac
+    fi
+    
+    # Check for invalid enum values
+    if echo "$validation_output" | grep -q "invalid.*status"; then
+        echo "  Issue: Invalid status value"
+        echo "  Fix: Use one of: not_started, active, completed, blocked, cancelled"
+    fi
+    
+    echo "  Action: Use Claude Code's Edit tool to fix the issues above"
+    echo ""
+}
+
 # Validate modified files
 validate_modified_files() {
     local validation_errors=0
@@ -157,10 +214,19 @@ validate_modified_files() {
         if [[ -n "$file" ]] && should_validate_file "$file"; then
             echo "Validating: $(basename "$file")"
             
-            if validate_carl_file "$file"; then
+            # Capture validation output for analysis
+            local validation_output
+            validation_output=$(validate_carl_file "$file" 2>&1)
+            local validation_exit_code=$?
+            
+            if [[ $validation_exit_code -eq 0 ]]; then
                 echo "  ✅ Validation passed"
             else
                 validation_errors=$((validation_errors + 1))
+                echo "  ❌ Validation failed"
+                
+                # Provide specific guidance to Claude Code
+                provide_claude_code_guidance "$file" "$validation_output"
                 
                 # Try auto-fix if enabled
                 if [[ "$auto_fix_enabled" == "true" ]]; then
@@ -173,6 +239,10 @@ validate_modified_files() {
                             validation_errors=$((validation_errors - 1))
                         else
                             echo "  ⚠️  Auto-fix applied but validation still fails"
+                            # Provide updated guidance after auto-fix attempt
+                            local post_fix_output
+                            post_fix_output=$(validate_carl_file "$file" 2>&1)
+                            provide_claude_code_guidance "$file" "$post_fix_output"
                         fi
                     else
                         echo "  ⚠️  No auto-fixes available for this validation error"

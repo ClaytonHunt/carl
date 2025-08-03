@@ -2,21 +2,14 @@
 # carl-session.sh - Session management utilities for CARL hooks
 # Dependencies: carl-git.sh
 
-# Use PROJECT_ROOT if available, otherwise detect it
-if [[ -z "${PROJECT_ROOT:-}" ]]; then
-    # Get project root with robust detection
-    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    source "${SCRIPT_DIR}/carl-project-root.sh"
-    
-    PROJECT_ROOT=$(get_project_root)
-    if [[ $? -ne 0 ]]; then
-        echo "Error: Could not determine CARL project root" >&2
-        exit 1
-    fi
+# Use CLAUDE_PROJECT_DIR which is guaranteed when hooks run
+if [[ -z "${CLAUDE_PROJECT_DIR:-}" ]]; then
+    echo "Error: CLAUDE_PROJECT_DIR not set. This library requires Claude Code environment." >&2
+    exit 1
 fi
 
-# Source required libraries using project root
-source "${PROJECT_ROOT}/.carl/hooks/lib/carl-git.sh"
+# Source required libraries using CLAUDE_PROJECT_DIR
+source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-git.sh"
 
 # Get session file path for a specific date and user
 get_session_file_path() {

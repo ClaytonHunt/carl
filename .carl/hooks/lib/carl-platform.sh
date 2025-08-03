@@ -22,10 +22,9 @@ speak_message() {
     local message="$1"
     local notification_type="${2:-}"
     
-    # Source settings if available
-    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    if [[ -f "$script_dir/carl-settings.sh" ]]; then
-        source "$script_dir/carl-settings.sh"
+    # Source settings if available (use CLAUDE_PROJECT_DIR)
+    if [[ -n "${CLAUDE_PROJECT_DIR:-}" ]] && [[ -f "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-settings.sh" ]]; then
+        source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-settings.sh"
         
         # Check if audio is enabled for this notification type
         if [[ -n "$notification_type" ]] && ! is_notification_enabled "$notification_type"; then
@@ -37,10 +36,9 @@ speak_message() {
     
     local platform=$(detect_platform)
     
-    # Source settings for voice configuration
-    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    if [[ -f "$script_dir/carl-settings.sh" ]]; then
-        source "$script_dir/carl-settings.sh"
+    # Source settings for voice configuration (use CLAUDE_PROJECT_DIR)
+    if [[ -n "${CLAUDE_PROJECT_DIR:-}" ]] && [[ -f "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-settings.sh" ]]; then
+        source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-settings.sh"
         
         # Check for ElevenLabs integration first
         local elevenlabs_enabled=$(get_carl_setting "audio.voice.elevenlabs.enabled" "false")
@@ -98,10 +96,9 @@ speak_message() {
 speak_with_elevenlabs() {
     local message="$1"
     
-    # Source settings
-    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    if [[ -f "$script_dir/carl-settings.sh" ]]; then
-        source "$script_dir/carl-settings.sh"
+    # Source settings (use CLAUDE_PROJECT_DIR)
+    if [[ -n "${CLAUDE_PROJECT_DIR:-}" ]] && [[ -f "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-settings.sh" ]]; then
+        source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-settings.sh"
         
         local api_key_env=$(get_carl_setting "audio.voice.elevenlabs.api_key_env" "ELEVENLABS_API_KEY")
         local voice_id=$(get_carl_setting "audio.voice.elevenlabs.voice_id" "21m00Tcm4TlvDq8ikWAM")
@@ -133,10 +130,9 @@ send_carl_notification() {
     shift 2
     local variables=("$@")
     
-    # Source settings
-    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    if [[ -f "$script_dir/carl-settings.sh" ]]; then
-        source "$script_dir/carl-settings.sh"
+    # Source settings (use CLAUDE_PROJECT_DIR)
+    if [[ -n "${CLAUDE_PROJECT_DIR:-}" ]] && [[ -f "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-settings.sh" ]]; then
+        source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-settings.sh"
         
         # Get the message template
         local message=$(get_notification_message "$notification_type" "$custom_message")

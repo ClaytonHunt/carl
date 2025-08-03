@@ -1,0 +1,32 @@
+id: test_completion_handler
+type: technical
+title: "Test Completion Handler Hook"
+status: completed
+priority: high
+completion_percentage: 100
+last_updated: "2025-08-03T13:25:09"
+
+technical_details:
+  category: testing
+  complexity: low
+  implementation_type: verification
+
+description: |
+  Testing the completion handler hook functionality.
+  This work item will be automatically moved to completed/
+  when the completion percentage reaches 100%.
+
+requirements:
+  - Test automatic completion detection
+  - Verify file movement to completed/ directory
+  - Confirm session event logging
+
+implementation_notes: |
+  This is a test work item to verify the completion handler
+  functionality. When we update this to 100% completion,
+  it should automatically move to the completed/ directory.
+
+verification:
+  - Work item moves to completed/ when 100% done
+  - Session file logs the completion event
+  - Status updates to "completed"

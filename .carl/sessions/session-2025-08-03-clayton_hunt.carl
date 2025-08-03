@@ -83,3 +83,1460 @@ stop_events:
     context: "updated 2 CARL files"
     session_duration: "unknown duration"
 
+
+# Stop Event - 2025-08-03T12:47:17
+stop_events:
+  - timestamp: "2025-08-03T12:47:17"
+    type: "operation_complete"
+    context: "committed: feat: Implement robust project root detection and ,updated 2 CARL files"
+    session_duration: "unknown duration"
+
+
+# Schema Validation - 2025-08-03T12:57:03
+validation_events:
+  - timestamp: "2025-08-03T12:57:03"
+    status: "success"
+    error_count: 0
+    mode: "strict"
+
+
+# Schema Validation - 2025-08-03T12:57:54
+validation_events:
+  - timestamp: "2025-08-03T12:57:54"
+    status: "success"
+    error_count: 0
+    mode: "strict"
+
+
+# Schema Validation - 2025-08-03T12:58:35
+validation_events:
+  - timestamp: "2025-08-03T12:58:35"
+    status: "success"
+    error_count: 0
+    mode: "strict"
+
+
+# Schema Validation - 2025-08-03T12:58:49
+validation_events:
+  - timestamp: "2025-08-03T12:58:49"
+    status: "success"
+    error_count: 0
+    mode: "strict"
+
+
+# Schema Validation - 2025-08-03T12:59:17
+validation_events:
+  - timestamp: "2025-08-03T12:59:17"
+    status: "success"
+    error_count: 0
+    mode: "strict"
+
+
+# Stop Event - 2025-08-03T12:59:33
+stop_events:
+  - timestamp: "2025-08-03T12:59:33"
+    type: "operation_complete"
+    context: "committed: feat: Implement robust project root detection and ,updated 2 CARL files"
+    session_duration: "unknown duration"
+
+
+# Schema Validation - 2025-08-03T12:59:59
+validation_events:
+  - timestamp: "2025-08-03T12:59:59"
+    status: "success"
+    error_count: 0
+    mode: "strict"
+
+
+# Stop Event - 2025-08-03T13:00:23
+stop_events:
+  - timestamp: "2025-08-03T13:00:23"
+    type: "operation_complete"
+    context: "committed: feat: Implement robust project root detection and ,updated 2 CARL files"
+    session_duration: "unknown duration"
+
+
+# Stop Event - 2025-08-03T13:02:58
+stop_events:
+  - timestamp: "2025-08-03T13:02:58"
+    type: "operation_complete"
+    context: "committed: feat: Implement robust project root detection and ,updated 2 CARL files"
+    session_duration: "unknown duration"
+
+
+# Schema Validation - 2025-08-03T13:03:44
+validation_events:
+  - timestamp: "2025-08-03T13:03:44"
+    status: "success"
+    error_count: 0
+    mode: "strict"
+
+
+# Schema Validation - 2025-08-03T13:04:09
+validation_events:
+  - timestamp: "2025-08-03T13:04:09"
+    status: "success"
+    error_count: 0
+    mode: "strict"
+
+
+# Schema Validation - 2025-08-03T13:04:58
+validation_events:
+  - timestamp: "2025-08-03T13:04:58"
+    status: "success"
+    error_count: 0
+    mode: "strict"
+
+
+# Schema Validation - 2025-08-03T13:05:12
+validation_events:
+  - timestamp: "2025-08-03T13:05:12"
+    status: "success"
+    error_count: 0
+    mode: "strict"
+
+
+# Stop Event - 2025-08-03T13:05:26
+stop_events:
+  - timestamp: "2025-08-03T13:05:26"
+    type: "operation_complete"
+    context: "committed: feat: Implement robust project root detection and ,updated 2 CARL files"
+    session_duration: "unknown duration"
+
+
+# Schema Validation - 2025-08-03T13:06:47
+validation_events:
+  - timestamp: "2025-08-03T13:06:47"
+    status: "success"
+    error_count: 0
+    mode: "strict"
+
+
+# Stop Event - 2025-08-03T13:07:16
+stop_events:
+  - timestamp: "2025-08-03T13:07:16"
+    type: "operation_complete"
+    context: "committed: feat: Implement robust project root detection and ,updated 2 CARL files"
+    session_duration: "10h 58m"
+
+
+# Stop Event - 2025-08-03T13:07:32
+stop_events:
+  - timestamp: "2025-08-03T13:07:32"
+    type: "operation_complete"
+    context: "committed: feat: Implement robust project root detection and ,updated 2 CARL files"
+    session_duration: "10h 58m"
+
+
+# Schema Validation - 2025-08-03T13:08:37
+validation_events:
+  - timestamp: "2025-08-03T13:08:37"
+    status: "success"
+    error_count: 0
+    mode: "strict"
+
+
+# Stop Event - 2025-08-03T13:08:49
+stop_events:
+  - timestamp: "2025-08-03T13:08:49"
+    type: "operation_complete"
+    context: "committed: feat: Implement robust project root detection and ,updated 2 CARL files"
+    session_duration: "11h 0m"
+
+
+# Schema Validation - 2025-08-03T13:18:31
+validation_events:
+  - timestamp: "2025-08-03T13:18:31"
+    status: "success"
+    error_count: 0
+    mode: "strict"
+
+
+# Schema Validation - 2025-08-03T13:18:58
+validation_events:
+  - timestamp: "2025-08-03T13:18:58"
+    status: "success"
+    error_count: 0
+    mode: "strict"
+
+
+# Schema Validation - 2025-08-03T13:19:09
+validation_events:
+  - timestamp: "2025-08-03T13:19:09"
+    status: "success"
+    error_count: 0
+    mode: "strict"
+
+
+# Schema Validation - 2025-08-03T13:19:22
+validation_events:
+  - timestamp: "2025-08-03T13:19:22"
+    status: "success"
+    error_count: 0
+    mode: "strict"
+
+
+# Stop Event - 2025-08-03T13:19:36
+stop_events:
+  - timestamp: "2025-08-03T13:19:36"
+    type: "operation_complete"
+    context: "updated 2 CARL files"
+    session_duration: "11h 10m"
+
+
+# Schema Validation - 2025-08-03T13:19:55
+validation_events:
+  - timestamp: "2025-08-03T13:19:55"
+    status: "success"
+    error_count: 0
+    mode: "strict"
+
+
+# Schema Validation - 2025-08-03T13:20:03
+validation_events:
+  - timestamp: "2025-08-03T13:20:03"
+    status: "success"
+    error_count: 0
+    mode: "strict"
+
+
+# Schema Validation - 2025-08-03T13:20:10
+validation_events:
+  - timestamp: "2025-08-03T13:20:10"
+    status: "success"
+    error_count: 0
+    mode: "strict"
+
+
+# Schema Validation - 2025-08-03T13:20:17
+validation_events:
+  - timestamp: "2025-08-03T13:20:17"
+    status: "success"
+    error_count: 0
+    mode: "strict"
+
+
+# Stop Event - 2025-08-03T13:20:42
+stop_events:
+  - timestamp: "2025-08-03T13:20:42"
+    type: "operation_complete"
+    context: "updated 2 CARL files"
+    session_duration: "11h 11m"
+
+
+# Stop Event - 2025-08-03T13:22:55
+stop_events:
+  - timestamp: "2025-08-03T13:22:55"
+    type: "operation_complete"
+    context: "updated 2 CARL files"
+    session_duration: "11h 14m"
+
+
+# Progress Metrics - 2025-08-03T13:25:09
+progress_metrics:
+  - timestamp: "2025-08-03T13:25:09"
+    project_stats: "total: 0, completed: 0, in_progress: 0, avg_completion: 0%"
+    velocity_tracking: "enabled"
+
+
+# Schema Validation - 2025-08-03T13:25:09
+validation_events:
+  - timestamp: "2025-08-03T13:25:09"
+    status: "failure"
+    error_count: 1
+    mode: "strict"
+
+
+# Work Completion - 2025-08-03T13:25:43
+completion_events:
+  - timestamp: "2025-08-03T13:25:43"
+    work_id: "test_completion_handler"
+    title: "Test Completion Handler Hook"
+    handler: "automatic"
+
+
+# Work Completion - 2025-08-03T13:27:10
+completion_events:
+  - timestamp: "2025-08-03T13:27:10"
+    work_id: "test_completion_handler"
+    title: "Test Completion Handler Hook"
+    handler: "automatic"
+
+
+# Progress Metrics - 2025-08-03T13:27:10
+progress_metrics:
+  - timestamp: "2025-08-03T13:27:10"
+    project_stats: "total: 0, completed: 0, in_progress: 0, avg_completion: 0%"
+    velocity_tracking: "enabled"
+
+
+# Schema Validation - 2025-08-03T13:27:10
+validation_events:
+  - timestamp: "2025-08-03T13:27:10"
+    status: "failure"
+    error_count: 1
+    mode: "strict"
+
+
+# Stop Event - 2025-08-03T13:27:25
+stop_events:
+  - timestamp: "2025-08-03T13:27:25"
+    type: "operation_complete"
+    context: "updated 3 CARL files"
+    session_duration: "11h 18m"
+
+
+# Work Completion - 2025-08-03T13:27:51
+completion_events:
+  - timestamp: "2025-08-03T13:27:51"
+    work_id: "test_completion_handler"
+    title: "\"Test Completion Handler Hook\""
+    handler: "automatic"
+
+
+# Progress Metrics - 2025-08-03T13:27:51
+progress_metrics:
+  - timestamp: "2025-08-03T13:27:51"
+    project_stats: "total: 0, completed: 0, in_progress: 0, avg_completion: 0%"
+    velocity_tracking: "enabled"
+
+
+# Schema Validation - 2025-08-03T13:27:51
+validation_events:
+  - timestamp: "2025-08-03T13:27:51"
+    status: "failure"
+    error_count: 1
+    mode: "strict"
+
+
+# Stop Event - 2025-08-03T13:27:58
+stop_events:
+  - timestamp: "2025-08-03T13:27:58"
+    type: "operation_complete"
+    context: "updated 3 CARL files"
+    session_duration: "11h 19m"
+
+
+# Work Completion - 2025-08-03T13:29:49
+completion_events:
+  - timestamp: "2025-08-03T13:29:49"
+    work_id: "test_completion_handler"
+    title: "\"Test Completion Handler Hook\""
+    handler: "automatic"
+
+
+# Progress Metrics - 2025-08-03T13:29:49
+progress_metrics:
+  - timestamp: "2025-08-03T13:29:49"
+    project_stats: "total: 0, completed: 0, in_progress: 0, avg_completion: 0%"
+    velocity_tracking: "enabled"
+
+
+# Schema Validation - 2025-08-03T13:29:49
+validation_events:
+  - timestamp: "2025-08-03T13:29:49"
+    status: "failure"
+    error_count: 1
+    mode: "strict"
+
+
+# Work Completion - 2025-08-03T13:34:13
+completion_events:
+  - timestamp: "2025-08-03T13:34:13"
+    work_id: "test_completion_handler"
+    title: "\"Test Completion Handler Hook\""
+    handler: "automatic"
+
+
+# Progress Metrics - 2025-08-03T13:34:13
+progress_metrics:
+  - timestamp: "2025-08-03T13:34:13"
+    project_stats: "total: 0, completed: 0, in_progress: 0, avg_completion: 0%"
+    velocity_tracking: "enabled"
+
+
+# Schema Validation - 2025-08-03T13:34:13
+validation_events:
+  - timestamp: "2025-08-03T13:34:13"
+    status: "failure"
+    error_count: 1
+    mode: "strict"
+
+
+# Stop Event - 2025-08-03T13:35:24
+stop_events:
+  - timestamp: "2025-08-03T13:35:24"
+    type: "operation_complete"
+    context: "updated 3 CARL files"
+    session_duration: "11h 26m"
+
+
+# Stop Event - 2025-08-03T13:36:39
+stop_events:
+  - timestamp: "2025-08-03T13:36:39"
+    type: "operation_complete"
+    context: "committed: feat: Implement complete CARL hook system with com,updated 3 CARL files"
+    session_duration: "11h 27m"
+
+
+# Work Completion - 2025-08-03T13:38:24
+completion_events:
+  - timestamp: "2025-08-03T13:38:24"
+    work_id: "test_completion_handler"
+    title: "\"Test Completion Handler Hook\""
+    handler: "automatic"
+
+
+# Progress Tracking - 2025-08-03T13:38:24
+work_periods:
+  - start_time: "2025-08-03T13:38:24"
+    activity_count: 23
+    active_items:
+      - "test_progress_tracking"
+
+
+# Progress Metrics - 2025-08-03T13:38:25
+progress_metrics:
+  - timestamp: "2025-08-03T13:38:25"
+    project_stats: "total: 0, completed: 0, in_progress: 0, avg_completion: 0%"
+    velocity_tracking: "enabled"
+
+
+# Schema Validation - 2025-08-03T13:38:25
+validation_events:
+  - timestamp: "2025-08-03T13:38:25"
+    status: "failure"
+    error_count: 1
+    mode: "strict"
+
+
+# Work Completion - 2025-08-03T13:38:44
+completion_events:
+  - timestamp: "2025-08-03T13:38:44"
+    work_id: "test_completion_handler"
+    title: "\"Test Completion Handler Hook\""
+    handler: "automatic"
+
+
+# Progress Tracking - 2025-08-03T13:38:44
+work_periods:
+  - start_time: "2025-08-03T13:38:44"
+    activity_count: 23
+    active_items:
+      - "test_progress_tracking"
+
+
+# Progress Metrics - 2025-08-03T13:38:44
+progress_metrics:
+  - timestamp: "2025-08-03T13:38:44"
+    project_stats: "total: 0, completed: 0, in_progress: 0, avg_completion: 0%"
+    velocity_tracking: "enabled"
+
+
+# Schema Validation - 2025-08-03T13:38:44
+validation_events:
+  - timestamp: "2025-08-03T13:38:44"
+    status: "failure"
+    error_count: 1
+    mode: "strict"
+
+
+# Stop Event - 2025-08-03T13:42:21
+stop_events:
+  - timestamp: "2025-08-03T13:42:21"
+    type: "operation_complete"
+    context: "active: Test Progress Tracking System, committed: feat: Implement complete CARL hook system with completion handling, updated 3 CARL files"
+    session_duration: "11h 33m"
+
+
+# Work Completion - 2025-08-03T13:43:45
+completion_events:
+  - timestamp: "2025-08-03T13:43:45"
+    work_id: "test_completion_handler"
+    title: "Test Completion Handler Hook"
+    handler: "automatic"
+
+
+# Progress Tracking - 2025-08-03T13:43:45
+work_periods:
+  - start_time: "2025-08-03T13:43:45"
+    activity_count: 24
+    active_items:
+      - "test_progress_tracking"
+
+
+# Progress Metrics - 2025-08-03T13:43:45
+progress_metrics:
+  - timestamp: "2025-08-03T13:43:45"
+    project_stats: "total: 0, completed: 0, in_progress: 0, avg_completion: 0%"
+    velocity_tracking: "enabled"
+
+
+# Schema Validation - 2025-08-03T13:43:46
+validation_events:
+  - timestamp: "2025-08-03T13:43:46"
+    status: "failure"
+    error_count: 1
+    mode: "strict"
+
+
+# Work Completion - 2025-08-03T13:44:04
+completion_events:
+  - timestamp: "2025-08-03T13:44:04"
+    work_id: "test_completion_handler"
+    title: "\"Test Completion Handler Hook\""
+    handler: "automatic"
+
+
+# Progress Tracking - 2025-08-03T13:44:04
+work_periods:
+  - start_time: "2025-08-03T13:44:04"
+    activity_count: 24
+    active_items:
+      - "test_progress_tracking"
+
+
+# Progress Metrics - 2025-08-03T13:44:04
+progress_metrics:
+  - timestamp: "2025-08-03T13:44:04"
+    project_stats: "total: 0, completed: 0, in_progress: 0, avg_completion: 0%"
+    velocity_tracking: "enabled"
+
+
+# Schema Validation - 2025-08-03T13:44:04
+validation_events:
+  - timestamp: "2025-08-03T13:44:04"
+    status: "failure"
+    error_count: 1
+    fixes_applied: 0
+    mode: "strict"
+
+
+# Work Completion - 2025-08-03T13:44:24
+completion_events:
+  - timestamp: "2025-08-03T13:44:24"
+    work_id: "test_completion_handler"
+    title: "\"Test Completion Handler Hook\""
+    handler: "automatic"
+
+
+# Progress Metrics - 2025-08-03T13:44:24
+progress_metrics:
+  - timestamp: "2025-08-03T13:44:24"
+    project_stats: "total: 0, completed: 0, in_progress: 0, avg_completion: 0%"
+    velocity_tracking: "enabled"
+
+
+# Schema Validation - 2025-08-03T13:44:24
+validation_events:
+  - timestamp: "2025-08-03T13:44:24"
+    status: "failure"
+    error_count: 1
+    fixes_applied: 1
+    mode: "strict"
+
+
+# Work Completion - 2025-08-03T13:45:11
+completion_events:
+  - timestamp: "2025-08-03T13:45:11"
+    work_id: "test_progress_tracking"
+    title: "\"Test Progress Tracking System\""
+    handler: "automatic"
+
+
+# Work Completion - 2025-08-03T13:45:11
+completion_events:
+  - timestamp: "2025-08-03T13:45:11"
+    work_id: "test_completion_handler"
+    title: "\"Test Completion Handler Hook\""
+    handler: "automatic"
+
+
+# Progress Tracking - 2025-08-03T13:45:11
+work_periods:
+  - start_time: "2025-08-03T13:45:11"
+    activity_count: 24    active_items:
+      - "test_auto_fix_validation"
+
+
+# Progress Metrics - 2025-08-03T13:45:11
+progress_metrics:
+  - timestamp: "2025-08-03T13:45:11"
+    project_stats: "total: 0, completed: 0, in_progress: 0, avg_completion: 0%"
+    velocity_tracking: "enabled"
+
+
+# Schema Validation - 2025-08-03T13:45:11
+validation_events:
+  - timestamp: "2025-08-03T13:45:11"
+    status: "failure"
+    error_count: 1
+    fixes_applied: 1
+    mode: "strict"
+
+
+# Stop Event - 2025-08-03T13:45:33
+stop_events:
+  - timestamp: "2025-08-03T13:45:33"
+    type: "operation_complete"
+    context: "active: "Test Auto-Fix Schema Validation";,committed: feat: Implement complete CARL hook system with com,updated 3 CARL files"
+    session_duration: "11h 36m"
+
+
+# Work Completion - 2025-08-03T13:46:44
+completion_events:
+  - timestamp: "2025-08-03T13:46:44"
+    work_id: "test_progress_tracking"
+    title: "\"Test Progress Tracking System\""
+    handler: "automatic"
+
+
+# Work Completion - 2025-08-03T13:46:44
+completion_events:
+  - timestamp: "2025-08-03T13:46:44"
+    work_id: "test_completion_handler"
+    title: "\"Test Completion Handler Hook\""
+    handler: "automatic"
+
+
+# Progress Tracking - 2025-08-03T13:46:44
+work_periods:
+  - start_time: "2025-08-03T13:46:44"
+    activity_count: 25    active_items:
+      - "test_auto_fix_validation"
+
+
+# Progress Metrics - 2025-08-03T13:46:44
+progress_metrics:
+  - timestamp: "2025-08-03T13:46:44"
+    project_stats: "total: 0, completed: 0, in_progress: 0, avg_completion: 0%"
+    velocity_tracking: "enabled"
+
+
+# Schema Validation - 2025-08-03T13:46:44
+validation_events:
+  - timestamp: "2025-08-03T13:46:44"
+    status: "failure"
+    error_count: 1
+    fixes_applied: 1
+    mode: "strict"
+
+
+# Work Completion - 2025-08-03T13:47:23
+completion_events:
+  - timestamp: "2025-08-03T13:47:23"
+    work_id: "test_progress_tracking"
+    title: "\"Test Progress Tracking System\""
+    handler: "automatic"
+
+
+# Work Completion - 2025-08-03T13:47:23
+completion_events:
+  - timestamp: "2025-08-03T13:47:23"
+    work_id: "test_completion_handler"
+    title: "\"Test Completion Handler Hook\""
+    handler: "automatic"
+
+
+# Progress Tracking - 2025-08-03T13:47:23
+work_periods:
+  - start_time: "2025-08-03T13:47:23"
+    activity_count: 25    active_items:
+      - "test_auto_fix_validation"
+
+
+# Progress Metrics - 2025-08-03T13:47:24
+progress_metrics:
+  - timestamp: "2025-08-03T13:47:24"
+    project_stats: "total: 0, completed: 0, in_progress: 0, avg_completion: 0%"
+    velocity_tracking: "enabled"
+
+
+# Schema Validation - 2025-08-03T13:47:24
+validation_events:
+  - timestamp: "2025-08-03T13:47:24"
+    status: "failure"
+    error_count: 1
+    fixes_applied: 1
+    mode: "strict"
+
+
+# Work Completion - 2025-08-03T13:47:40
+completion_events:
+  - timestamp: "2025-08-03T13:47:40"
+    work_id: "test_progress_tracking"
+    title: "\"Test Progress Tracking System\""
+    handler: "automatic"
+
+
+# Work Completion - 2025-08-03T13:47:40
+completion_events:
+  - timestamp: "2025-08-03T13:47:40"
+    work_id: "test_completion_handler"
+    title: "\"Test Completion Handler Hook\""
+    handler: "automatic"
+
+
+# Progress Tracking - 2025-08-03T13:47:40
+work_periods:
+  - start_time: "2025-08-03T13:47:40"
+    activity_count: 25    active_items:
+      - "test_auto_fix_validation"
+
+
+# Progress Metrics - 2025-08-03T13:47:40
+progress_metrics:
+  - timestamp: "2025-08-03T13:47:40"
+    project_stats: "total: 0, completed: 0, in_progress: 0, avg_completion: 0%"
+    velocity_tracking: "enabled"
+
+
+# Schema Validation - 2025-08-03T13:47:40
+validation_events:
+  - timestamp: "2025-08-03T13:47:40"
+    status: "failure"
+    error_count: 1
+    fixes_applied: 1
+    mode: "strict"
+
+
+# Work Completion - 2025-08-03T13:50:33
+completion_events:
+  - timestamp: "2025-08-03T13:50:33"
+    work_id: "test_progress_tracking"
+    title: "\"Test Progress Tracking System\""
+    handler: "automatic"
+
+
+# Work Completion - 2025-08-03T13:50:33
+completion_events:
+  - timestamp: "2025-08-03T13:50:33"
+    work_id: "test_completion_handler"
+    title: "\"Test Completion Handler Hook\""
+    handler: "automatic"
+
+
+# Work Completion - 2025-08-03T13:50:33
+completion_events:
+  - timestamp: "2025-08-03T13:50:33"
+    work_id: "test_auto_fix_validation"
+    title: "\"Test Auto-Fix Schema Validation\""
+    handler: "automatic"
+
+
+# Progress Metrics - 2025-08-03T13:50:33
+progress_metrics:
+  - timestamp: "2025-08-03T13:50:33"
+    project_stats: "total: 0, completed: 0, in_progress: 0, avg_completion: 0%"
+    velocity_tracking: "enabled"
+
+
+# Schema Validation - 2025-08-03T13:50:34
+validation_events:
+  - timestamp: "2025-08-03T13:50:34"
+    status: "failure"
+    error_count: 1
+    fixes_applied: 1
+    mode: "strict"
+
+
+# Work Completion - 2025-08-03T13:51:05
+completion_events:
+  - timestamp: "2025-08-03T13:51:05"
+    work_id: "test_progress_tracking"
+    title: "\"Test Progress Tracking System\""
+    handler: "automatic"
+
+
+# Work Completion - 2025-08-03T13:51:05
+completion_events:
+  - timestamp: "2025-08-03T13:51:05"
+    work_id: "test_completion_handler"
+    title: "\"Test Completion Handler Hook\""
+    handler: "automatic"
+
+
+# Progress Metrics - 2025-08-03T13:51:05
+progress_metrics:
+  - timestamp: "2025-08-03T13:51:05"
+    project_stats: "total: 0, completed: 0, in_progress: 0, avg_completion: 0%"
+    velocity_tracking: "enabled"
+
+
+# Work Completion - 2025-08-03T13:51:05
+completion_events:
+  - timestamp: "2025-08-03T13:51:05"
+    work_id: "test_auto_fix_validation"
+    title: "\"Test Auto-Fix Schema Validation\""
+    handler: "automatic"
+
+
+# Schema Validation - 2025-08-03T13:51:06
+validation_events:
+  - timestamp: "2025-08-03T13:51:06"
+    status: "failure"
+    error_count: 1
+    fixes_applied: 1
+    mode: "strict"
+
+
+# Stop Event - 2025-08-03T13:51:25
+stop_events:
+  - timestamp: "2025-08-03T13:51:25"
+    type: "operation_complete"
+    context: "committed: feat: Implement complete CARL hook system with com,updated 3 CARL files"
+    session_duration: "11h 42m"
+
+
+# Stop Event - 2025-08-03T13:53:47
+stop_events:
+  - timestamp: "2025-08-03T13:53:47"
+    type: "operation_complete"
+    context: "committed: feat: Enhance schema validation with auto-fixing a,updated 3 CARL files"
+    session_duration: "11h 45m"
+
+
+# Stop Event - 2025-08-03T13:55:05
+stop_events:
+  - timestamp: "2025-08-03T13:55:05"
+    type: "operation_complete"
+    context: "committed: feat: Enhance schema validation with auto-fixing a,updated 3 CARL files"
+    session_duration: "11h 46m"
+
+
+# Work Completion - 2025-08-03T14:01:06
+completion_events:
+  - timestamp: "2025-08-03T14:01:06"
+    work_id: "test_progress_tracking"
+    title: "\"Test Progress Tracking System\""
+    handler: "automatic"
+
+
+# Work Completion - 2025-08-03T14:01:06
+completion_events:
+  - timestamp: "2025-08-03T14:01:06"
+    work_id: "test_completion_handler"
+    title: "\"Test Completion Handler Hook\""
+    handler: "automatic"
+
+
+# Progress Metrics - 2025-08-03T14:01:07
+progress_metrics:
+  - timestamp: "2025-08-03T14:01:07"
+    project_stats: "total: 0, completed: 0, in_progress: 0, avg_completion: 0%"
+    velocity_tracking: "enabled"
+
+
+# Work Completion - 2025-08-03T14:01:07
+completion_events:
+  - timestamp: "2025-08-03T14:01:07"
+    work_id: "test_auto_fix_validation"
+    title: "\"Test Auto-Fix Schema Validation\""
+    handler: "automatic"
+
+
+# Schema Validation - 2025-08-03T14:01:07
+validation_events:
+  - timestamp: "2025-08-03T14:01:07"
+    status: "failure"
+    error_count: 1
+    fixes_applied: 1
+    mode: "strict"
+
+
+# Work Completion - 2025-08-03T14:01:16
+completion_events:
+  - timestamp: "2025-08-03T14:01:16"
+    work_id: "test_progress_tracking"
+    title: "\"Test Progress Tracking System\""
+    handler: "automatic"
+
+
+# Work Completion - 2025-08-03T14:01:16
+completion_events:
+  - timestamp: "2025-08-03T14:01:16"
+    work_id: "test_completion_handler"
+    title: "\"Test Completion Handler Hook\""
+    handler: "automatic"
+
+
+# Work Completion - 2025-08-03T14:01:16
+completion_events:
+  - timestamp: "2025-08-03T14:01:16"
+    work_id: "test_auto_fix_validation"
+    title: "\"Test Auto-Fix Schema Validation\""
+    handler: "automatic"
+
+
+# Progress Metrics - 2025-08-03T14:01:16
+progress_metrics:
+  - timestamp: "2025-08-03T14:01:16"
+    project_stats: "total: 0, completed: 0, in_progress: 0, avg_completion: 0%"
+    velocity_tracking: "enabled"
+
+
+# Schema Validation - 2025-08-03T14:01:16
+validation_events:
+  - timestamp: "2025-08-03T14:01:16"
+    status: "failure"
+    error_count: 1
+    fixes_applied: 1
+    mode: "strict"
+
+
+# Work Completion - 2025-08-03T14:01:28
+completion_events:
+  - timestamp: "2025-08-03T14:01:28"
+    work_id: "test_progress_tracking"
+    title: "\"Test Progress Tracking System\""
+    handler: "automatic"
+
+
+# Work Completion - 2025-08-03T14:01:28
+completion_events:
+  - timestamp: "2025-08-03T14:01:28"
+    work_id: "test_completion_handler"
+    title: "\"Test Completion Handler Hook\""
+    handler: "automatic"
+
+
+# Progress Metrics - 2025-08-03T14:01:28
+progress_metrics:
+  - timestamp: "2025-08-03T14:01:28"
+    project_stats: "total: 0, completed: 0, in_progress: 0, avg_completion: 0%"
+    velocity_tracking: "enabled"
+
+
+# Work Completion - 2025-08-03T14:01:28
+completion_events:
+  - timestamp: "2025-08-03T14:01:28"
+    work_id: "test_auto_fix_validation"
+    title: "\"Test Auto-Fix Schema Validation\""
+    handler: "automatic"
+
+
+# Schema Validation - 2025-08-03T14:01:28
+validation_events:
+  - timestamp: "2025-08-03T14:01:28"
+    status: "failure"
+    error_count: 1
+    fixes_applied: 1
+    mode: "strict"
+
+
+# Work Completion - 2025-08-03T14:02:12
+completion_events:
+  - timestamp: "2025-08-03T14:02:12"
+    work_id: "test_progress_tracking"
+    title: "\"Test Progress Tracking System\""
+    handler: "automatic"
+
+
+# Work Completion - 2025-08-03T14:02:12
+completion_events:
+  - timestamp: "2025-08-03T14:02:12"
+    work_id: "test_completion_handler"
+    title: "\"Test Completion Handler Hook\""
+    handler: "automatic"
+
+
+# Progress Tracking - 2025-08-03T14:02:12
+work_periods:
+  - start_time: "2025-08-03T14:02:12"
+    activity_count: 28    active_items:
+      - "cache_removal_test"
+
+
+# Work Completion - 2025-08-03T14:02:12
+completion_events:
+  - timestamp: "2025-08-03T14:02:12"
+    work_id: "test_auto_fix_validation"
+    title: "\"Test Auto-Fix Schema Validation\""
+    handler: "automatic"
+
+
+# Progress Metrics - 2025-08-03T14:02:12
+progress_metrics:
+  - timestamp: "2025-08-03T14:02:12"
+    project_stats: "total: 0, completed: 0, in_progress: 0, avg_completion: 0%"
+    velocity_tracking: "enabled"
+
+
+# Schema Validation - 2025-08-03T14:02:12
+validation_events:
+  - timestamp: "2025-08-03T14:02:12"
+    status: "failure"
+    error_count: 1
+    fixes_applied: 1
+    mode: "strict"
+
+
+# Stop Event - 2025-08-03T14:03:04
+stop_events:
+  - timestamp: "2025-08-03T14:03:04"
+    type: "operation_complete"
+    context: "active: "Test Validation Without Cache";,committed: refactor: Remove redundant validation cache system,updated 3 CARL files"
+    session_duration: "11h 54m"
+
+
+# Stop Event - 2025-08-03T14:04:47
+stop_events:
+  - timestamp: "2025-08-03T14:04:47"
+    type: "operation_complete"
+    context: "active: "Test Validation Without Cache";,committed: refactor: Remove redundant validation cache system,updated 3 CARL files"
+    session_duration: "11h 56m"
+
+
+# Work Completion - 2025-08-03T14:07:47
+completion_events:
+  - timestamp: "2025-08-03T14:07:47"
+    work_id: "test_progress_tracking"
+    title: "\"Test Progress Tracking System\""
+    handler: "automatic"
+
+
+# Work Completion - 2025-08-03T14:07:47
+completion_events:
+  - timestamp: "2025-08-03T14:07:47"
+    work_id: "test_completion_handler"
+    title: "\"Test Completion Handler Hook\""
+    handler: "automatic"
+
+
+# Work Completion - 2025-08-03T14:07:47
+completion_events:
+  - timestamp: "2025-08-03T14:07:47"
+    work_id: "test_auto_fix_validation"
+    title: "\"Test Auto-Fix Schema Validation\""
+    handler: "automatic"
+
+
+# Progress Tracking - 2025-08-03T14:07:47
+work_periods:
+  - start_time: "2025-08-03T14:07:47"
+    activity_count: 30    active_items:
+      - "cache_removal_test"
+
+
+# Schema Validation - 2025-08-03T14:07:47
+validation_events:
+  - timestamp: "2025-08-03T14:07:47"
+    status: "failure"
+    error_count: 1
+    fixes_applied: 0
+    mode: "strict"
+
+
+# Progress Metrics - 2025-08-03T14:07:47
+progress_metrics:
+  - timestamp: "2025-08-03T14:07:47"
+    project_stats: "total: 0, completed: 0, in_progress: 0, avg_completion: 0%"
+    velocity_tracking: "enabled"
+
+
+# Work Completion - 2025-08-03T14:07:57
+completion_events:
+  - timestamp: "2025-08-03T14:07:57"
+    work_id: "test_progress_tracking"
+    title: "\"Test Progress Tracking System\""
+    handler: "automatic"
+
+
+# Work Completion - 2025-08-03T14:07:57
+completion_events:
+  - timestamp: "2025-08-03T14:07:57"
+    work_id: "test_completion_handler"
+    title: "\"Test Completion Handler Hook\""
+    handler: "automatic"
+
+
+# Progress Tracking - 2025-08-03T14:07:57
+work_periods:
+  - start_time: "2025-08-03T14:07:57"
+    activity_count: 30    active_items:
+      - "cache_removal_test"
+
+
+# Work Completion - 2025-08-03T14:07:57
+completion_events:
+  - timestamp: "2025-08-03T14:07:57"
+    work_id: "test_auto_fix_validation"
+    title: "\"Test Auto-Fix Schema Validation\""
+    handler: "automatic"
+
+
+# Schema Validation - 2025-08-03T14:07:57
+validation_events:
+  - timestamp: "2025-08-03T14:07:57"
+    status: "failure"
+    error_count: 1
+    fixes_applied: 0
+    mode: "strict"
+
+
+# Progress Metrics - 2025-08-03T14:07:58
+progress_metrics:
+  - timestamp: "2025-08-03T14:07:58"
+    project_stats: "total: 0, completed: 0, in_progress: 0, avg_completion: 0%"
+    velocity_tracking: "enabled"
+
+
+# Work Completion - 2025-08-03T14:08:15
+completion_events:
+  - timestamp: "2025-08-03T14:08:15"
+    work_id: "test_progress_tracking"
+    title: "\"Test Progress Tracking System\""
+    handler: "automatic"
+
+
+# Work Completion - 2025-08-03T14:08:15
+completion_events:
+  - timestamp: "2025-08-03T14:08:15"
+    work_id: "test_completion_handler"
+    title: "\"Test Completion Handler Hook\""
+    handler: "automatic"
+
+
+# Work Completion - 2025-08-03T14:08:15
+completion_events:
+  - timestamp: "2025-08-03T14:08:15"
+    work_id: "test_auto_fix_validation"
+    title: "\"Test Auto-Fix Schema Validation\""
+    handler: "automatic"
+
+
+# Schema Validation - 2025-08-03T14:08:15
+validation_events:
+  - timestamp: "2025-08-03T14:08:15"
+    status: "failure"
+    error_count: 1
+    fixes_applied: 0
+    mode: "strict"
+
+
+# Progress Metrics - 2025-08-03T14:08:15
+progress_metrics:
+  - timestamp: "2025-08-03T14:08:15"
+    project_stats: "total: 0, completed: 0, in_progress: 0, avg_completion: 0%"
+    velocity_tracking: "enabled"
+
+
+# Work Completion - 2025-08-03T14:08:22
+completion_events:
+  - timestamp: "2025-08-03T14:08:22"
+    work_id: "test_progress_tracking"
+    title: "\"Test Progress Tracking System\""
+    handler: "automatic"
+
+
+# Work Completion - 2025-08-03T14:08:22
+completion_events:
+  - timestamp: "2025-08-03T14:08:22"
+    work_id: "cache_removal_test"
+    title: "\"Test Validation Without Cache\""
+    handler: "automatic"
+
+
+# Work Completion - 2025-08-03T14:08:22
+completion_events:
+  - timestamp: "2025-08-03T14:08:22"
+    work_id: "test_completion_handler"
+    title: "\"Test Completion Handler Hook\""
+    handler: "automatic"
+
+
+# Progress Metrics - 2025-08-03T14:08:22
+progress_metrics:
+  - timestamp: "2025-08-03T14:08:22"
+    project_stats: "total: 0, completed: 0, in_progress: 0, avg_completion: 0%"
+    velocity_tracking: "enabled"
+
+
+# Work Completion - 2025-08-03T14:08:22
+completion_events:
+  - timestamp: "2025-08-03T14:08:22"
+    work_id: "test_auto_fix_validation"
+    title: "\"Test Auto-Fix Schema Validation\""
+    handler: "automatic"
+
+
+# Schema Validation - 2025-08-03T14:08:22
+validation_events:
+  - timestamp: "2025-08-03T14:08:22"
+    status: "failure"
+    error_count: 1
+    fixes_applied: 0
+    mode: "strict"
+
+
+# Work Completion - 2025-08-03T14:08:26
+completion_events:
+  - timestamp: "2025-08-03T14:08:26"
+    work_id: "test_progress_tracking"
+    title: "\"Test Progress Tracking System\""
+    handler: "automatic"
+
+
+# Work Completion - 2025-08-03T14:08:26
+completion_events:
+  - timestamp: "2025-08-03T14:08:26"
+    work_id: "cache_removal_test"
+    title: "\"Test Validation Without Cache\""
+    handler: "automatic"
+
+
+# Work Completion - 2025-08-03T14:08:26
+completion_events:
+  - timestamp: "2025-08-03T14:08:26"
+    work_id: "test_completion_handler"
+    title: "\"Test Completion Handler Hook\""
+    handler: "automatic"
+
+
+# Progress Metrics - 2025-08-03T14:08:26
+progress_metrics:
+  - timestamp: "2025-08-03T14:08:26"
+    project_stats: "total: 0, completed: 0, in_progress: 0, avg_completion: 0%"
+    velocity_tracking: "enabled"
+
+
+# Work Completion - 2025-08-03T14:08:26
+completion_events:
+  - timestamp: "2025-08-03T14:08:26"
+    work_id: "test_auto_fix_validation"
+    title: "\"Test Auto-Fix Schema Validation\""
+    handler: "automatic"
+
+
+# Schema Validation - 2025-08-03T14:08:26
+validation_events:
+  - timestamp: "2025-08-03T14:08:26"
+    status: "failure"
+    error_count: 1
+    fixes_applied: 0
+    mode: "strict"
+
+
+# Work Completion - 2025-08-03T14:08:43
+completion_events:
+  - timestamp: "2025-08-03T14:08:43"
+    work_id: "test_progress_tracking"
+    title: "\"Test Progress Tracking System\""
+    handler: "automatic"
+
+
+# Work Completion - 2025-08-03T14:08:43
+completion_events:
+  - timestamp: "2025-08-03T14:08:43"
+    work_id: "cache_removal_test"
+    title: "\"Test Validation Without Cache\""
+    handler: "automatic"
+
+
+# Work Completion - 2025-08-03T14:08:43
+completion_events:
+  - timestamp: "2025-08-03T14:08:43"
+    work_id: "test_completion_handler"
+    title: "\"Test Completion Handler Hook\""
+    handler: "automatic"
+
+
+# Progress Metrics - 2025-08-03T14:08:43
+progress_metrics:
+  - timestamp: "2025-08-03T14:08:43"
+    project_stats: "total: 0, completed: 0, in_progress: 0, avg_completion: 0%"
+    velocity_tracking: "enabled"
+
+
+# Work Completion - 2025-08-03T14:08:43
+completion_events:
+  - timestamp: "2025-08-03T14:08:43"
+    work_id: "test_auto_fix_validation"
+    title: "\"Test Auto-Fix Schema Validation\""
+    handler: "automatic"
+
+
+# Schema Validation - 2025-08-03T14:08:43
+validation_events:
+  - timestamp: "2025-08-03T14:08:43"
+    status: "failure"
+    error_count: 1
+    fixes_applied: 0
+    mode: "strict"
+
+
+# Work Completion - 2025-08-03T14:08:47
+completion_events:
+  - timestamp: "2025-08-03T14:08:47"
+    work_id: "test_progress_tracking"
+    title: "\"Test Progress Tracking System\""
+    handler: "automatic"
+
+
+# Work Completion - 2025-08-03T14:08:47
+completion_events:
+  - timestamp: "2025-08-03T14:08:47"
+    work_id: "cache_removal_test"
+    title: "\"Test Validation Without Cache\""
+    handler: "automatic"
+
+
+# Work Completion - 2025-08-03T14:08:47
+completion_events:
+  - timestamp: "2025-08-03T14:08:47"
+    work_id: "test_completion_handler"
+    title: "\"Test Completion Handler Hook\""
+    handler: "automatic"
+
+
+# Progress Metrics - 2025-08-03T14:08:47
+progress_metrics:
+  - timestamp: "2025-08-03T14:08:47"
+    project_stats: "total: 0, completed: 0, in_progress: 0, avg_completion: 0%"
+    velocity_tracking: "enabled"
+
+
+# Work Completion - 2025-08-03T14:08:47
+completion_events:
+  - timestamp: "2025-08-03T14:08:47"
+    work_id: "test_auto_fix_validation"
+    title: "\"Test Auto-Fix Schema Validation\""
+    handler: "automatic"
+
+
+# Schema Validation - 2025-08-03T14:08:47
+validation_events:
+  - timestamp: "2025-08-03T14:08:47"
+    status: "failure"
+    error_count: 1
+    fixes_applied: 0
+    mode: "strict"
+
+
+# Stop Event - 2025-08-03T14:10:51
+stop_events:
+  - timestamp: "2025-08-03T14:10:51"
+    type: "operation_complete"
+    context: "committed: fix: Exclude session files from auto-fix and clean,updated 3 CARL files"
+    session_duration: "12h 2m"
+
+
+# Progress Metrics - 2025-08-03T14:13:32
+progress_metrics:
+  - timestamp: "2025-08-03T14:13:32"
+    project_stats: "total: 0, completed: 0, in_progress: 0, avg_completion: 0%"
+    velocity_tracking: "enabled"
+
+
+# Schema Validation - 2025-08-03T14:13:32
+validation_events:
+  - timestamp: "2025-08-03T14:13:32"
+    status: "failure"
+    error_count: 1
+    fixes_applied: 0
+    mode: "strict"
+
+
+# Stop Event - 2025-08-03T14:14:16
+stop_events:
+  - timestamp: "2025-08-03T14:14:16"
+    type: "operation_complete"
+    context: "committed: fix: Exclude session files from auto-fix and clean,updated 2 CARL files"
+    session_duration: "12h 5m"
+
+
+# Progress Metrics - 2025-08-03T14:15:36
+progress_metrics:
+  - timestamp: "2025-08-03T14:15:36"
+    project_stats: "total: 0, completed: 0, in_progress: 0, avg_completion: 0%"
+    velocity_tracking: "enabled"
+
+
+# Schema Validation - 2025-08-03T14:15:36
+validation_events:
+  - timestamp: "2025-08-03T14:15:36"
+    status: "failure"
+    error_count: 1
+    fixes_applied: 0
+    mode: "strict"
+
+
+# Progress Metrics - 2025-08-03T14:17:33
+progress_metrics:
+  - timestamp: "2025-08-03T14:17:33"
+    project_stats: "total: 0, completed: 0, in_progress: 0, avg_completion: 0%"
+    velocity_tracking: "enabled"
+
+
+# Schema Validation - 2025-08-03T14:17:33
+validation_events:
+  - timestamp: "2025-08-03T14:17:33"
+    status: "failure"
+    error_count: 1
+    fixes_applied: 0
+    mode: "strict"
+
+
+# Progress Metrics - 2025-08-03T14:18:01
+progress_metrics:
+  - timestamp: "2025-08-03T14:18:01"
+    project_stats: "total: 0, completed: 0, in_progress: 0, avg_completion: 0%"
+    velocity_tracking: "enabled"
+
+
+# Schema Validation - 2025-08-03T14:18:01
+validation_events:
+  - timestamp: "2025-08-03T14:18:01"
+    status: "failure"
+    error_count: 1
+    fixes_applied: 0
+    mode: "strict"
+
+
+# Progress Metrics - 2025-08-03T14:18:08
+progress_metrics:
+  - timestamp: "2025-08-03T14:18:08"
+    project_stats: "total: 0, completed: 0, in_progress: 0, avg_completion: 0%"
+    velocity_tracking: "enabled"
+
+
+# Schema Validation - 2025-08-03T14:18:08
+validation_events:
+  - timestamp: "2025-08-03T14:18:08"
+    status: "failure"
+    error_count: 1
+    fixes_applied: 0
+    mode: "strict"
+
+
+# Progress Metrics - 2025-08-03T14:18:12
+progress_metrics:
+  - timestamp: "2025-08-03T14:18:12"
+    project_stats: "total: 0, completed: 0, in_progress: 0, avg_completion: 0%"
+    velocity_tracking: "enabled"
+
+
+# Schema Validation - 2025-08-03T14:18:12
+validation_events:
+  - timestamp: "2025-08-03T14:18:12"
+    status: "failure"
+    error_count: 1
+    fixes_applied: 0
+    mode: "strict"
+
+
+# Progress Metrics - 2025-08-03T14:18:16
+progress_metrics:
+  - timestamp: "2025-08-03T14:18:16"
+    project_stats: "total: 0, completed: 0, in_progress: 0, avg_completion: 0%"
+    velocity_tracking: "enabled"
+
+
+# Schema Validation - 2025-08-03T14:18:16
+validation_events:
+  - timestamp: "2025-08-03T14:18:16"
+    status: "failure"
+    error_count: 1
+    fixes_applied: 0
+    mode: "strict"
+
