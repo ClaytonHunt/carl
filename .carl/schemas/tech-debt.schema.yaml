@@ -1,0 +1,82 @@
+$schema: "http://json-schema.org/draft-07/schema#"
+title: "CARL Technical Debt File Schema"
+description: "Schema for tech-debt.carl - Technical debt tracking (TODO/FIXME/HACK comments)"
+type: object
+additionalProperties: false
+
+required:
+  - metadata
+  - debt_items
+
+properties:
+  metadata:
+    type: object
+    additionalProperties: false
+    required: ["last_updated", "total_items", "sources"]
+    properties:
+      last_updated:
+        type: string
+        pattern: "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
+        description: "Last update timestamp in ISO 8601 format"
+      total_items:
+        type: integer
+        minimum: 0
+        description: "Total number of debt items tracked"
+      sources:
+        type: array
+        items:
+          type: string
+          description: "Source file paths that have been scanned"
+        description: "List of files that have been scanned for debt"
+    description: "Metadata about the technical debt tracking"
+    
+  debt_items:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required: ["id", "type", "file_path", "line_number", "content", "priority", "discovered_date", "status"]
+      properties:
+        id:
+          type: string
+          pattern: "^debt_[a-f0-9]{8}$"
+          description: "Unique debt item identifier"
+        type:
+          type: string
+          enum: ["TODO", "FIXME", "HACK"]
+          description: "Type of technical debt marker"
+        file_path:
+          type: string
+          minLength: 1
+          description: "File path where debt was found"
+        line_number:
+          type: integer
+          minimum: 1
+          description: "Line number in the file"
+        content:
+          type: string
+          minLength: 1
+          description: "Full comment content"
+        priority:
+          type: string
+          enum: ["low", "medium", "high", "critical"]
+          description: "Debt priority level"
+        discovered_date:
+          type: string
+          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+          description: "Date when debt was discovered (YYYY-MM-DD)"
+        status:
+          type: string
+          enum: ["active", "resolved", "obsolete"]
+          description: "Current status of the debt item"
+        context:
+          type: string
+          description: "Optional additional context about the debt"
+        resolution_date:
+          type: string
+          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+          description: "Date when debt was resolved (if applicable)"
+        resolution_notes:
+          type: string
+          description: "Notes about how the debt was resolved"
+    description: "Individual technical debt items"

@@ -1,6 +1,14 @@
 # Claude Code Hooks
 
-CARL operates through Claude Code's hook system with minimal, focused shell scripts:
+CARL operates through Claude Code's hook system with minimal, focused shell scripts.
+
+## Prerequisites
+
+Before implementing CARL hooks, review the official Claude Code hooks documentation:
+- **[Hooks Overview](https://docs.anthropic.com/en/docs/claude-code/hooks)** - Core concepts and hook types
+- **[Hooks Getting Started Guide](https://docs.anthropic.com/en/docs/claude-code/hooks-guide)** - Setup and configuration examples
+
+CARL builds on these foundations with project-specific implementations:
 
 ## Hook Architecture Principles
 - **Zero Dependencies**: Pure bash scripts, no external packages
@@ -25,13 +33,14 @@ CARL operates through Claude Code's hook system with minimal, focused shell scri
 - Minimal context: Just active work and relevant scope files
 - ~25 lines of intelligent context loading
 
-### 3. PostToolUse Hooks (Write/Edit tools only - Async-optimized execution)
-- **Schema Validation Hook**: Validate CARL files against `.carl/schemas/` definitions (BLOCKING)
-- **Quality Gate Hook**: Conditional TDD gate enforcement when TDD enabled (BLOCKING)
-- **Progress Tracking Hook**: Update progress tracking in daily session files (ASYNC)
-- **Completion Handler Hook**: Move completed items to `completed/` subdirectory (ASYNC)
-- **Tech Debt Extraction Hook**: Extract TODO/FIXME/HACK comments to `tech-debt.carl` (ASYNC)
-- **Hook Execution Pattern**: Blocking hooks → Async hooks with `&` → `wait` for completion
+### 3. PostToolUse Hook Array (Write/Edit tools only)
+Multiple focused hooks that run in sequence for different responsibilities:
+- **Schema Validation Hook**: Validate CARL files against `.carl/schemas/` definitions
+- **Progress Tracking Hook**: Update progress tracking in daily session files  
+- **Completion Handler Hook**: Move completed items to `completed/` subdirectory
+- **Tech Debt Extraction Hook**: Extract TODO/FIXME/HACK comments to `tech-debt.carl`
+
+Each hook is small, focused, and handles one specific responsibility following Claude Code best practices.
 
 ### 4. Stop Hook
 - Log completed work to daily session file
@@ -45,15 +54,21 @@ CARL operates through Claude Code's hook system with minimal, focused shell scri
 - Project-aware messages: "[project-name] needs your attention"
 - ~15 lines main script + 5 lines per platform
 
-## Shared Functions (`carl-functions.sh`)
-Single sourced file with core utilities:
-- `get_git_user()` - Get current git user for session files
-- `get_active_work()` - Extract current work item ID
-- `update_progress()` - Update completion percentage
-- `move_completed()` - Move completed files
-- `detect_platform()` - Return platform (macos/linux/windows)
-- `speak_message()` - Cross-platform TTS wrapper
-- ~60 lines total, sourced by all hooks
+## Focused Library Scripts (Just-In-Time Creation)
+Domain-specific utility scripts created as needed during hook implementation:
+
+- **`carl-session.sh`** - Session file operations (create, update, compact)
+- **`carl-validation.sh`** - Schema validation and error handling helpers
+- **`carl-git.sh`** - Git user detection, commit tracking, branch utilities
+- **`carl-work.sh`** - Work item management (active work, completion tracking)
+- **`carl-platform.sh`** - Cross-platform utilities (TTS, path handling)
+- **`carl-context.sh`** - Context injection and CARL command detection
+
+**Design Principles:**
+- **Single Responsibility**: Each script focuses on one domain
+- **Just-In-Time**: Create functions only when implementing hooks that need them
+- **Focused Testing**: Smaller scripts are easier to test and maintain
+- **Clear Dependencies**: Explicit sourcing shows which hooks use which utilities
 
 ## What NOT to Include in Hooks
 - **Complex Audio System**: Keep notification hook simple, elaborate personalities for future
@@ -86,7 +101,19 @@ Single sourced file with core utilities:
       "hooks": [
         {
           "type": "command", 
-          "command": "bash ${CLAUDE_PROJECT_DIR}/.carl/hooks/post-tool-orchestrator.sh"
+          "command": "bash ${CLAUDE_PROJECT_DIR}/.carl/hooks/schema-validate.sh"
+        },
+        {
+          "type": "command", 
+          "command": "bash ${CLAUDE_PROJECT_DIR}/.carl/hooks/progress-track.sh"
+        },
+        {
+          "type": "command", 
+          "command": "bash ${CLAUDE_PROJECT_DIR}/.carl/hooks/completion-handler.sh"
+        },
+        {
+          "type": "command", 
+          "command": "bash ${CLAUDE_PROJECT_DIR}/.carl/hooks/tech-debt-extract.sh"
         }
       ]
     }],
@@ -110,27 +137,11 @@ Single sourced file with core utilities:
 
 ## Hook Execution Patterns
 
-### Async Hook Orchestration (`post-tool-orchestrator.sh`)
-- **Purpose**: Single entry point for PostToolUse processing with optimized async execution
-- **Pattern**: Blocking hooks execute first, async hooks run in parallel, `wait` ensures completion
-- **Implementation**:
-  ```bash
-  #!/bin/bash
-  # Blocking hooks (must complete before continuing)
-  bash ${CLAUDE_PROJECT_DIR}/.carl/hooks/schema-validate.sh
-  if [[ $? -ne 0 ]]; then exit 1; fi  # Block on validation failure
-  
-  bash ${CLAUDE_PROJECT_DIR}/.carl/hooks/quality-gate.sh
-  if [[ $? -ne 0 ]]; then exit 1; fi  # Block on quality failure
-  
-  # Async hooks (can run in parallel)
-  bash ${CLAUDE_PROJECT_DIR}/.carl/hooks/progress-track.sh &
-  bash ${CLAUDE_PROJECT_DIR}/.carl/hooks/completion-handler.sh &
-  bash ${CLAUDE_PROJECT_DIR}/.carl/hooks/tech-debt-extract.sh &
-  
-  # Wait for all async hooks to complete
-  wait
-  ```
+### PostToolUse Hook Array Execution
+- **Sequential Execution**: Claude Code runs hooks in array order automatically
+- **Individual Responsibility**: Each hook handles one specific concern
+- **Error Handling**: Individual hooks can fail without affecting others
+- **Simplicity**: No orchestration needed - Claude Code manages execution
 
 ### Performance Logging Integration
 - **Agent Performance**: Session files capture agent invocation times and success rates

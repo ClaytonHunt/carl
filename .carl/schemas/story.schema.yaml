@@ -1,0 +1,107 @@
+$schema: "http://json-schema.org/draft-07/schema#"
+title: "CARL Story File Schema"
+description: "Schema for .story.carl files - Implementation tasks (2-5 days)"
+type: object
+additionalProperties: false
+
+required:
+  - id
+  - name
+  - completion_percentage
+  - current_phase
+  - parent_feature
+  - story_description
+  - acceptance_criteria
+  - technical_requirements
+  - test_scenarios
+  - dependencies
+  - estimate
+
+properties:
+  id:
+    type: string
+    pattern: "^[a-z][a-z0-9_]*[a-z0-9]$"
+    description: "Unique identifier in snake_case format"
+    
+  name:
+    type: string
+    minLength: 1
+    maxLength: 100
+    description: "Human readable name for the story"
+    
+  completion_percentage:
+    type: integer
+    minimum: 0
+    maximum: 100
+    description: "Required for hooks - completion percentage"
+    
+  current_phase:
+    type: string
+    enum: ["planning", "development", "testing", "complete"]
+    description: "Current development phase"
+    
+  parent_feature:
+    type: string
+    pattern: "^[a-z][a-z0-9_]*[a-z0-9]$"
+    description: "Parent feature ID in snake_case"
+    
+  story_description:
+    type: string
+    minLength: 1
+    description: "Implementation task description"
+    
+  acceptance_criteria:
+    type: array
+    items:
+      type: string
+      minLength: 1
+    minItems: 1
+    description: "Required for TDD hook - acceptance criteria"
+    
+  technical_requirements:
+    type: array
+    items:
+      type: string
+      minLength: 1
+    description: "Technical requirements for implementation"
+    
+  test_scenarios:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required: ["scenario", "status"]
+      properties:
+        scenario:
+          type: string
+          minLength: 1
+          description: "Test scenario description"
+        status:
+          type: string
+          enum: ["pending", "passing", "failing"]
+          description: "Test execution status"
+    description: "Test scenarios and their status"
+    
+  dependencies:
+    type: array
+    items:
+      type: string
+      pattern: "^[a-z][a-z0-9_]*[a-z0-9]$"
+    description: "Other story IDs this story depends on"
+    
+  estimate:
+    type: object
+    additionalProperties: false
+    required: ["story_points"]
+    properties:
+      story_points:
+        type: integer
+        enum: [1, 2, 3, 5, 8, 13, 21, 34, 55, 89]
+        description: "Story points using Fibonacci sequence"
+      time_guidance:
+        type: string
+        description: "Optional time guidance (e.g., '2-5 days')"
+      complexity_notes:
+        type: string
+        description: "Optional notes about complexity factors"
+    description: "Story estimation using story points"

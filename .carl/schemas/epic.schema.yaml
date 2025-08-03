@@ -1,0 +1,113 @@
+$schema: "http://json-schema.org/draft-07/schema#"
+title: "CARL Epic File Schema"
+description: "Schema for .epic.carl files - Strategic initiatives (3-6 months)"
+type: object
+additionalProperties: false
+
+required:
+  - id
+  - name
+  - completion_percentage
+  - current_phase
+  - epic_objectives
+  - features
+  - acceptance_criteria
+  - dependencies
+  - timeline
+  - estimate
+
+properties:
+  id:
+    type: string
+    pattern: "^[a-z][a-z0-9_]*[a-z0-9]$"
+    description: "Unique identifier in snake_case format"
+    
+  name:
+    type: string
+    minLength: 1
+    maxLength: 100
+    description: "Human readable name for the epic"
+    
+  completion_percentage:
+    type: integer
+    minimum: 0
+    maximum: 100
+    description: "Required for hooks - completion percentage"
+    
+  current_phase:
+    type: string
+    enum: ["planning", "development", "testing", "integration", "complete"]
+    description: "Current development phase"
+    
+  epic_objectives:
+    type: array
+    items:
+      type: string
+      minLength: 1
+    minItems: 1
+    description: "List of strategic objectives for this epic"
+    
+  features:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required: ["id", "status"]
+      properties:
+        id:
+          type: string
+          pattern: "^[a-z][a-z0-9_]*[a-z0-9]$"
+          description: "Child feature ID in snake_case"
+        status:
+          type: string
+          enum: ["pending", "active", "complete"]
+          description: "Feature status"
+    description: "Child features belonging to this epic"
+    
+  acceptance_criteria:
+    type: array
+    items:
+      type: string
+      minLength: 1
+    minItems: 1
+    description: "Required for TDD hook - acceptance criteria"
+    
+  dependencies:
+    type: array
+    items:
+      type: string
+      pattern: "^[a-z][a-z0-9_]*[a-z0-9]$"
+    description: "External epic IDs this epic depends on"
+    
+  timeline:
+    type: object
+    additionalProperties: false
+    required: ["start_date", "target_date"]
+    properties:
+      start_date:
+        type: string
+        pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+        description: "Start date in YYYY-MM-DD format"
+      target_date:
+        type: string
+        pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+        description: "Target completion date in YYYY-MM-DD format"
+    description: "Epic timeline with start and target dates"
+    
+  estimate:
+    type: object
+    additionalProperties: false
+    required: ["t_shirt_size"]
+    properties:
+      t_shirt_size:
+        type: string
+        enum: ["S", "M", "L", "XL", "XXL", "XXXL"]
+        description: "T-shirt size estimate for strategic planning"
+      calculated_story_points:
+        type: integer
+        minimum: 0
+        description: "Sum of story points from child features (auto-calculated)"
+      time_guidance:
+        type: string
+        description: "Optional time guidance (e.g., '3-6 months')"
+    description: "Epic estimation using t-shirt sizes with calculated story points"

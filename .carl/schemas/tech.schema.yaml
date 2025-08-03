@@ -1,0 +1,89 @@
+$schema: "http://json-schema.org/draft-07/schema#"
+title: "CARL Technical File Schema"
+description: "Schema for .tech.carl files - Infrastructure & process work (varies)"
+type: object
+additionalProperties: false
+
+required:
+  - id
+  - name
+  - completion_percentage
+  - current_phase
+  - tech_type
+  - description
+  - acceptance_criteria
+  - technical_specs
+  - impact_scope
+  - estimate
+
+properties:
+  id:
+    type: string
+    pattern: "^[a-z][a-z0-9_]*[a-z0-9]$"
+    description: "Unique identifier in snake_case format"
+    
+  name:
+    type: string
+    minLength: 1
+    maxLength: 100
+    description: "Human readable name for the technical work"
+    
+  completion_percentage:
+    type: integer
+    minimum: 0
+    maximum: 100
+    description: "Required for hooks - completion percentage"
+    
+  current_phase:
+    type: string
+    enum: ["planning", "development", "testing", "complete"]
+    description: "Current development phase"
+    
+  tech_type:
+    type: string
+    enum: ["infrastructure", "refactoring", "process", "tooling", "security"]
+    description: "Type of technical work"
+    
+  description:
+    type: string
+    minLength: 1
+    description: "Technical work description"
+    
+  acceptance_criteria:
+    type: array
+    items:
+      type: string
+      minLength: 1
+    minItems: 1
+    description: "Required for TDD hook - acceptance criteria"
+    
+  technical_specs:
+    type: array
+    items:
+      type: string
+      minLength: 1
+    description: "Technical specifications and requirements"
+    
+  impact_scope:
+    type: array
+    items:
+      type: string
+      minLength: 1
+    description: "Components or areas affected by this work"
+    
+  estimate:
+    type: object
+    additionalProperties: false
+    required: ["story_points"]
+    properties:
+      story_points:
+        type: integer
+        enum: [1, 2, 3, 5, 8, 13, 21, 34, 55, 89]
+        description: "Story points using Fibonacci sequence (implementation-focused)"
+      time_guidance:
+        type: string
+        description: "Optional time guidance based on work type"
+      complexity_notes:
+        type: string
+        description: "Optional notes about technical complexity factors"
+    description: "Technical work estimation using story points"

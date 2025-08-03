@@ -1,0 +1,85 @@
+$schema: "http://json-schema.org/draft-07/schema#"
+title: "CARL Active Work File Schema"
+description: "Schema for active.work.carl - Current work queue and priorities"
+type: object
+additionalProperties: false
+
+required:
+  - active_intent
+  - work_queue
+
+properties:
+  active_intent:
+    type: object
+    additionalProperties: false
+    required: ["id", "completion", "current_phase"]
+    properties:
+      id:
+        type: string
+        pattern: "^[a-z][a-z0-9_]*[a-z0-9]$"
+        description: "Required for hooks - current work item ID"
+      completion:
+        type: integer
+        minimum: 0
+        maximum: 100
+        description: "Required for hooks - completion percentage"
+      current_phase:
+        type: string
+        description: "Current phase name"
+    description: "Currently active work item"
+    
+  work_queue:
+    type: object
+    additionalProperties: false
+    required: ["ready_for_work", "in_progress", "blocked"]
+    properties:
+      ready_for_work:
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          required: ["id", "priority"]
+          properties:
+            id:
+              type: string
+              pattern: "^[a-z][a-z0-9_]*[a-z0-9]$"
+              description: "Work item ID"
+            priority:
+              type: string
+              enum: ["critical", "high", "medium", "low"]
+              description: "Work priority level"
+        description: "Work items ready to start"
+        
+      in_progress:
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          required: ["id", "status"]
+          properties:
+            id:
+              type: string
+              pattern: "^[a-z][a-z0-9_]*[a-z0-9]$"
+              description: "Work item ID"
+            status:
+              type: string
+              description: "Current status description"
+        description: "Work items currently in progress"
+        
+      blocked:
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          required: ["id", "blocker"]
+          properties:
+            id:
+              type: string
+              pattern: "^[a-z][a-z0-9_]*[a-z0-9]$"
+              description: "Work item ID"
+            blocker:
+              type: string
+              minLength: 1
+              description: "Reason for being blocked"
+        description: "Work items that are blocked"
+    description: "Work queue organization"
