@@ -1,35 +1,69 @@
-# CARL Project Artifacts
-# These are excluded in the CARL template repository only
-# Normal CARL projects should track these files
+# CARL Work Files - Ignore actual work items to keep repo clean
+# This allows using CARL to develop CARL without polluting the repository
 
-# Project-specific CARL artifacts
+# CARL project work files (generated during development)
+.carl/project/epics/*.carl
+.carl/project/features/*.carl  
+.carl/project/stories/*.carl
+.carl/project/technical/*.carl
+.carl/project/completed/
+.carl/project/active.work.carl
+.carl/project/vision.carl
+.carl/project/process.carl
+.carl/project/roadmap.carl
+.carl/project/tech-debt.carl
 
-# Active development artifacts
+# CARL session files (personal development tracking)
+.carl/sessions/session-*.carl
+.carl/sessions/archive/
 
-# User-specific configurations
+# CARL settings (personal preferences - should not be shared)
+.carl/carl-settings.json
 
-# Local personalities (keep template only)
-# .carl/personalities.config.carl is tracked as template
+# Keep CARL system files (schemas, hooks, agents, commands)
+!.carl/schemas/
+!.carl/hooks/
+!.claude/agents/
+!.claude/commands/
 
-# Temporary and backup files
-.carl/backups/
-*.bak
-*.tmp
-
-# OS files
+# Standard ignores
+node_modules/
+.env
+.env.local
 .DS_Store
-Thumbs.db
+*.log
+.vscode/settings.json
+.idea/
 
-# Editor files
+# Temporary files
+*.tmp
 *.swp
 *.swo
 *~
-.vscode/
-.idea/
 
-# Debug and log files
-*.log
-debug/
-logs/
-# Session files (user-specific, not tracked) - matches any .carl/sessions/ directory
-**/.carl/sessions/
+# Build artifacts
+dist/
+build/
+*.tgz
+
+# Coverage reports
+coverage/
+*.lcov
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity

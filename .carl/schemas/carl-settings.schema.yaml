@@ -1,0 +1,452 @@
+$schema: "http://json-schema.org/draft-07/schema#"
+title: "CARL Settings Schema"
+description: "Schema for .carl/carl-settings.json - CARL system configuration"
+type: object
+additionalProperties: false
+
+required:
+  - system
+  - audio
+  - session
+  - hooks
+  - context_injection
+  - developer
+
+properties:
+  system:
+    type: object
+    description: "System configuration and metadata"
+    required:
+      - version
+      - project_root
+      - installation_path
+      - created_at
+    properties:
+      version:
+        type: string
+        description: "CARL system version"
+        default: "2.0.0"
+      project_root:
+        type: string
+        description: "Absolute path to the CARL project root directory"
+        pattern: "^/"
+      installation_path:
+        type: string
+        description: "Absolute path to the .carl installation directory"
+        pattern: "^/"
+      created_at:
+        type: string
+        format: date-time
+        description: "ISO timestamp when CARL settings were created"
+  audio:
+    type: object
+    additionalProperties: false
+    required: ["enabled", "notifications", "voice"]
+    default:
+      enabled: true
+      notifications:
+        session_start:
+          enabled: true
+          message_template: "Good {time_of_day}, we've been working on {active_work}. Next planned: {next_activity}"
+          fallback_message: "Good {time_of_day}, CARL session started"
+        stop:
+          enabled: true
+          message_template: "{project} has finished {task_description}"
+          fallback_message: "{project} operation completed"
+        attention:
+          enabled: true
+          message_template: "{project} needs your attention"
+          fallback_message: "Claude Code needs your attention"
+        progress_milestone:
+          enabled: false
+          message_template: "{work_item} reached {milestone_percentage}% completion"
+          fallback_message: "Progress milestone reached"
+        schema_validation_error:
+          enabled: false
+          message_template: "Schema validation failed for {file_name}"
+          fallback_message: "Schema validation error detected"
+        tech_debt_detected:
+          enabled: false
+          message_template: "New technical debt detected in {file_name}"
+          fallback_message: "Technical debt detected"
+      voice:
+        macos:
+          voice: "default"
+          rate: 200
+          volume: 0.5
+        linux:
+          voice: "default"
+          rate: "normal"
+          volume: "normal"
+        wsl:
+          voice: "default"
+          rate: 0
+          volume: 100
+        windows:
+          voice: "default"
+          rate: 0
+          volume: 100
+        elevenlabs:
+          integration_level: "disabled"
+          mcp_enabled: false
+          voice_id: "21m00Tcm4TlvDq8ikWAM"
+          model: "eleven_monolingual_v1"
+          output_format: "mp3_44100_128"
+          cache_audio: true
+          cache_duration_hours: 24
+          generic_messages_only: true
+    properties:
+      enabled:
+        type: boolean
+        description: "Global audio enable/disable"
+        default: true
+      notifications:
+        type: object
+        additionalProperties: false
+        required: ["session_start", "stop", "attention", "progress_milestone", "schema_validation_error", "tech_debt_detected"]
+        properties:
+          session_start:
+            $ref: "#/definitions/notification"
+          stop:
+            $ref: "#/definitions/notification"
+          attention:
+            $ref: "#/definitions/notification"
+          progress_milestone:
+            $ref: "#/definitions/notification"
+          schema_validation_error:
+            $ref: "#/definitions/notification"
+          tech_debt_detected:
+            $ref: "#/definitions/notification"
+      voice:
+        type: object
+        additionalProperties: false
+        required: ["macos", "linux", "wsl", "windows", "elevenlabs"]
+        properties:
+          macos:
+            $ref: "#/definitions/macosVoice"
+          linux:
+            $ref: "#/definitions/linuxVoice"
+          wsl:
+            $ref: "#/definitions/windowsVoice"
+          windows:
+            $ref: "#/definitions/windowsVoice"
+          elevenlabs:
+            $ref: "#/definitions/elevenlabsVoice"
+
+  session:
+    type: object
+    additionalProperties: false
+    required: ["auto_compaction", "compaction_strategy", "retention_periods", "track_agent_performance", "track_command_metrics"]
+    default:
+      auto_compaction: true
+      compaction_strategy: "calendar_based"
+      retention_periods:
+        daily_sessions_days: 7
+      track_agent_performance: true
+      track_command_metrics: true
+    properties:
+      auto_compaction:
+        type: boolean
+        description: "Automatically compact old session files"
+        default: true
+      compaction_strategy:
+        type: string
+        enum: ["calendar_based", "time_based"]
+        description: "Session compaction strategy"
+        default: "calendar_based"
+      retention_periods:
+        type: object
+        additionalProperties: false
+        required: ["daily_sessions_days"]
+        default:
+          daily_sessions_days: 7
+        properties:
+          daily_sessions_days:
+            type: integer
+            minimum: 1
+            maximum: 30
+            description: "Days to keep individual daily sessions"
+            default: 7
+      track_agent_performance:
+        type: boolean
+        description: "Record agent execution metrics"
+        default: true
+      track_command_metrics:
+        type: boolean
+        description: "Record CARL command performance"
+        default: true
+
+  hooks:
+    type: object
+    additionalProperties: false
+    required: ["schema_validation", "progress_tracking", "tech_debt_extraction", "completion_handler"]
+    default:
+      schema_validation:
+        strict_mode: true
+        auto_fix_minor_issues: true
+      progress_tracking:
+        auto_update_percentages: true
+        milestone_thresholds: [25, 50, 75, 90, 100]
+      tech_debt_extraction:
+        keywords: ["TODO", "FIXME", "HACK", "XXX", "NOTE"]
+        auto_prioritize: true
+      completion_handler:
+        auto_move_completed: true
+        completion_threshold: 100
+    properties:
+      schema_validation:
+        type: object
+        additionalProperties: false
+        required: ["strict_mode", "auto_fix_minor_issues"]
+        default:
+          strict_mode: true
+          auto_fix_minor_issues: true
+        properties:
+          strict_mode:
+            type: boolean
+            description: "Enforce strict schema compliance"
+            default: true
+          auto_fix_minor_issues:
+            type: boolean
+            description: "Automatically fix minor formatting issues"
+            default: true
+      progress_tracking:
+        type: object
+        additionalProperties: false
+        required: ["auto_update_percentages", "milestone_thresholds"]
+        default:
+          auto_update_percentages: true
+          milestone_thresholds: [25, 50, 75, 90, 100]
+        properties:
+          auto_update_percentages:
+            type: boolean
+            description: "Automatically update completion percentages"
+            default: true
+          milestone_thresholds:
+            type: array
+            items:
+              type: integer
+              minimum: 0
+              maximum: 100
+            description: "Completion percentages that trigger notifications"
+            default: [25, 50, 75, 90, 100]
+      tech_debt_extraction:
+        type: object
+        additionalProperties: false
+        required: ["keywords", "auto_prioritize"]
+        default:
+          keywords: ["TODO", "FIXME", "HACK", "XXX", "NOTE"]
+          auto_prioritize: true
+        properties:
+          keywords:
+            type: array
+            items:
+              type: string
+              minLength: 1
+            description: "Comment keywords to detect as technical debt"
+            default: ["TODO", "FIXME", "HACK", "XXX", "NOTE"]
+          auto_prioritize:
+            type: boolean
+            description: "Automatically assign priority based on keyword"
+            default: true
+      completion_handler:
+        type: object
+        additionalProperties: false
+        required: ["auto_move_completed", "completion_threshold"]
+        default:
+          auto_move_completed: true
+          completion_threshold: 100
+        properties:
+          auto_move_completed:
+            type: boolean
+            description: "Move completed items to completed/ directories"
+            default: true
+          completion_threshold:
+            type: integer
+            minimum: 0
+            maximum: 100
+            description: "Completion percentage considered 'done'"
+            default: 100
+
+  context_injection:
+    type: object
+    additionalProperties: false
+    required: ["enabled", "carl_commands_only", "include_active_work", "include_recent_sessions", "max_context_tokens"]
+    default:
+      enabled: true
+      carl_commands_only: true
+      include_active_work: true
+      include_recent_sessions: false
+      max_context_tokens: 500
+    properties:
+      enabled:
+        type: boolean
+        description: "Enable context injection for CARL commands"
+        default: true
+      carl_commands_only:
+        type: boolean
+        description: "Only inject context for /carl:* commands"
+        default: true
+      include_active_work:
+        type: boolean
+        description: "Include active work item in context"
+        default: true
+      include_recent_sessions:
+        type: boolean
+        description: "Include recent session summaries"
+        default: false
+      max_context_tokens:
+        type: integer
+        minimum: 100
+        maximum: 2000
+        description: "Maximum tokens to inject"
+        default: 500
+
+  developer:
+    type: object
+    additionalProperties: false
+    required: ["preferred_time_format", "timezone", "work_hours"]
+    default:
+      preferred_time_format: "12h"
+      timezone: "auto"
+      work_hours:
+        start: "07:00"
+        end: "18:00"
+    properties:
+      preferred_time_format:
+        type: string
+        enum: ["12h", "24h"]
+        description: "Preferred time format"
+        default: "12h"
+      timezone:
+        type: string
+        description: "Timezone (auto or specific timezone)"
+        default: "auto"
+      work_hours:
+        type: object
+        additionalProperties: false
+        required: ["start", "end"]
+        default:
+          start: "07:00"
+          end: "18:00"
+        properties:
+          start:
+            type: string
+            pattern: "^\\d{2}:\\d{2}$"
+            description: "Work start time (HH:MM)"
+            default: "07:00"
+          end:
+            type: string
+            pattern: "^\\d{2}:\\d{2}$"
+            description: "Work end time (HH:MM)"
+            default: "18:00"
+
+definitions:
+  notification:
+    type: object
+    additionalProperties: false
+    required: ["enabled", "message_template", "fallback_message"]
+    properties:
+      enabled:
+        type: boolean
+        description: "Enable this notification type"
+        default: true
+      message_template:
+        type: string
+        minLength: 1
+        description: "Message template with variable substitution"
+      fallback_message:
+        type: string
+        minLength: 1
+        description: "Fallback message when template fails"
+
+  macosVoice:
+    type: object
+    additionalProperties: false
+    required: ["voice", "rate", "volume"]
+    properties:
+      voice:
+        type: string
+        description: "macOS voice name or 'default'"
+      rate:
+        type: integer
+        minimum: 90
+        maximum: 720
+        description: "Words per minute"
+      volume:
+        type: number
+        minimum: 0.0
+        maximum: 1.0
+        description: "Volume level (0.0 to 1.0)"
+
+  linuxVoice:
+    type: object
+    additionalProperties: false
+    required: ["voice", "rate", "volume"]
+    properties:
+      voice:
+        type: string
+        description: "Linux voice name or 'default'"
+      rate:
+        type: string
+        enum: ["slow", "normal", "fast"]
+        description: "Speech rate"
+      volume:
+        type: string
+        enum: ["quiet", "normal", "loud"]
+        description: "Volume level"
+
+  windowsVoice:
+    type: object
+    additionalProperties: false
+    required: ["voice", "rate", "volume"]
+    properties:
+      voice:
+        type: string
+        description: "Windows voice name or 'default'"
+      rate:
+        type: integer
+        minimum: -10
+        maximum: 10
+        description: "Speech rate (-10 to 10)"
+      volume:
+        type: integer
+        minimum: 0
+        maximum: 100
+        description: "Volume level (0 to 100)"
+
+  elevenlabsVoice:
+    type: object
+    additionalProperties: false
+    required: ["integration_level", "mcp_enabled", "voice_id", "model", "output_format", "cache_audio"]
+    properties:
+      integration_level:
+        type: string
+        enum: ["disabled", "cached_generic", "live_api"]
+        description: "Level of ElevenLabs integration"
+      mcp_enabled:
+        type: boolean
+        description: "Use ElevenLabs MCP server if available"
+      api_key_env:
+        type: string
+        description: "Environment variable containing API key"
+      voice_id:
+        type: string
+        description: "ElevenLabs voice identifier"
+      model:
+        type: string
+        description: "TTS model to use"
+      output_format:
+        type: string
+        description: "Audio format for generated speech"
+      cache_audio:
+        type: boolean
+        description: "Cache generated audio files"
+      cache_duration_hours:
+        type: integer
+        minimum: 1
+        maximum: 720
+        description: "Hours to cache audio files"
+      generic_messages_only:
+        type: boolean
+        description: "Only use generic/fallback messages (no custom generation)"

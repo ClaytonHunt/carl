@@ -1,76 +1,42 @@
 {
-  "permissions": {
-    "allow": [
-      "Bash(mkdir:*)",      
-      "Bash(find:*)",
-      "Bash(mv:*)",
-      "Bash(grep:*)",
-      "Bash(npm:*)",
-      "Bash(ls:*)",
-      "Bash(cp:*)",
-      "Write",
-      "Edit",
-      "Bash(chmod:*)",
-      "Bash(touch:*)",
-      "WebFetch(domain:docs.anthropic.com)"
-    ],
-    "deny": []
-  },
   "hooks": {
-    "Notification": [
-      {
-        "matcher": ".*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.sh"
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "matcher": ".*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/session-end.sh"
-          }
-        ]
-      }
-    ],
-    "UserPromptSubmit": [
-      {
-        "matcher": ".*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/user-prompt-submit.sh"
-          }
-        ]
-      }
-    ],
-    "PreToolUse": [
-      {
-        "matcher": ".*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/tool-call.sh pre"
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": ".*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/tool-call.sh post"
-          }
-        ]
-      }
-    ]
+    "SessionStart": [{
+      "matcher": ".*",
+      "hooks": [{
+        "type": "command",
+        "command": "bash $CLAUDE_PROJECT_DIR/.carl/hooks/session-start.sh"
+      }]
+    }],
+    "Notification": [{
+      "matcher": ".*",
+      "hooks": [{
+        "type": "command",
+        "command": "bash $CLAUDE_PROJECT_DIR/.carl/hooks/notify-attention.sh"
+      }]
+    }],
+    "Stop": [{
+      "matcher": ".*",
+      "hooks": [{
+        "type": "command",
+        "command": "bash $CLAUDE_PROJECT_DIR/.carl/hooks/stop.sh"
+      }]
+    }],
+    "PostToolUse": [{
+      "matcher": "Write|Edit|MultiEdit",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "bash $CLAUDE_PROJECT_DIR/.carl/hooks/schema-validate.sh"
+        },
+        {
+          "type": "command",
+          "command": "bash $CLAUDE_PROJECT_DIR/.carl/hooks/progress-track.sh"
+        },
+        {
+          "type": "command",
+          "command": "bash $CLAUDE_PROJECT_DIR/.carl/hooks/completion-handler.sh"
+        }
+      ]
+    }]
   }
 }

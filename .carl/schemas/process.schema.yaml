@@ -1,0 +1,52 @@
+$schema: "http://json-schema.org/draft-07/schema#"
+title: "CARL Process File Schema"
+description: "Schema for process.carl - Team processes and standards"
+type: object
+additionalProperties: false
+
+required:
+  - default_methodology
+  - monorepo
+  - applications
+
+properties:
+  default_methodology:
+    type: string
+    description: "Default development methodology"
+    
+  monorepo:
+    type: boolean
+    description: "Whether this is a monorepo project"
+    
+  applications:
+    type: object
+    patternProperties:
+      "^[a-z][a-z0-9_-]*[a-z0-9]$":
+        type: object
+        additionalProperties: false
+        required: ["path", "methodology", "test_command", "quality_requirements"]
+        properties:
+          path:
+            type: string
+            pattern: "^[a-zA-Z0-9_/-]+$"
+            description: "Relative path to application"
+          methodology:
+            type: string
+            description: "Development methodology for this application"
+          test_command:
+            type: string
+            minLength: 1
+            description: "Command to run tests for this application"
+          quality_requirements:
+            type: object
+            additionalProperties: false
+            required: ["code_coverage_goal"]
+            properties:
+              code_coverage_goal:
+                type: integer
+                minimum: 0
+                maximum: 100
+                description: "Target code coverage percentage"
+            description: "Quality requirements and thresholds"
+        description: "Application-specific configuration"
+    description: "Configuration for each application in the project"

@@ -1,0 +1,3 @@
+# This file ensures the .carl/project/ directory is preserved in git
+# CARL work files in this directory are gitignored to keep the repo clean
+# Users can run /carl:analyze to populate this directory with their project files

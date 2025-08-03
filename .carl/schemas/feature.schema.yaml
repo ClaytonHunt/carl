@@ -1,0 +1,109 @@
+$schema: "http://json-schema.org/draft-07/schema#"
+title: "CARL Feature File Schema"
+description: "Schema for .feature.carl files - User capabilities (2-4 weeks)"
+type: object
+additionalProperties: false
+
+required:
+  - id
+  - name
+  - completion_percentage
+  - current_phase
+  - parent_epic
+  - feature_description
+  - stories
+  - acceptance_criteria
+  - user_stories
+  - dependencies
+  - estimate
+
+properties:
+  id:
+    type: string
+    pattern: "^[a-z][a-z0-9_]*[a-z0-9]$"
+    description: "Unique identifier in snake_case format"
+    
+  name:
+    type: string
+    minLength: 1
+    maxLength: 100
+    description: "Human readable name for the feature"
+    
+  completion_percentage:
+    type: integer
+    minimum: 0
+    maximum: 100
+    description: "Required for hooks - completion percentage"
+    
+  current_phase:
+    type: string
+    enum: ["planning", "development", "testing", "integration", "complete"]
+    description: "Current development phase"
+    
+  parent_epic:
+    type: string
+    pattern: "^[a-z][a-z0-9_]*[a-z0-9]$"
+    description: "Parent epic ID in snake_case"
+    
+  feature_description:
+    type: string
+    minLength: 1
+    description: "User-facing capability description"
+    
+  stories:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required: ["id", "status"]
+      properties:
+        id:
+          type: string
+          pattern: "^[a-z][a-z0-9_]*[a-z0-9]$"
+          description: "Child story ID in snake_case"
+        status:
+          type: string
+          enum: ["pending", "active", "complete"]
+          description: "Story status"
+    description: "Child stories belonging to this feature"
+    
+  acceptance_criteria:
+    type: array
+    items:
+      type: string
+      minLength: 1
+    minItems: 1
+    description: "Required for TDD hook - acceptance criteria"
+    
+  user_stories:
+    type: array
+    items:
+      type: string
+      pattern: "^As a .+, I want .+, so that .+$"
+      minLength: 1
+    description: "User stories in standard format"
+    
+  dependencies:
+    type: array
+    items:
+      type: string
+      pattern: "^[a-z][a-z0-9_]*[a-z0-9]$"
+    description: "Other feature IDs this feature depends on"
+    
+  estimate:
+    type: object
+    additionalProperties: false
+    required: ["t_shirt_size"]
+    properties:
+      t_shirt_size:
+        type: string
+        enum: ["XS", "S", "M", "L", "XL", "XXL"]
+        description: "T-shirt size estimate for feature complexity"
+      calculated_story_points:
+        type: integer
+        minimum: 0
+        description: "Sum of story points from child stories (auto-calculated)"
+      time_guidance:
+        type: string
+        description: "Optional time guidance (e.g., '2-4 weeks')"
+    description: "Feature estimation using t-shirt sizes with calculated story points"
