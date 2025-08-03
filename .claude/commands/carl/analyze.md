@@ -110,6 +110,7 @@ Execute checks in this exact order:
    - Identify monorepo structure and multi-app configurations
 
 3. **Strategic Artifact Generation**:
+   - **carl-settings.json**: User-specific CARL configuration (generated from schema defaults)
    - **vision.carl**: Project purpose, goals, success criteria
    - **process.carl**: TDD settings, test commands, quality gates
    - **roadmap.carl**: High-level development phases and milestones
