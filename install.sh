@@ -121,10 +121,15 @@ resolve_version() {
     fi
     
     # Set download URL
-    if [ "$CARL_VERSION" = "main" ] || [ "$CARL_VERSION" = "master" ]; then
-        TARBALL_URL="https://github.com/${REPO_OWNER}/${REPO_NAME}/archive/refs/heads/${CARL_VERSION}.tar.gz"
-    else
+    # Check if this looks like a branch name (contains non-version characters)
+    if [[ "$CARL_VERSION" =~ ^v?[0-9]+\.[0-9]+(\.[0-9]+)?(-.*)?$ ]]; then
+        # Looks like a version tag (v2.0.0, 2.0.0, v2.0.0-beta, etc.)
         TARBALL_URL="https://github.com/${REPO_OWNER}/${REPO_NAME}/archive/refs/tags/${CARL_VERSION}.tar.gz"
+        verbose "Treating '$CARL_VERSION' as a tag"
+    else
+        # Treat as branch name (main, carl-system-v2, feature-branch, etc.)
+        TARBALL_URL="https://github.com/${REPO_OWNER}/${REPO_NAME}/archive/refs/heads/${CARL_VERSION}.tar.gz"
+        verbose "Treating '$CARL_VERSION' as a branch"
     fi
     verbose "Download URL: $TARBALL_URL"
 }
