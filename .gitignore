@@ -1,0 +1,69 @@
+# CARL Work Files - Ignore actual work items to keep repo clean
+# This allows using CARL to develop CARL without polluting the repository
+
+# CARL project work files (generated during development)
+.carl/project/epics/*.carl
+.carl/project/features/*.carl  
+.carl/project/stories/*.carl
+.carl/project/technical/*.carl
+.carl/project/completed/
+.carl/project/active.work.carl
+.carl/project/vision.carl
+.carl/project/process.carl
+.carl/project/roadmap.carl
+.carl/project/tech-debt.carl
+
+# CARL session files (personal development tracking)
+.carl/sessions/session-*.carl
+.carl/sessions/archive/
+
+# CARL settings (personal preferences)
+.carl/carl-settings.json
+
+# Keep CARL system files (schemas, hooks, agents, commands)
+!.carl/schemas/
+!.carl/hooks/
+!.claude/agents/
+!.claude/commands/
+
+# Standard ignores
+node_modules/
+.env
+.env.local
+.DS_Store
+*.log
+.vscode/settings.json
+.idea/
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+*~
+
+# Build artifacts
+dist/
+build/
+*.tgz
+
+# Coverage reports
+coverage/
+*.lcov
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity

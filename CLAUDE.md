@@ -6,9 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is the CARL (Context-Aware Requirements Language) v2 system - an AI-optimized planning and execution framework for Claude Code. For complete documentation, see [CARL.md](CARL.md).
 
-## Commands to Develop
+## CARL Commands
 
-### Core CARL Commands
+### Core Commands (Production Ready)
 
 1. **`/carl:analyze`** - Intelligent project foundation with auto-state detection
 2. **`/carl:plan [requirement]`** - Context-aware planning with auto-scope detection
@@ -23,20 +23,22 @@ For detailed command documentation, see:
 
 **Note**: Commands are located in `.claude/commands/carl/` to avoid namespace collisions.
 
-### Development Commands
+### Direct File Access
 
-CARL operates through hook scripts and agent definitions. Direct file access:
+CARL operates through hook scripts and agent definitions. When debugging or inspecting:
 
 ```bash
-# View active work
-cat .carl/project/active.work.carl
+# View session history (always available)
+ls .carl/sessions/
 
-# List work items
+# View CARL files (when project uses CARL)
 ls .carl/project/{epics,features,stories,technical}/
 
-# View session history
-ls .carl/sessions/
+# View active work (when initialized)
+cat .carl/project/active.work.carl
 ```
+
+**Note**: This development project intentionally keeps `.carl/project/` clean - user projects will have full structure.
 
 ## High-Level Architecture
 

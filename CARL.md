@@ -6,7 +6,56 @@
 
 CARL is a comprehensive development workflow system designed to bridge the gap between human cognitive simplicity and AI context precision. It provides structured planning, execution, and tracking capabilities through a dual-layer architecture that keeps developers productive while giving AI assistants rich context.
 
-## Quick Links
+## Getting Started
+
+1. **`/carl:analyze`** - Understand your project and set up strategic artifacts
+2. **`/carl:plan`** - Create your first work items with proper scope  
+3. **`/carl:task`** - Execute work with automatic dependency handling
+4. **`/carl:status`** - Monitor progress and get actionable insights
+
+## Core Commands
+
+CARL operates through four primary commands:
+
+1. **`/carl:analyze`** - Establish project foundation and strategic context
+2. **`/carl:plan`** - Create work items with intelligent scope detection
+3. **`/carl:task`** - Execute work with full context and dependency analysis
+4. **`/carl:status`** - Monitor progress and project health
+
+## Key Features
+
+- **Single-File System**: Each work item has one comprehensive file containing requirements, progress, and relationships
+- **Hierarchical Organization**: Epics (3-6mo) → Features (2-4wk) → Stories (2-5d) → Technical (varies)
+- **Session Continuity**: Daily developer tracking with progressive compaction for historical analysis
+- **Dynamic Agent Creation**: Automatically generates specialist agents when domain gaps detected
+- **Dependency Management**: Intelligent parallel execution with topological sorting
+- **Multi-Developer Support**: Branch-based isolation with git-aware session tracking
+- **Schema Validation**: Automatic validation ensures CARL file consistency
+- **Hook Integration**: Minimal bash scripts for context injection and automation
+
+## How CARL Works
+
+CARL operates through a **dual-layer architecture** that keeps developers focused while providing AI assistants with rich context:
+
+### Human Layer (Simple)
+- **Four Commands**: `/carl:analyze`, `/carl:plan`, `/carl:task`, `/carl:status`
+- **No Complex Decisions**: Commands automatically determine what action is needed
+- **Zero Maintenance**: Hooks handle schema validation and progress tracking automatically
+
+### AI Layer (Rich Context)
+- **CARL Files**: Single file per work item with comprehensive requirements and progress
+- **Session Tracking**: Daily activity logs for trend analysis and health monitoring  
+- **Specialized Agents**: Domain-specific assistants created automatically as needed
+- **Schema Validation**: Automatic data integrity with self-healing capabilities
+
+### Workflow Integration
+CARL integrates seamlessly with existing development workflows:
+- **Git Integration**: Branch-aware session tracking and multi-developer coordination
+- **Claude Code Hooks**: Automatic progress tracking and completion handling
+- **Schema Compliance**: All files validated against defined schemas with auto-fixing
+- **Quality Gates**: TDD enforcement and testing integration when configured
+
+## Detailed Documentation
 
 ### Core Documentation
 - [Core Philosophy](docs/core/philosophy.md) - Fundamental principles and design philosophy
@@ -35,56 +84,9 @@ CARL is a comprehensive development workflow system designed to bridge the gap b
 
 ### Guides & Reference
 - [Audio System (Future)](docs/guides/audio-system.md) - Planned character-based audio features
-- [Changelog](docs/reference/changelog.md) - Architecture updates and version history
-
-## Core Commands
-
-CARL operates through four primary commands:
-
-1. **`/carl:analyze`** - Establish project foundation and strategic context
-2. **`/carl:plan`** - Create work items with intelligent scope detection
-3. **`/carl:task`** - Execute work with full context and dependency analysis
-4. **`/carl:status`** - Monitor progress and project health
-
-## Key Features
-
-- **Single-File System**: Each work item has one comprehensive file containing requirements, progress, and relationships
-- **Hierarchical Organization**: Epics (3-6mo) → Features (2-4wk) → Stories (2-5d) → Technical (varies)
-- **Session Continuity**: Daily developer tracking with progressive compaction for historical analysis
-- **Dynamic Agent Creation**: Automatically generates specialist agents when domain gaps detected
-- **Dependency Management**: Intelligent parallel execution with topological sorting
-- **Multi-Developer Support**: Branch-based isolation with git-aware session tracking
-- **Schema Validation**: Automatic validation ensures CARL file consistency
-- **Hook Integration**: Minimal bash scripts for context injection and automation
-
-## Getting Started
-
-1. Run `/carl:analyze` to understand your project and set up strategic artifacts
-2. Use `/carl:plan` to create your first work items with proper scope
-3. Execute work with `/carl:task`, which handles dependencies automatically
-4. Monitor progress with `/carl:status` for insights and metrics
-
-## Implementation Status
-
-- ✅ **Core Architecture**: Complete documentation and design
-- ✅ **Agent System**: `carl-agent-builder` and `carl-requirements-analyst` implemented and production-ready
-- ✅ **Hook System**: Fully operational with schema validation, completion handling, and progress tracking
-- ✅ **Session Management**: Active daily session tracking with progressive compaction
-- ✅ **CARL Planning**: `/carl:plan` command implemented with single-turn agent integration
-- 🔌 **MCP Integration**: Framework established for external tool integration
-
-### Production Components
-- ✅ **`/carl:plan` Command**: Interactive requirements gathering with intelligent scope detection
-- ✅ **`/carl:task` Command**: Intelligent work execution with dependency analysis and parallel processing
-- ✅ **`/carl:status` Command**: AI-powered project health dashboard with session analysis
-- ✅ **carl-requirements-analyst Agent**: Single-turn analysis generating schema-compliant CARL files
-- ✅ **carl-session-analyst Agent**: Session data analysis specialist for progress monitoring
-- ✅ **Schema Validation Hook**: Auto-fixing validation with proper CLAUDE_PROJECT_DIR usage
-- ✅ **Complete Hook Suite**: SessionStart, Stop, PostToolUse array, and Notification hooks operational
-
-### Ready for Development
-- ✅ **`/carl:analyze` Command**: Intelligent project foundation with auto-state detection
 
 ---
 
-**Current Status**: CARL Core System is **production-ready** with complete planning, execution, and monitoring capabilities. Users can plan with `/carl:plan [requirement]`, execute with `/carl:task [work-item]`, and monitor progress with `/carl:status` - all with full schema compliance and intelligent automation.
+## Next Steps
+
+Ready to start using CARL? Begin with `/carl:analyze` to establish your project foundation, then use `/carl:plan` to create your first work items. The system handles complexity automatically while keeping your workflow simple and focused.
