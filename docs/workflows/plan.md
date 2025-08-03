@@ -2,6 +2,20 @@
 
 **Purpose**: Context-aware planning that adapts to scope and complexity
 
+## Implementation Architecture
+
+**Claude Code Slash Command**: `.claude/commands/plan.md`
+- Handles interactive requirements gathering through natural conversation
+- Conducts scope analysis and user validation
+- Invokes `carl-requirements-analyst` agent with complete context
+- Creates CARL files based on agent analysis
+
+**Agent Integration**: Single-turn `carl-requirements-analyst` invocation
+- Receives complete requirements context from command
+- Performs scope classification and validation
+- Generates schema-compliant CARL files
+- Returns structured results for command processing
+
 ## Modes
 
 - `/carl:plan [requirement description]`: Create single work item at determined scope level
@@ -10,34 +24,46 @@
 ## Auto-Scope Detection Algorithm
 
 ```
-1. Requirements Gathering → Complete understanding of request
-2. Effort Estimation → AI estimates completion time/complexity
-3. Scope Classification:
+1. Interactive Requirements Gathering → Claude Code conducts natural conversation
+2. Context Assembly → All requirements, constraints, and details collected
+3. Agent Analysis → carl-requirements-analyst performs scope classification:
    - Epic Level: 3-6 months (architecture changes, major initiatives)
    - Feature Level: 2-4 weeks (user-facing capabilities) 
    - Story Level: 2-5 days (implementation tasks)
    - Technical Level: Variable timing (infrastructure/process work)
-4. Validation → Confirm scope with user before file creation
+4. User Validation → Confirm scope and approach before file creation
+5. CARL Generation → Agent creates schema-compliant files with relationships
 ```
 
 ## Planning Decision Flow
 
 ```
-Planning Request → Context Loading → Requirements Gathering → Effort Estimation
+User Request → /carl:plan Command → Interactive Requirements Gathering
        ↓
-Agent Gap Detection → Create Missing Specialists → Specialist Consultation
+Complete Context Assembly → carl-requirements-analyst Agent (Single Turn)
        ↓  
-Scope Classification → User Validation → CARL Generation → Breakdown (if needed)
+Scope Analysis & Validation → CARL File Generation → File Creation & Organization
 ```
 
-## Detailed Algorithm
+## Detailed Implementation
 
-1. **Requirements Gathering**: Interactive questioning until complete understanding achieved
-2. **Effort Estimation**: AI analyzes complexity, dependencies, technical challenges to estimate completion time
-3. **Scope Classification**: Map estimate to scope level (3-6mo=Epic, 2-4wk=Feature, 2-5d=Story, Variable=Technical)
-4. **User Validation**: Confirm scope level and approach before creating CARL files
-5. **Agent Management**: Deploy specialists for domain expertise during requirements/estimation phases
-6. **CARL Generation**: Create files with proper hierarchical relationships and dependencies
+### Phase 1: Interactive Requirements Gathering (Claude Code)
+- **Natural Conversation**: Claude Code conducts requirements gathering directly
+- **Progressive Context Building**: Each user response builds complete picture
+- **Gap Identification**: Claude Code identifies missing information and asks follow-ups
+- **Domain Expertise**: Create specialist agents for complex domains when needed
+
+### Phase 2: Single-Turn Agent Analysis (carl-requirements-analyst)
+- **Complete Context Processing**: Agent receives full requirements context
+- **Scope Classification**: Maps complexity to appropriate scope level
+- **Schema Validation**: Ensures all required fields and relationships
+- **CARL Generation**: Creates properly structured files with dependencies
+
+### Phase 3: File Creation & Organization (Claude Code)
+- **Directory Management**: Creates proper `.carl/project/` structure
+- **File Placement**: Organizes files in correct scope directories
+- **Relationship Setup**: Establishes parent-child and dependency links
+- **Next Steps**: Provides actionable recommendations for user
 
 ## Scope Breakdown Examples
 
@@ -50,9 +76,32 @@ Scope Classification → User Validation → CARL Generation → Breakdown (if n
 - **Ready for Implementation**: "Start work on `email-validation.story.carl` using `/carl:task email-validation.story.carl`"
 - **Dependencies First**: "Complete `database-schema.tech.carl` before starting user registration features"
 
-## Agent Management
+## Claude Code Integration
 
-- **Gap Detection**: Automatically identifies missing domain expertise during planning
-- **Dynamic Creation**: Uses `carl-agent-builder` to create specialized agents for research or analysis
-- **Lifecycle Management**: Creates temporary agents for research, deletes unneeded definitions after planning decisions
-- **Permanent vs Temporary**: Core project stack agents remain, evaluation-only agents are removed
+### Slash Command Implementation
+**File**: `.claude/commands/plan.md`
+```markdown
+# Plan Work Item
+
+You are implementing the `/carl:plan` command for intelligent CARL work item planning.
+
+## Process:
+1. Conduct interactive requirements gathering through natural conversation
+2. Build complete context including constraints, dependencies, acceptance criteria
+3. When requirements are complete, invoke the carl-requirements-analyst agent
+4. Create CARL files based on agent analysis and organize in proper directories
+5. Provide next steps and breakdown recommendations
+
+## Arguments:
+- No args: Plan new work item from user description
+- `--from [file]`: Break down existing work item to next scope level
+
+Use the carl-requirements-analyst agent for final scope analysis and CARL generation.
+```
+
+### Agent Integration
+- **Single-Turn Analysis**: Agent receives complete requirements context
+- **Token Efficiency**: No repeated agent calls with context rebuilding
+- **Natural Flow**: Claude Code handles conversation, agent handles analysis
+- **Specialist Creation**: Use `carl-agent-builder` for domain expertise when needed
+- **Stateless Design**: Each planning session is independent and complete
