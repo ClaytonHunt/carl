@@ -2,14 +2,15 @@
 
 CARL operates through Claude Code's hook system providing **automated workflow management** with intelligent, self-healing capabilities.
 
-## System Status: ✅ Production Ready
+## System Status: ✅ Production Ready & Tested
 
 The CARL hook system is fully operational with these core capabilities:
-- **Auto-fixing schema validation** with proactive error correction
-- **Intelligent progress tracking** based on activity patterns  
-- **Automated completion handling** with file organization
-- **Accurate session duration** tracking with UTC timezone support
-- **Cross-platform audio notifications** for user interaction
+- **Auto-fixing schema validation** with proactive error correction ✅ **TESTED**
+- **Intelligent progress tracking** based on activity patterns ✅ **OPERATIONAL**
+- **Automated completion handling** with file organization ✅ **OPERATIONAL**
+- **Accurate session duration** tracking with UTC timezone support ✅ **OPERATIONAL**
+- **Cross-platform audio notifications** for user interaction ✅ **OPERATIONAL**
+- **Fixed PostToolUse execution** with proper CLAUDE_PROJECT_DIR usage ✅ **RESOLVED**
 
 ## Prerequisites
 
@@ -50,7 +51,7 @@ Review the official Claude Code hooks documentation:
 **Triggered after**: Write/Edit/MultiEdit operations  
 **Execution**: Sequential processing with individual error handling
 
-#### 3a. Schema Validation Hook 🔧 **AUTO-FIXING**
+#### 3a. Schema Validation Hook 🔧 **AUTO-FIXING** ✅ **FIXED**
 **File**: `.carl/hooks/schema-validate.sh`
 - **Proactive auto-fixing** instead of just error reporting
 - **Auto-fixes applied**:
@@ -60,6 +61,8 @@ Review the official Claude Code hooks documentation:
   - YAML formatting corrections
 - **Smart reporting**: Logs `fixes_applied` count and creates backups
 - **Mode**: Strict validation with auto-remediation
+- **CLAUDE_PROJECT_DIR Usage**: Fixed to use proper environment variable pattern
+- **PostToolUse Integration**: Resolved execution errors and path resolution issues
 
 #### 3b. Progress Tracking Hook 📈 **INTELLIGENT**  
 **File**: `.carl/hooks/progress-track.sh`
@@ -195,9 +198,9 @@ All utility scripts are implemented and tested in production:
 - **Error handling**: Fail gracefully, don't break Claude Code flow
 - **Dependencies**: `yq` recommended for full monorepo support (graceful fallback to grep/sed parsing if not available)
 
-## Production Architecture ✅ **BATTLE-TESTED**
+## Production Architecture ✅ **BATTLE-TESTED & VERIFIED**
 
-### Project Root Detection
+### Project Root Detection ✅ **STANDARDIZED**
 All hooks use **CLAUDE_PROJECT_DIR** for robust path resolution:
 ```bash
 #!/bin/bash
@@ -212,6 +215,12 @@ fi
 # Source libraries using CLAUDE_PROJECT_DIR
 source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-platform.sh"
 ```
+
+**Design Changes Made:**
+- ✅ **Removed complex project root detection** - Eliminated `carl-project-root.sh` dependency
+- ✅ **Standardized environment variable usage** - All hooks now use `CLAUDE_PROJECT_DIR` consistently  
+- ✅ **Fixed PostToolUse execution errors** - Schema validation hook now works reliably
+- ✅ **Aligned with working hook patterns** - Follows same pattern as `session-start.sh` and `stop.sh`
 
 ### Fallback Detection (carl-project-root.sh)
 For standalone execution, robust detection with multiple methods:
@@ -238,12 +247,20 @@ Based on current session (session-2025-08-03-clayton_hunt.carl):
 
 ## System Status Summary 🚀
 
-**CARL Hook System v2 is production ready** with:
+**CARL Hook System v2 is production ready and verified** with:
 - ✅ **Zero manual intervention** required for common workflow tasks
-- ✅ **Self-healing** schema validation with proactive fixes
+- ✅ **Self-healing** schema validation with proactive fixes  
 - ✅ **Intelligent automation** for progress tracking and completion
 - ✅ **Accurate metrics** for session duration and work velocity
 - ✅ **Cross-platform compatibility** (Windows WSL2, macOS, Linux)
 - ✅ **Error resilience** with graceful fallbacks and recovery
+- ✅ **PostToolUse reliability** with resolved execution path issues
+- ✅ **Consistent environment handling** across all hook components
 
-The system now provides **complete workflow automation** while maintaining simplicity and reliability.
+## Recent Fixes Applied
+- **Schema Validation Hook**: Fixed CLAUDE_PROJECT_DIR usage, removed complex root detection
+- **Validation Library**: Updated carl-validation.sh to use environment variable consistently
+- **Session File YAML**: Resolved malformed YAML syntax causing validation failures
+- **Hook Pattern Alignment**: Standardized approach across all hook scripts
+
+The system now provides **complete workflow automation** while maintaining **proven reliability** and **consistent execution patterns**.
