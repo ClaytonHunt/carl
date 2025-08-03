@@ -251,7 +251,22 @@ merge_claude_settings() {
             # Use jq for proper JSON merging
             verbose "Using jq for JSON merging..."
             
-            if jq -s '.[0] * {"hooks": (.[0].hooks // {} | . * .[1].hooks)}' \
+            # More sophisticated merge that handles arrays properly
+            if jq -s '
+                def merge_hooks(existing; new):
+                    existing as $existing |
+                    new as $new |
+                    $existing + ($new | to_entries | map(
+                        if $existing[.key] then
+                            {key: .key, value: ($existing[.key] + .value)}
+                        else
+                            .
+                        end
+                    ) | from_entries);
+                    
+                .[0] * {
+                    "hooks": merge_hooks(.[0].hooks // {}; .[1].hooks // {})
+                }' \
                 "$settings_file" "$temp_settings" > "${settings_file}.tmp"; then
                 mv "${settings_file}.tmp" "$settings_file"
                 success "Settings merged successfully"
