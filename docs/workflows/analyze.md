@@ -1,20 +1,60 @@
-# /carl:analyze - Project Understanding & Foundation Setup
+# /carl:analyze - Intelligent Project Foundation
 
-**Purpose**: Understand project fundamentals and establish CARL strategic foundation
+**Purpose**: Automatically establish and maintain CARL strategic foundation with smart state detection
 
-## Process
+## Smart State Detection
 
-1. **Technology Stack Analysis**: Identify languages, frameworks, build tools, testing patterns
-2. **Architecture Pattern Recognition**: Detect MVC, microservices, monolith, API patterns, etc.
-3. **Development Pattern Discovery**: TDD practices, deployment patterns, code organization
-4. **Utility and Library Assessment**: Key dependencies, custom utilities, integration patterns
-5. **Interactive Validation**: Present findings to developer for confirmation and refinement
-6. **Strategic Artifact Generation**: Create/update `vision.carl`, `roadmap.carl`, `process.carl`
-   - **Monorepo Detection**: Automatically identifies multiple applications and creates per-app process sections
-   - **Process Customization**: Each app gets appropriate test commands and coverage goals
-7. **Specialized Agent Creation**: Generate project-specific agents based on technology stack (see Agent Architecture section)
+The `/carl:analyze` command intelligently determines what analysis is needed:
 
-## Modes
+1. **Foundation Check**: If strategic files exist (vision.carl, process.carl, roadmap.carl) → **Sync Mode**
+2. **Agent Check**: If foundation missing but required agents exist → **Foundation Creation**
+3. **Bootstrap**: If foundation and agents missing → **Agent Creation** (restart required)
 
-- `--sync`: Detect code changes that affect strategic artifacts or require new agents
-- `--comprehensive`: Deep analysis with full technology assessment and interactive validation
+## Execution Modes
+
+### Sync Mode (< 2 seconds)
+**Triggers**: Foundation files exist
+- Quick change detection via file timestamps
+- Technology stack drift detection
+- Minimal updates only
+- **Output**: "✅ No changes detected (0.8s)"
+
+### Agent Creation Phase (30-60 seconds)
+**Triggers**: Missing foundation AND missing project agents
+- Comprehensive technology stack detection
+- Batch creation of project-specific agents
+- **Restart required**: New agents need to be loaded
+- **Output**: "🔄 Restart Claude Code with --resume and run /carl:analyze again"
+
+### Foundation Creation Phase (2-5 minutes)  
+**Triggers**: Missing foundation AND required agents available
+- Deep project analysis using specialized agents
+- Strategic artifact generation: vision.carl, process.carl, roadmap.carl
+- Monorepo detection and per-app configuration
+- **Output**: "🚀 CARL foundation complete! Ready for /carl:plan"
+
+## Technology Stack Detection
+
+**Automatic identification of**:
+- **Languages**: TypeScript, Python, Rust, Java, C#
+- **Frameworks**: React, Vue, Angular, Django, Express, FastAPI
+- **Databases**: PostgreSQL, MongoDB, Redis
+- **Deployment**: Docker, Kubernetes, AWS
+- **Testing**: Jest, Pytest, Playwright
+
+## Agent Integration
+
+**Two-Phase Pattern**:
+1. **Phase 1**: Create missing project agents (project-react.md, project-typescript.md, etc.)
+2. **Phase 2**: Use agents for comprehensive foundation analysis
+
+**Resume Pattern**: When agents are created, user restarts Claude Code to load them for subsequent analysis.
+
+## User Experience
+
+**Zero Cognitive Load**: Single command automatically does the right thing
+- Established projects: Fast sync check  
+- New projects: Complete bootstrap with clear guidance
+- Changed projects: Targeted updates only
+
+**Usage**: Simply run `/carl:analyze` - no flags or decisions needed
