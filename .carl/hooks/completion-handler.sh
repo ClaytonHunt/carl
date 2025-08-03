@@ -6,22 +6,18 @@
 
 set -euo pipefail
 
-# Get project root with robust detection
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${SCRIPT_DIR}/lib/carl-project-root.sh"
-
-PROJECT_ROOT=$(get_project_root)
-if [[ $? -ne 0 ]]; then
-    echo "Error: Could not determine CARL project root" >&2
+# Use CLAUDE_PROJECT_DIR for all paths
+if [[ -z "${CLAUDE_PROJECT_DIR:-}" ]]; then
+    echo "Error: CLAUDE_PROJECT_DIR environment variable not set" >&2
     exit 1
 fi
 
 # Source libraries using project root
-source "${PROJECT_ROOT}/.carl/hooks/lib/carl-work.sh"
-source "${PROJECT_ROOT}/.carl/hooks/lib/carl-settings.sh"
-source "${PROJECT_ROOT}/.carl/hooks/lib/carl-session.sh"
-source "${PROJECT_ROOT}/.carl/hooks/lib/carl-git.sh"
-source "${PROJECT_ROOT}/.carl/hooks/lib/carl-time.sh"
+source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-work.sh"
+source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-settings.sh"
+source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-session.sh"
+source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-git.sh"
+source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-time.sh"
 
 # Check if completion handling is enabled
 is_completion_handling_enabled() {
@@ -107,7 +103,7 @@ log_completion_event() {
     git_user=$(get_git_user)
     local date_str
     date_str=$(get_date_string)
-    local session_file="${PROJECT_ROOT}/.carl/sessions/session-${date_str}-${git_user}.carl"
+    local session_file="${CLAUDE_PROJECT_DIR}/.carl/sessions/session-${date_str}-${git_user}.carl"
     
     if [[ -f "$session_file" ]]; then
         local timestamp
@@ -160,7 +156,7 @@ check_for_orphaned_completed() {
     local moved_count=0
     
     # Search all work directories for completed items not in completed/ subdirs
-    for dir in "${PROJECT_ROOT}/.carl/project"/{epics,features,stories,technical}; do
+    for dir in "${CLAUDE_PROJECT_DIR}/.carl/project"/{epics,features,stories,technical}; do
         if [[ -d "$dir" ]]; then
             # Find completed items not in completed subdirectory
             find "$dir" -maxdepth 1 -name "*.carl" -type f | while read -r file; do

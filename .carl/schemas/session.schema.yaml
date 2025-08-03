@@ -1,6 +1,6 @@
 $schema: "http://json-schema.org/draft-07/schema#"
 title: "CARL Session File Schema"
-description: "Schema for session-YYYY-MM-DD-{user}.carl - Daily session tracking"
+description: "Schema for session-YYYY-MM-DD-{user}.carl - Daily session tracking with optimized logging"
 type: object
 additionalProperties: false
 
@@ -28,7 +28,7 @@ properties:
   session_summary:
     type: object
     additionalProperties: false
-    required: ["start_time", "end_time", "total_active_time"]
+    required: ["start_time"]
     properties:
       start_time:
         type: string
@@ -37,11 +37,7 @@ properties:
       end_time:
         type: string
         pattern: "^\\d{2}:\\d{2}:\\d{2}Z$"
-        description: "Session end time in HH:MM:SSZ format"
-      total_active_time:
-        type: string
-        pattern: "^\\d+(\\.\\d+)?\\s+(hours?|minutes?)$"
-        description: "Total active time (e.g., '7.5 hours', '45 minutes')"
+        description: "Session end time in HH:MM:SSZ format (optional)"
     description: "High-level session timing information"
     
   work_periods:

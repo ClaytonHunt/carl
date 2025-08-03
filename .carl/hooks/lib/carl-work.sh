@@ -3,25 +3,21 @@
 # carl-work.sh - Work item management utilities for CARL hooks
 # Provides work item operations, progress tracking, and completion handling
 
-# Get project root with robust detection
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${SCRIPT_DIR}/carl-project-root.sh"
-
-PROJECT_ROOT=$(get_project_root)
-if [[ $? -ne 0 ]]; then
-    echo "Error: Could not determine CARL project root" >&2
+# Use CLAUDE_PROJECT_DIR for all paths
+if [[ -z "${CLAUDE_PROJECT_DIR:-}" ]]; then
+    echo "Error: CLAUDE_PROJECT_DIR environment variable not set" >&2
     exit 1
 fi
 
 # Source required libraries
-source "${PROJECT_ROOT}/.carl/hooks/lib/carl-time.sh"
+source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-time.sh"
 
 # Find all CARL work items
 find_all_work_items() {
     local work_items=()
     
     # Search all work item directories
-    for dir in "${PROJECT_ROOT}/.carl/project"/{epics,features,stories,technical}; do
+    for dir in "${CLAUDE_PROJECT_DIR}/.carl/project"/{epics,features,stories,technical}; do
         if [[ -d "$dir" ]]; then
             find "$dir" -name "*.carl" -type f | while read -r file; do
                 echo "$file"

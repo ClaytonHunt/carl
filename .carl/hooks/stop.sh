@@ -4,14 +4,13 @@
 # Called when Claude Code operations complete
 # Logs activity and provides audio notifications
 # Version: 2.0 - With robust project root detection
-
-set -euo pipefail
-
-# Use CLAUDE_PROJECT_DIR which is guaranteed by Claude Code
+# Use CLAUDE_PROJECT_DIR for all paths
 if [[ -z "${CLAUDE_PROJECT_DIR:-}" ]]; then
-    echo "Error: CLAUDE_PROJECT_DIR not set. This hook must be run by Claude Code." >&2
+    echo "Error: CLAUDE_PROJECT_DIR environment variable not set" >&2
     exit 1
 fi
+
+set -euo pipefail
 
 # Source libraries using CLAUDE_PROJECT_DIR
 source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-platform.sh"
@@ -107,48 +106,38 @@ update_session_stop() {
     local work_context
     work_context=$(get_work_context)
     
-    # Add stop event to session file
+    # Check if this is a duplicate stop event (prevent spam)
+    if [[ -f "$SESSION_FILE" ]]; then
+        local last_context
+        last_context=$(grep "context:" "$SESSION_FILE" | tail -1 | cut -d'"' -f2 2>/dev/null)
+        if [[ "$work_context" == "$last_context" ]]; then
+            # Same context as last stop event, check if within 2 minutes
+            local last_timestamp
+            last_timestamp=$(grep "# Stop Event" "$SESSION_FILE" | tail -1 | grep -o '[0-9T:-]*' | tail -1)
+            if [[ -n "$last_timestamp" ]]; then
+                local current_epoch last_epoch time_diff
+                current_epoch=$(date -d "${timestamp}" +%s 2>/dev/null)
+                last_epoch=$(date -d "${last_timestamp}" +%s 2>/dev/null)
+                time_diff=$((current_epoch - last_epoch))
+                
+                # Skip if within 120 seconds (2 minutes) with same context
+                if [[ $time_diff -lt 120 ]]; then
+                    return 0
+                fi
+            fi
+        fi
+    fi
+    
+    # Add stop event to session file (compact format)
     cat >> "$SESSION_FILE" << EOF
 
 # Stop Event - $timestamp
 stop_events:
-  - timestamp: "$timestamp"
-    type: "operation_complete"
-    context: "$work_context"
-    session_duration: "$(get_session_duration)"
+  - $timestamp: "$work_context"
 
 EOF
 }
 
-# Calculate session duration since last start
-get_session_duration() {
-    if [[ -f "$SESSION_FILE" ]]; then
-        # Find the session start time from the header
-        local start_time
-        start_time=$(grep "^  start_time:" "$SESSION_FILE" | head -1 | cut -d'"' -f2 2>/dev/null)
-        
-        if [[ -n "$start_time" ]]; then
-            # Calculate duration between start and now
-            local duration_text
-            duration_text=$(calculate_time_duration "$start_time")
-            echo "$duration_text"
-        else
-            # Fallback: find the first timestamp in the file
-            local first_event
-            first_event=$(grep -E "timestamp:|start_time:" "$SESSION_FILE" | head -1 | grep -o '"[^"]*"' | tr -d '"' 2>/dev/null)
-            
-            if [[ -n "$first_event" ]]; then
-                local duration_text
-                duration_text=$(calculate_time_duration "$first_event")
-                echo "$duration_text"
-            else
-                echo "unknown duration"
-            fi
-        fi
-    else
-        echo "new session"
-    fi
-}
 
 # Calculate human-readable duration between two times
 calculate_time_duration() {

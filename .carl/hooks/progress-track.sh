@@ -6,22 +6,18 @@
 
 set -euo pipefail
 
-# Get project root with robust detection
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${SCRIPT_DIR}/lib/carl-project-root.sh"
-
-PROJECT_ROOT=$(get_project_root)
-if [[ $? -ne 0 ]]; then
-    echo "Error: Could not determine CARL project root" >&2
+# Use CLAUDE_PROJECT_DIR for all paths
+if [[ -z "${CLAUDE_PROJECT_DIR:-}" ]]; then
+    echo "Error: CLAUDE_PROJECT_DIR environment variable not set" >&2
     exit 1
 fi
 
 # Source libraries using project root
-source "${PROJECT_ROOT}/.carl/hooks/lib/carl-work.sh"
-source "${PROJECT_ROOT}/.carl/hooks/lib/carl-settings.sh"
-source "${PROJECT_ROOT}/.carl/hooks/lib/carl-session.sh"
-source "${PROJECT_ROOT}/.carl/hooks/lib/carl-git.sh"
-source "${PROJECT_ROOT}/.carl/hooks/lib/carl-time.sh"
+source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-work.sh"
+source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-settings.sh"
+source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-session.sh"
+source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-git.sh"
+source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-time.sh"
 
 # Check if progress tracking is enabled
 is_progress_tracking_enabled() {
@@ -136,7 +132,7 @@ aggregate_stop_events_to_work_periods() {
     git_user=$(get_git_user)
     local date_str
     date_str=$(get_date_string)
-    local session_file="${PROJECT_ROOT}/.carl/sessions/session-${date_str}-${git_user}.carl"
+    local session_file="${CLAUDE_PROJECT_DIR}/.carl/sessions/session-${date_str}-${git_user}.carl"
     
     if [[ ! -f "$session_file" ]]; then
         return 0
@@ -183,29 +179,42 @@ EOF
     fi
 }
 
-# Generate progress metrics for session
+# Generate progress metrics for session (only when meaningful)
 generate_progress_metrics() {
     local git_user
     git_user=$(get_git_user)
     local date_str
     date_str=$(get_date_string)
-    local session_file="${PROJECT_ROOT}/.carl/sessions/session-${date_str}-${git_user}.carl"
+    local session_file="${CLAUDE_PROJECT_DIR}/.carl/sessions/session-${date_str}-${git_user}.carl"
     
     # Get project progress statistics
     local progress_stats
     progress_stats=$(get_project_progress_stats)
     
+    # Skip logging if no work items exist (meaningless "total: 0" spam)
+    if [[ "$progress_stats" == *"total: 0"* ]]; then
+        return 0
+    fi
+    
+    # Check if stats have changed since last entry (prevent duplicate logging)
+    if [[ -f "$session_file" ]]; then
+        local last_stats
+        last_stats=$(grep "project_stats:" "$session_file" | tail -1 | cut -d'"' -f2 2>/dev/null)
+        if [[ "$progress_stats" == "$last_stats" ]]; then
+            # Stats unchanged, skip logging
+            return 0
+        fi
+    fi
+    
     local timestamp
     timestamp=$(get_iso_timestamp)
     
-    # Add progress metrics to session file
+    # Add progress metrics to session file (compact format)
     cat >> "$session_file" << EOF
 
 # Progress Metrics - $timestamp
 progress_metrics:
-  - timestamp: "$timestamp"
-    project_stats: "$progress_stats"
-    velocity_tracking: "enabled"
+  - $timestamp: "$progress_stats"
 
 EOF
 }

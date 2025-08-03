@@ -6,9 +6,9 @@
 
 set -euo pipefail
 
-# Use CLAUDE_PROJECT_DIR which is guaranteed by Claude Code
+# Use CLAUDE_PROJECT_DIR for all paths
 if [[ -z "${CLAUDE_PROJECT_DIR:-}" ]]; then
-    echo "Error: CLAUDE_PROJECT_DIR not set. This hook must be run by Claude Code." >&2
+    echo "Error: CLAUDE_PROJECT_DIR environment variable not set" >&2
     exit 1
 fi
 
@@ -291,17 +291,20 @@ log_validation_results() {
             local timestamp
             timestamp=$(get_iso_timestamp)
             
-            cat >> "$session_file" << EOF
+            # Use compact format for logging
+            if [[ "$validation_status" == "success" && $error_count -eq 0 && $fixes_applied -eq 0 ]]; then
+                # Skip logging successful validation with no activity (noise reduction)
+                return 0
+            else
+                # Log meaningful validation events in compact format
+                cat >> "$session_file" << EOF
 
-# Schema Validation - $timestamp
+# Schema Validation - $timestamp  
 validation_events:
-  - timestamp: "$timestamp"
-    status: "$validation_status"
-    error_count: $error_count
-    fixes_applied: $fixes_applied
-    mode: "$(get_validation_mode)"
+  - $timestamp: "$validation_status, errors: $error_count, fixes: $fixes_applied"
 
 EOF
+            fi
         fi
     fi
 }
@@ -332,12 +335,13 @@ main() {
         echo "🧹 Cleaned up backup files after successful auto-fixes"
     fi
     
-    # Log results to session
+    # Log results to session (only when meaningful - failures or fixes applied)
     if [[ $validation_errors -eq 0 ]]; then
-        log_validation_results "success" 0 $total_fixes
         if [[ $total_fixes -gt 0 ]]; then
+            log_validation_results "success" 0 $total_fixes
             echo "✅ Schema validation passed after applying $total_fixes auto-fixes"
         fi
+        # Skip logging for successful validation with no fixes (noise reduction)
     else
         log_validation_results "failure" $validation_errors $total_fixes
         if [[ $total_fixes -gt 0 ]]; then

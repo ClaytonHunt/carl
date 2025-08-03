@@ -14,7 +14,6 @@ date: "2025-08-01"
 session_summary:
   start_time: "08:30:00Z"
   end_time: "17:45:00Z"
-  total_active_time: "7.5 hours"
   
 work_periods:
   - start: "08:30:00Z"
@@ -63,7 +62,16 @@ cleanup_log:
     retention_period: "90_days"
 ```
 
-## Session Compaction & Retention
+## Session Optimization & Efficiency
+
+### Automatic Data Filtering
+Hooks automatically filter out redundant/meaningless data:
+- **Skip zero-activity progress**: Don't log when `total: 0` work items
+- **Skip successful validations**: Only log validation events with errors/fixes
+- **Prevent duplicate stops**: Skip stop events within 2 minutes of previous
+- **Remove session_duration**: Calculate from timestamps when needed
+
+### Session Compaction & Retention
 - **Daily Sessions**: Individual files for 7 days
 - **Weekly Summaries**: Compact 7+ day old sessions into `week-YYYY-WW-{git-user}.carl`
 - **Monthly Summaries**: Compact 4+ week old weeklies into `month-YYYY-MM-{git-user}.carl`

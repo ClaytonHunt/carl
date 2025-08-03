@@ -3,10 +3,10 @@
 # carl-validation.sh - Schema validation utilities for CARL files
 # Provides YAML schema validation and error handling
 
-# Use CLAUDE_PROJECT_DIR which is guaranteed by Claude Code
+# Use CLAUDE_PROJECT_DIR for all paths
 if [[ -z "${CLAUDE_PROJECT_DIR:-}" ]]; then
-    echo "Error: CLAUDE_PROJECT_DIR not set. This library must be sourced by a Claude Code hook." >&2
-    return 1
+    echo "Error: CLAUDE_PROJECT_DIR environment variable not set" >&2
+    exit 1
 fi
 
 # Validate a CARL file against its schema
