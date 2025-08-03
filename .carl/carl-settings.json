@@ -1,0 +1,111 @@
+{
+  "audio": {
+    "enabled": true,
+    "notifications": {
+      "session_start": {
+        "enabled": true,
+        "message_template": "Good {time_of_day}, we've been working on {active_work}. Next planned: {next_activity}",
+        "fallback_message": "Good {time_of_day}, CARL session started"
+      },
+      "stop": {
+        "enabled": true,
+        "message_template": "{project} has finished {task_description}",
+        "fallback_message": "{project} operation completed"
+      },
+      "attention": {
+        "enabled": true,
+        "message_template": "{project} needs your attention",
+        "fallback_message": "Claude Code needs your attention"
+      },
+      "progress_milestone": {
+        "enabled": false,
+        "message_template": "{work_item} reached {milestone_percentage}% completion",
+        "fallback_message": "Progress milestone reached"
+      },
+      "schema_validation_error": {
+        "enabled": false,
+        "message_template": "Schema validation failed for {file_name}",
+        "fallback_message": "Schema validation error detected"
+      },
+      "tech_debt_detected": {
+        "enabled": false,
+        "message_template": "New technical debt detected in {file_name}",
+        "fallback_message": "Technical debt detected"
+      }
+    },
+    "voice": {
+      "macos": {
+        "voice": "default",
+        "rate": 200,
+        "volume": 0.5
+      },
+      "linux": {
+        "voice": "default",
+        "rate": "normal",
+        "volume": "normal"
+      },
+      "wsl": {
+        "voice": "default",
+        "rate": 0,
+        "volume": 100
+      },
+      "windows": {
+        "voice": "default",
+        "rate": 0,
+        "volume": 100
+      },
+      "elevenlabs": {
+        "integration_level": "disabled",
+        "mcp_enabled": false,
+        "voice_id": "21m00Tcm4TlvDq8ikWAM",
+        "model": "eleven_monolingual_v1",
+        "output_format": "mp3_44100_128",
+        "cache_audio": true,
+        "cache_duration_hours": 24,
+        "generic_messages_only": true
+      }
+    }
+  },
+  "session": {
+    "auto_compaction": true,
+    "compaction_strategy": "calendar_based",
+    "retention_periods": {
+      "daily_sessions_days": 7
+    },
+    "track_agent_performance": true,
+    "track_command_metrics": true
+  },
+  "hooks": {
+    "schema_validation": {
+      "strict_mode": true,
+      "auto_fix_minor_issues": true
+    },
+    "progress_tracking": {
+      "auto_update_percentages": true,
+      "milestone_thresholds": [25, 50, 75, 90, 100]
+    },
+    "tech_debt_extraction": {
+      "keywords": ["TODO", "FIXME", "HACK", "XXX", "NOTE"],
+      "auto_prioritize": true
+    },
+    "completion_handler": {
+      "auto_move_completed": true,
+      "completion_threshold": 100
+    }
+  },
+  "context_injection": {
+    "enabled": true,
+    "carl_commands_only": true,
+    "include_active_work": true,
+    "include_recent_sessions": false,
+    "max_context_tokens": 500
+  },
+  "developer": {
+    "preferred_time_format": "12h",
+    "timezone": "auto",
+    "work_hours": {
+      "start": "07:00",
+      "end": "18:00"
+    }
+  }
+}

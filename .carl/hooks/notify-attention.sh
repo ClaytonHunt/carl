@@ -10,15 +10,11 @@ source "${SCRIPT_DIR}/lib/carl-platform.sh"
 # Main notification function
 notify_user() {
     local project_name=$(get_project_name)
-    local message="$project_name needs your attention"
     
-    # Only speak if TTS is available
-    if tts_available; then
-        speak_message "$message"
-    fi
+    # Use CARL settings-aware notification
+    local message=$(send_carl_notification "attention" "$project_name needs your attention" "$project_name")
     
-    # Log the notification (optional)
-    echo "$(date '+%Y-%m-%d %H:%M:%S') - Notification sent: $message" >> "${SCRIPT_DIR}/notify.log" 2>/dev/null || true
+# Notification logging removed - notifications are tracked in session files
 }
 
 # Execute notification

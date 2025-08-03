@@ -64,6 +64,7 @@ Domain-specific utility scripts created as needed during hook implementation:
 - **`carl-work.sh`** - Work item management (active work, completion tracking)
 - **`carl-platform.sh`** - Cross-platform utilities (TTS, path handling)
 - **`carl-context.sh`** - Context injection and CARL command detection
+- **`carl-time.sh`** - Time utilities (time of day, timestamps, work hours)
 
 **Design Principles:**
 - **Single Responsibility**: Each script focuses on one domain
@@ -122,7 +123,7 @@ Domain-specific utility scripts created as needed during hook implementation:
       "matcher": ".*",
       "hooks": [{
         "type": "command",
-        "command": "bash ${CLAUDE_PROJECT_DIR}/.carl/hooks/activity-log.sh"
+        "command": "bash ${CLAUDE_PROJECT_DIR}/.carl/hooks/stop.sh"
       }]
     }],
     "Notification": [{
