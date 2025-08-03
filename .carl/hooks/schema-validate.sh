@@ -77,6 +77,11 @@ auto_fix_carl_file() {
         return 1
     fi
     
+    # Skip auto-fix for session files (different schema and structure)
+    if [[ "$file_path" == *"session-"*.carl ]]; then
+        return 1
+    fi
+    
     # Create backup
     cp "$file_path" "${file_path}.backup"
     
