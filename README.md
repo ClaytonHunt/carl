@@ -10,24 +10,27 @@ CARL bridges the gap between human cognitive simplicity and AI context precision
 
 ### 1. Installation
 
-Copy the CARL system to your project:
-```bash
-# Clone CARL system files
-git clone https://github.com/yourusername/carl.git
-cd carl
+Install CARL with a single command:
 
-# Copy CARL system to your project
-cp -r .carl/ /path/to/your/project/
-cp -r .claude/ /path/to/your/project/
-cp CLAUDE.md /path/to/your/project/
+```bash
+curl -fsSL https://github.com/ClaytonHunt/carl/releases/latest/download/install.sh | bash
+```
+
+**Alternative installation options:**
+```bash
+# Install specific version
+curl -fsSL https://github.com/ClaytonHunt/carl/releases/download/v2.0.0/install.sh | bash
+
+# Dry run (see what would be installed)
+curl -fsSL https://github.com/ClaytonHunt/carl/releases/latest/download/install.sh | CARL_DRY_RUN=1 bash
+
+# Verbose installation
+curl -fsSL https://github.com/ClaytonHunt/carl/releases/latest/download/install.sh | CARL_VERBOSE=1 bash
 ```
 
 ### 2. Initialize Your Project
 
 ```bash
-cd /path/to/your/project
-claude # Start Claude Code session
-
 # Let CARL analyze and set up your project
 /carl:analyze
 ```
@@ -119,6 +122,9 @@ CARL uses a **dual-layer architecture**:
 - [Claude Code](https://claude.ai/code) (Claude AI's official CLI)
 - Git (for session tracking and multi-developer support)
 - Bash (for hook system automation)
+- curl (for installation)
+- tar (for extracting releases)
+- jq (optional, for better JSON processing)
 
 ## Documentation
 
