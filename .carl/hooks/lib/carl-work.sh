@@ -206,6 +206,12 @@ move_to_completed() {
         return 1
     fi
     
+    # Skip if already in a completed directory (prevent infinite nesting)
+    if [[ "$file_path" == */completed/* ]]; then
+        echo "Work item already in completed directory: $file_path"
+        return 0
+    fi
+    
     # Check if already completed
     local status
     status=$(get_work_item_details "$file_path" "status")
