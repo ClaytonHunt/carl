@@ -227,44 +227,5 @@ get_validation_summary() {
     fi
 }
 
-# Check if file needs validation (based on modification time)
-needs_validation() {
-    local file_path="$1"
-    local cache_file="${PROJECT_ROOT}/.carl/.validation_cache"
-    
-    # If no cache, needs validation
-    if [[ ! -f "$cache_file" ]]; then
-        return 0
-    fi
-    
-    # Check if file is newer than cache
-    if [[ "$file_path" -nt "$cache_file" ]]; then
-        return 0
-    fi
-    
-    # Check if file is in cache as valid
-    if grep -q "^valid:$file_path$" "$cache_file" 2>/dev/null; then
-        return 1  # Doesn't need validation
-    else
-        return 0  # Needs validation
-    fi
-}
-
-# Update validation cache
-update_validation_cache() {
-    local file_path="$1"
-    local status="$2"  # "valid" or "invalid"
-    local cache_file="${PROJECT_ROOT}/.carl/.validation_cache"
-    
-    # Create cache directory if needed
-    mkdir -p "$(dirname "$cache_file")"
-    
-    # Remove old entry if exists
-    if [[ -f "$cache_file" ]]; then
-        grep -v ":$file_path$" "$cache_file" > "${cache_file}.tmp" || true
-        mv "${cache_file}.tmp" "$cache_file"
-    fi
-    
-    # Add new entry
-    echo "$status:$file_path" >> "$cache_file"
-}
+# Validation cache functions removed - validation runs on every PostToolUse
+# No caching needed since we validate-on-save with auto-fixing

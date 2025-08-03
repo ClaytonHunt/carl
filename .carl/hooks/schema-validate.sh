@@ -61,7 +61,7 @@ get_modified_files() {
     else
         find "${PROJECT_ROOT}/.carl" -name "*.carl" -o -name "carl-settings.json" | \
         while read -r file; do
-            if [[ -f "$file" ]] && needs_validation "$file"; then
+            if [[ -f "$file" ]]; then
                 echo "$file"
             fi
         done
@@ -153,10 +153,9 @@ validate_modified_files() {
             echo "Validating: $(basename "$file")"
             
             if validate_carl_file "$file"; then
-                update_validation_cache "$file" "valid"
+                echo "  ✅ Validation passed"
             else
                 validation_errors=$((validation_errors + 1))
-                update_validation_cache "$file" "invalid"
                 
                 # Try auto-fix if enabled
                 if [[ "$auto_fix_enabled" == "true" ]]; then
@@ -166,7 +165,6 @@ validate_modified_files() {
                         echo "  🔄 Re-validating after auto-fix..."
                         if validate_carl_file "$file"; then
                             echo "  ✅ Auto-fix successful - validation now passes"
-                            update_validation_cache "$file" "valid"
                             validation_errors=$((validation_errors - 1))
                         else
                             echo "  ⚠️  Auto-fix applied but validation still fails"
