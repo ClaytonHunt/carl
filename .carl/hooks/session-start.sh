@@ -3,12 +3,17 @@
 # Triggered when Claude Code session starts
 # Dependencies: carl-session.sh, carl-git.sh
 
-# Get script directory and source required libraries
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${SCRIPT_DIR}/lib/carl-session.sh"
-source "${SCRIPT_DIR}/lib/carl-platform.sh"
-source "${SCRIPT_DIR}/lib/carl-settings.sh"
-source "${SCRIPT_DIR}/lib/carl-time.sh"
+# Use CLAUDE_PROJECT_DIR for all paths
+if [[ -z "${CLAUDE_PROJECT_DIR:-}" ]]; then
+    echo "Error: CLAUDE_PROJECT_DIR environment variable not set" >&2
+    exit 1
+fi
+
+# Source libraries using project root
+source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-session.sh"
+source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-platform.sh"
+source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-settings.sh"
+source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-time.sh"
 
 # Main session initialization function
 initialize_session() {

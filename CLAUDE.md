@@ -80,6 +80,6 @@ CARL uses a **dual-layer architecture**:
 
 ## Claude Code Principles
 
-- Always push back on any request that I have if it is a bad idea, contradicts community best practices, principles or patterns.
+- **MANDATORY** Always push back on any request that I have if it is a bad idea, contradicts community best practices, principles or patterns.
 
 For complete documentation, architecture details, and implementation guides, see [CARL.md](CARL.md) and the [docs/](docs/) directory.

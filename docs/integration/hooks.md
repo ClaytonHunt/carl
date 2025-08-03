@@ -46,8 +46,13 @@ Each hook is small, focused, and handles one specific responsibility following C
 - Log work completed during current Claude Code operations
 - Record accomplishments and context from this specific run
 - Update work period information (NOT session end)
-- Avoid duplicate logging with other CARL hooks
-- ~15 lines of activity logging
+- Capture meaningful context: active work, git commits, modified files
+- ~50 lines of activity logging with context detection
+
+**Enhancement TODO**: Add specific file tracking using:
+- `CLAUDE_MODIFIED_FILES` environment variable
+- `git diff --name-only` for changed files
+- File timestamp comparison for CARL file modifications
 
 ### 5. Notification Hook (Cross-platform audio alerts)
 - Alert when Claude Code needs user input
@@ -154,7 +159,49 @@ Domain-specific utility scripts created as needed during hook implementation:
 ## Hook Security & Performance
 - **60-second timeout**: All hooks must complete within timeout
 - **Parallel execution**: Hooks run in parallel, design accordingly
-- **Path validation**: Always use `CLAUDE_PROJECT_DIR` for paths
+- **Path validation**: Always use robust project root detection (see Project Root Guidelines below)
 - **Minimal processing**: Keep hooks lightweight for performance
 - **Error handling**: Fail gracefully, don't break Claude Code flow
 - **Dependencies**: `yq` recommended for full monorepo support (graceful fallback to grep/sed parsing if not available)
+
+## Project Root Guidelines
+
+All CARL hooks and libraries MUST use robust project root detection instead of hardcoded paths:
+
+### Required Pattern for All Hooks
+```bash
+#!/bin/bash
+set -euo pipefail
+
+# Get project root with robust detection
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/lib/carl-project-root.sh"
+
+PROJECT_ROOT=$(get_project_root)
+if [[ $? -ne 0 ]]; then
+    echo "Error: Could not determine CARL project root" >&2
+    exit 1
+fi
+
+# Source libraries using project root
+source "${PROJECT_ROOT}/.carl/hooks/lib/carl-platform.sh"
+# ... other libraries
+```
+
+### Project Root Detection Methods (in order of priority)
+1. **CLAUDE_PROJECT_DIR**: Use environment variable if available
+2. **Find .carl directory**: Search current and parent directories
+3. **CARL settings**: Check stored project_root in carl-settings.json
+4. **Git repository root**: Use git root if .carl directory exists there
+5. **Directory traversal**: Walk up directory tree looking for .carl
+
+### Benefits
+- **Environment independence**: Works with or without CLAUDE_PROJECT_DIR
+- **Portable**: Can be run from any subdirectory within the project
+- **Cached**: Project root stored in CARL settings for performance
+- **Resilient**: Multiple fallback methods ensure reliability
+
+### What NOT to Do
+❌ **Never use relative paths**: `../sessions/`, `./lib/`
+❌ **Never hardcode paths**: `/specific/user/path`
+❌ **Never assume current directory**: Hooks may run from anywhere

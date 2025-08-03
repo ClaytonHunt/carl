@@ -40,7 +40,7 @@ get_carl_setting() {
     local cache_key="$setting_path"
     
     # Return cached value if available
-    if [[ -n "${CARL_SETTINGS_CACHE[$cache_key]}" ]]; then
+    if [[ -n "${CARL_SETTINGS_CACHE[$cache_key]:-}" ]]; then
         echo "${CARL_SETTINGS_CACHE[$cache_key]}"
         return 0
     fi

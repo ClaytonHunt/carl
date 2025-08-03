@@ -5,6 +5,7 @@ type: object
 additionalProperties: false
 
 required:
+  - system
   - audio
   - session
   - hooks
@@ -12,6 +13,25 @@ required:
   - developer
 
 properties:
+  system:
+    type: object
+    description: "System configuration and metadata"
+    required:
+      - project_root
+      - installation_path
+    properties:
+      project_root:
+        type: string
+        description: "Absolute path to the CARL project root directory"
+        pattern: "^/"
+      installation_path:
+        type: string
+        description: "Absolute path to the .carl installation directory"
+        pattern: "^/"
+      created_at:
+        type: string
+        format: date-time
+        description: "ISO timestamp when CARL settings were created"
   audio:
     type: object
     additionalProperties: false

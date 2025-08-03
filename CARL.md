@@ -74,4 +74,4 @@ CARL operates through four primary commands:
 
 ---
 
-**Next Steps**: Implement the hook system and remaining core agents to bring CARL v2 to life. See [future-recommendations.md](future-recommendations.md) for additional enhancement ideas.
+**Next Steps**: Implement the hook system and remaining core agents to bring CARL v2 to life.

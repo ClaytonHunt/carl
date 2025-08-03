@@ -3,9 +3,14 @@
 # Triggered when Claude Code needs user input
 # Dependencies: carl-platform.sh
 
-# Get script directory and source platform utilities
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${SCRIPT_DIR}/lib/carl-platform.sh"
+# Use CLAUDE_PROJECT_DIR for all paths
+if [[ -z "${CLAUDE_PROJECT_DIR:-}" ]]; then
+    echo "Error: CLAUDE_PROJECT_DIR environment variable not set" >&2
+    exit 1
+fi
+
+# Source libraries using project root
+source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-platform.sh"
 
 # Main notification function
 notify_user() {

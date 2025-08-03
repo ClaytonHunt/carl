@@ -20,7 +20,7 @@ detect_platform() {
 # Cross-platform text-to-speech with CARL settings integration
 speak_message() {
     local message="$1"
-    local notification_type="$2"
+    local notification_type="${2:-}"
     
     # Source settings if available
     local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

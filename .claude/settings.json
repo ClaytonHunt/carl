@@ -20,6 +20,13 @@
         "type": "command",
         "command": "bash ${CLAUDE_PROJECT_DIR}/.carl/hooks/stop.sh"
       }]
+    }],
+    "PostToolUse": [{
+      "matcher": "Write|Edit|MultiEdit",
+      "hooks": [{
+        "type": "command",
+        "command": "bash ${CLAUDE_PROJECT_DIR}/.carl/hooks/schema-validate.sh"
+      }]
     }]
   }
 }
