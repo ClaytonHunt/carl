@@ -31,7 +31,7 @@ validate_carl_file() {
             schema_name="story"
             ;;
         *.tech.carl)
-            schema_name="technical"
+            schema_name="tech"
             ;;
         *session-*.carl)
             schema_name="session"

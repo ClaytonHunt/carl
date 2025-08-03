@@ -54,3 +54,44 @@ get_formatted_time() {
         date '+%I:%M %p'
     fi
 }
+
+# Calculate time duration between two timestamps
+calculate_time_duration() {
+    local start_time="$1"
+    local end_time="${2:-$(date -u +%Y-%m-%dT%H:%M:%SZ)}"
+    
+    # Ensure we handle UTC times consistently
+    # Add Z suffix if not present to indicate UTC
+    [[ "$start_time" != *"Z" ]] && start_time="${start_time}Z"
+    [[ "$end_time" != *"Z" ]] && end_time="${end_time}Z"
+    
+    # Convert to epoch seconds
+    local start_epoch end_epoch
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS date command
+        start_epoch=$(date -u -j -f "%Y-%m-%dT%H:%M:%SZ" "$start_time" "+%s" 2>/dev/null || echo "0")
+        end_epoch=$(date -u -j -f "%Y-%m-%dT%H:%M:%SZ" "$end_time" "+%s" 2>/dev/null || date -u "+%s")
+    else
+        # Linux date command - properly handle UTC
+        start_epoch=$(date -u -d "${start_time}" "+%s" 2>/dev/null || echo "0")
+        end_epoch=$(date -u -d "${end_time}" "+%s" 2>/dev/null || date -u "+%s")
+    fi
+    
+    # Calculate duration in seconds
+    local duration=$((end_epoch - start_epoch))
+    
+    if [[ $duration -lt 0 || $start_epoch -eq 0 ]]; then
+        echo "unknown duration"
+        return
+    fi
+    
+    # Format duration as human-readable
+    local hours=$((duration / 3600))
+    local minutes=$(((duration % 3600) / 60))
+    
+    if [[ $hours -gt 0 ]]; then
+        echo "${hours}h ${minutes}m"
+    else
+        echo "${minutes}m"
+    fi
+}

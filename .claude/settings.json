@@ -23,10 +23,20 @@
     }],
     "PostToolUse": [{
       "matcher": "Write|Edit|MultiEdit",
-      "hooks": [{
-        "type": "command",
-        "command": "bash ${CLAUDE_PROJECT_DIR}/.carl/hooks/schema-validate.sh"
-      }]
+      "hooks": [
+        {
+          "type": "command",
+          "command": "bash ${CLAUDE_PROJECT_DIR}/.carl/hooks/schema-validate.sh"
+        },
+        {
+          "type": "command",
+          "command": "bash ${CLAUDE_PROJECT_DIR}/.carl/hooks/progress-track.sh"
+        },
+        {
+          "type": "command",
+          "command": "bash ${CLAUDE_PROJECT_DIR}/.carl/hooks/completion-handler.sh"
+        }
+      ]
     }]
   }
 }
