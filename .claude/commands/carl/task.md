@@ -9,7 +9,7 @@ allowed-tools: Task, Read, Write, Glob, Grep, LS, MultiEdit, Bash, TodoWrite
 You are implementing intelligent work execution for the CARL system with context-aware dependency handling.
 
 ## Current Context
-- **Project Structure**: !`.carl/project/` directory structure
+- **Project Structure**: `.carl/project/` directory structure
 - **Active Work**: @.carl/project/active.work.carl (if exists)  
 - **Arguments**: $ARGUMENTS
 

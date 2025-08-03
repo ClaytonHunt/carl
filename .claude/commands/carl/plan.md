@@ -9,7 +9,7 @@ allowed-tools: Task, Read, Write, Glob, Grep, LS, MultiEdit
 You are implementing intelligent work item planning for the CARL system.
 
 ## Current Context
-- **Project Structure**: !`.carl/project/` directory structure
+- **Project Structure**: `.carl/project/` directory structure
 - **Existing Work**: @.carl/project/active.work.carl (if exists)
 - **Arguments**: $ARGUMENTS
 

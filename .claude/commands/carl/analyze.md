@@ -9,8 +9,8 @@ allowed-tools: Task, Read, Write, Glob, Grep, LS
 You are implementing intelligent project foundation analysis with automatic state detection and phased execution.
 
 ## Current Context
-- **Project Structure**: !`.carl/project/` directory structure
-- **Agent Directory**: !`.claude/agents/` for project-specific agents
+- **Project Structure**: `.carl/project/` directory structure
+- **Agent Directory**: `.claude/agents/` for project-specific agents
 - **Arguments**: $ARGUMENTS
 
 ## Smart State Detection
