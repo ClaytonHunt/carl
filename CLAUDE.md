@@ -10,16 +10,16 @@ This is the CARL (Context-Aware Requirements Language) v2 system - an AI-optimiz
 
 ### Core CARL Commands
 
-1. **`/carl:analyze`** - Project foundation and strategic setup
-2. **`/carl:plan [requirement]`** - Context-aware planning with auto-scope detection
-3. **`/carl:task [work-item.carl]`** - Intelligent execution with dependency analysis
-4. **`/carl:status`** - Project health dashboard
+1. **`/carl:plan [requirement]`** - Context-aware planning with auto-scope detection
+2. **`/carl:task [work-item.carl]`** - Intelligent execution with dependency analysis
+3. **`/carl:status`** - Project health dashboard
 
 For detailed command documentation, see:
-- [/carl:analyze](docs/workflows/analyze.md)
 - [/carl:plan](docs/workflows/plan.md)
 - [/carl:task](docs/workflows/task.md)
 - [/carl:status](docs/workflows/status.md)
+
+**Note**: Commands are located in `.claude/commands/carl/` to avoid namespace collisions.
 
 ### Development Commands
 
