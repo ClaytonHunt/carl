@@ -248,7 +248,9 @@ validate_modified_files() {
                 # In strict mode, fail immediately if still invalid
                 if [[ "$validation_mode" == "strict" ]] && [[ $validation_errors -gt 0 ]]; then
                     echo "❌ Schema validation failed in strict mode"
-                    return 1
+                    # Decision Control: Block further processing
+                    echo '{"decision": "block", "reason": "CARL schema validation failed - fix schema errors before continuing"}'
+                    return 2  # Exit code 2 blocks further processing
                 fi
             fi
         fi
@@ -264,7 +266,9 @@ validate_modified_files() {
             return 0
         else
             echo "❌ Found $validation_errors validation error(s)"
-            return 1
+            # Decision Control: Block further processing in strict mode
+            echo '{"decision": "block", "reason": "CARL schema validation failed - fix schema errors before continuing"}'
+            return 2  # Exit code 2 blocks further processing
         fi
     fi
 }
@@ -349,7 +353,20 @@ main() {
         fi
     fi
     
-    return $validation_errors
+    # Return appropriate exit code
+    if [[ $validation_errors -gt 0 ]]; then
+        local validation_mode
+        validation_mode=$(get_validation_mode)
+        if [[ "$validation_mode" == "strict" ]]; then
+            # Decision Control: Block further processing
+            echo '{"decision": "block", "reason": "CARL schema validation failed - fix schema errors before continuing"}'
+            return 2  # Exit code 2 blocks further processing
+        else
+            return 0  # Permissive mode allows continuation
+        fi
+    else
+        return 0  # Success
+    fi
 }
 
 # Execute if called directly

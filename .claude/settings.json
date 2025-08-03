@@ -4,21 +4,21 @@
       "matcher": ".*",
       "hooks": [{
         "type": "command",
-        "command": "bash ${CLAUDE_PROJECT_DIR}/.carl/hooks/session-start.sh"
+        "command": "bash $CLAUDE_PROJECT_DIR/.carl/hooks/session-start.sh"
       }]
     }],
     "Notification": [{
       "matcher": ".*",
       "hooks": [{
         "type": "command",
-        "command": "bash ${CLAUDE_PROJECT_DIR}/.carl/hooks/notify-attention.sh"
+        "command": "bash $CLAUDE_PROJECT_DIR/.carl/hooks/notify-attention.sh"
       }]
     }],
     "Stop": [{
       "matcher": ".*",
       "hooks": [{
         "type": "command",
-        "command": "bash ${CLAUDE_PROJECT_DIR}/.carl/hooks/stop.sh"
+        "command": "bash $CLAUDE_PROJECT_DIR/.carl/hooks/stop.sh"
       }]
     }],
     "PostToolUse": [{
@@ -26,15 +26,15 @@
       "hooks": [
         {
           "type": "command",
-          "command": "bash ${CLAUDE_PROJECT_DIR}/.carl/hooks/schema-validate.sh"
+          "command": "bash $CLAUDE_PROJECT_DIR/.carl/hooks/schema-validate.sh"
         },
         {
           "type": "command",
-          "command": "bash ${CLAUDE_PROJECT_DIR}/.carl/hooks/progress-track.sh"
+          "command": "bash $CLAUDE_PROJECT_DIR/.carl/hooks/progress-track.sh"
         },
         {
           "type": "command",
-          "command": "bash ${CLAUDE_PROJECT_DIR}/.carl/hooks/completion-handler.sh"
+          "command": "bash $CLAUDE_PROJECT_DIR/.carl/hooks/completion-handler.sh"
         }
       ]
     }]

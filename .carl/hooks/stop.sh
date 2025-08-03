@@ -10,8 +10,6 @@ if [[ -z "${CLAUDE_PROJECT_DIR:-}" ]]; then
     exit 1
 fi
 
-set -euo pipefail
-
 # Source libraries using CLAUDE_PROJECT_DIR
 source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-platform.sh"
 source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-git.sh"

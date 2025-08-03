@@ -211,7 +211,7 @@ All utility scripts are implemented and tested in production:
 All hooks use **CLAUDE_PROJECT_DIR** for robust path resolution:
 ```bash
 #!/bin/bash
-set -euo pipefail
+# Note: Don't use 'set -euo pipefail' as it causes hooks to fail on non-critical command failures
 
 # Use CLAUDE_PROJECT_DIR which is guaranteed by Claude Code
 if [[ -z "${CLAUDE_PROJECT_DIR:-}" ]]; then
@@ -269,5 +269,6 @@ Based on current session (session-2025-08-03-clayton_hunt.carl):
 - **Validation Library**: Updated carl-validation.sh to use environment variable consistently
 - **Session File YAML**: Resolved malformed YAML syntax causing validation failures
 - **Hook Pattern Alignment**: Standardized approach across all hook scripts
+- **Stop Hook**: Removed `set -euo pipefail` to match other working hooks and prevent failures on non-critical commands
 
 The system now provides **complete workflow automation** while maintaining **proven reliability** and **consistent execution patterns**.

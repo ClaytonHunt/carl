@@ -75,15 +75,16 @@ CARL operates through four primary commands:
 
 ### Production Components
 - ✅ **`/carl:plan` Command**: Interactive requirements gathering with intelligent scope detection
+- ✅ **`/carl:task` Command**: Intelligent work execution with dependency analysis and parallel processing
+- ✅ **`/carl:status` Command**: AI-powered project health dashboard with session analysis
 - ✅ **carl-requirements-analyst Agent**: Single-turn analysis generating schema-compliant CARL files
+- ✅ **carl-session-analyst Agent**: Session data analysis specialist for progress monitoring
 - ✅ **Schema Validation Hook**: Auto-fixing validation with proper CLAUDE_PROJECT_DIR usage
 - ✅ **Complete Hook Suite**: SessionStart, Stop, PostToolUse array, and Notification hooks operational
 
 ### Ready for Development
-- 📋 **`/carl:task` Command**: Execution workflow (carl-requirements-analyst proven, ready for implementation)
-- 📋 **`/carl:status` Command**: Progress dashboard (requires carl-session-analyst agent)
 - 📋 **`/carl:analyze` Command**: Project analysis and setup (requires additional agents)
 
 ---
 
-**Current Status**: CARL Planning System is **production-ready** and tested. Users can now create and organize work items using `/carl:plan [requirement]` with full schema compliance and intelligent scope detection.
+**Current Status**: CARL Core System is **production-ready** with complete planning, execution, and monitoring capabilities. Users can plan with `/carl:plan [requirement]`, execute with `/carl:task [work-item]`, and monitor progress with `/carl:status` - all with full schema compliance and intelligent automation.
