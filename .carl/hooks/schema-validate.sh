@@ -68,11 +68,73 @@ get_modified_files() {
     fi
 }
 
+# Auto-fix common CARL file issues
+auto_fix_carl_file() {
+    local file_path="$1"
+    local fixes_applied=0
+    
+    if [[ ! -f "$file_path" ]]; then
+        return 1
+    fi
+    
+    # Create backup
+    cp "$file_path" "${file_path}.backup"
+    
+    # Fix 1: Add missing last_updated field
+    if ! grep -q "last_updated:" "$file_path"; then
+        local timestamp
+        timestamp=$(date -u +%Y-%m-%dT%H:%M:%S)
+        sed -i "/^completion_percentage:/a last_updated: \"$timestamp\"" "$file_path"
+        fixes_applied=$((fixes_applied + 1))
+        echo "  ✅ Added missing last_updated field"
+    fi
+    
+    # Fix 2: Ensure required fields exist based on file type
+    case "$file_path" in
+        *.feature.carl)
+            if ! grep -q "feature_details:" "$file_path"; then
+                echo "feature_details:" >> "$file_path"
+                echo "  category: general" >> "$file_path"
+                echo "  complexity: medium" >> "$file_path"
+                fixes_applied=$((fixes_applied + 1))
+                echo "  ✅ Added missing feature_details section"
+            fi
+            ;;
+        *.tech.carl)
+            if ! grep -q "technical_details:" "$file_path"; then
+                echo "technical_details:" >> "$file_path"
+                echo "  category: general" >> "$file_path"
+                echo "  complexity: medium" >> "$file_path"
+                fixes_applied=$((fixes_applied + 1))
+                echo "  ✅ Added missing technical_details section"
+            fi
+            ;;
+    esac
+    
+    # Fix 3: Fix invalid enum values
+    sed -i 's/status: in_progress/status: active/g' "$file_path"
+    if [[ $? -eq 0 ]]; then
+        fixes_applied=$((fixes_applied + 1))
+        echo "  ✅ Fixed status: in_progress -> active"
+    fi
+    
+    # If no fixes were needed, remove backup
+    if [[ $fixes_applied -eq 0 ]]; then
+        rm -f "${file_path}.backup"
+        return 1
+    fi
+    
+    echo "  🔧 Applied $fixes_applied auto-fixes to $(basename "$file_path")"
+    return 0
+}
+
 # Validate modified files
 validate_modified_files() {
     local validation_errors=0
     local validation_mode
     validation_mode=$(get_validation_mode)
+    local auto_fix_enabled
+    auto_fix_enabled=$(get_carl_setting "hooks.schema_validation.auto_fix" "true")
     
     echo "🔍 Validating modified CARL files..."
     
@@ -96,8 +158,26 @@ validate_modified_files() {
                 validation_errors=$((validation_errors + 1))
                 update_validation_cache "$file" "invalid"
                 
-                # In strict mode, fail immediately
-                if [[ "$validation_mode" == "strict" ]]; then
+                # Try auto-fix if enabled
+                if [[ "$auto_fix_enabled" == "true" ]]; then
+                    echo "  🔧 Attempting auto-fix..."
+                    if auto_fix_carl_file "$file"; then
+                        # Re-validate after fixes
+                        echo "  🔄 Re-validating after auto-fix..."
+                        if validate_carl_file "$file"; then
+                            echo "  ✅ Auto-fix successful - validation now passes"
+                            update_validation_cache "$file" "valid"
+                            validation_errors=$((validation_errors - 1))
+                        else
+                            echo "  ⚠️  Auto-fix applied but validation still fails"
+                        fi
+                    else
+                        echo "  ⚠️  No auto-fixes available for this validation error"
+                    fi
+                fi
+                
+                # In strict mode, fail immediately if still invalid
+                if [[ "$validation_mode" == "strict" ]] && [[ $validation_errors -gt 0 ]]; then
                     echo "❌ Schema validation failed in strict mode"
                     return 1
                 fi
@@ -124,6 +204,7 @@ validate_modified_files() {
 log_validation_results() {
     local validation_status="$1"
     local error_count="$2"
+    local fixes_applied="${3:-0}"
     
     # Source session management
     if [[ -f "${PROJECT_ROOT}/.carl/hooks/lib/carl-session.sh" ]]; then
@@ -148,6 +229,7 @@ validation_events:
   - timestamp: "$timestamp"
     status: "$validation_status"
     error_count: $error_count
+    fixes_applied: $fixes_applied
     mode: "$(get_validation_mode)"
 
 EOF
@@ -163,17 +245,35 @@ main() {
         return 0
     fi
     
+    # Track fixes applied
+    local total_fixes=0
+    
     # Validate modified files
     local validation_errors=0
     if ! validate_modified_files; then
         validation_errors=1
     fi
     
+    # Count fixes applied by checking for backup files
+    total_fixes=$(find "${PROJECT_ROOT}/.carl" -name "*.backup" 2>/dev/null | wc -l)
+    
+    # Clean up backup files if validation passed
+    if [[ $validation_errors -eq 0 && $total_fixes -gt 0 ]]; then
+        find "${PROJECT_ROOT}/.carl" -name "*.backup" -delete 2>/dev/null
+        echo "🧹 Cleaned up backup files after successful auto-fixes"
+    fi
+    
     # Log results to session
     if [[ $validation_errors -eq 0 ]]; then
-        log_validation_results "success" 0
+        log_validation_results "success" 0 $total_fixes
+        if [[ $total_fixes -gt 0 ]]; then
+            echo "✅ Schema validation passed after applying $total_fixes auto-fixes"
+        fi
     else
-        log_validation_results "failure" $validation_errors
+        log_validation_results "failure" $validation_errors $total_fixes
+        if [[ $total_fixes -gt 0 ]]; then
+            echo "⚠️ Applied $total_fixes auto-fixes but $validation_errors errors remain"
+        fi
     fi
     
     return $validation_errors
