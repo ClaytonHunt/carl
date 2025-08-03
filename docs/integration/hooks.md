@@ -43,9 +43,10 @@ Multiple focused hooks that run in sequence for different responsibilities:
 Each hook is small, focused, and handles one specific responsibility following Claude Code best practices.
 
 ### 4. Stop Hook
-- Log completed work to daily session file
-- Update work item progress if changes detected
-- Track time spent on current work item
+- Log work completed during current Claude Code operations
+- Record accomplishments and context from this specific run
+- Update work period information (NOT session end)
+- Avoid duplicate logging with other CARL hooks
 - ~15 lines of activity logging
 
 ### 5. Notification Hook (Cross-platform audio alerts)

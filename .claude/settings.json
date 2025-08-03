@@ -1,3 +1,18 @@
 {
-  
+  "hooks": {
+    "SessionStart": [{
+      "matcher": ".*",
+      "hooks": [{
+        "type": "command",
+        "command": "bash ${CLAUDE_PROJECT_DIR}/.carl/hooks/session-start.sh"
+      }]
+    }],
+    "Notification": [{
+      "matcher": ".*",
+      "hooks": [{
+        "type": "command",
+        "command": "bash ${CLAUDE_PROJECT_DIR}/.carl/hooks/notify-attention.sh"
+      }]
+    }]
+  }
 }
