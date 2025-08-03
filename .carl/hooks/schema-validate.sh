@@ -6,19 +6,15 @@
 
 set -euo pipefail
 
-# Get project root with robust detection
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${SCRIPT_DIR}/lib/carl-project-root.sh"
-
-PROJECT_ROOT=$(get_project_root)
-if [[ $? -ne 0 ]]; then
-    echo "Error: Could not determine CARL project root" >&2
+# Use CLAUDE_PROJECT_DIR which is guaranteed by Claude Code
+if [[ -z "${CLAUDE_PROJECT_DIR:-}" ]]; then
+    echo "Error: CLAUDE_PROJECT_DIR not set. This hook must be run by Claude Code." >&2
     exit 1
 fi
 
-# Source libraries using project root
-source "${PROJECT_ROOT}/.carl/hooks/lib/carl-validation.sh"
-source "${PROJECT_ROOT}/.carl/hooks/lib/carl-settings.sh"
+# Source libraries using CLAUDE_PROJECT_DIR
+source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-validation.sh"
+source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-settings.sh"
 
 # Check if schema validation is enabled (always enabled, but check strict mode)
 is_validation_enabled() {
@@ -59,7 +55,7 @@ get_modified_files() {
     
     # Fallback: check recently modified CARL files
     else
-        find "${PROJECT_ROOT}/.carl" -name "*.carl" -o -name "carl-settings.json" | \
+        find "${CLAUDE_PROJECT_DIR}/.carl" -name "*.carl" -o -name "carl-settings.json" | \
         while read -r file; do
             if [[ -f "$file" ]]; then
                 echo "$file"
@@ -280,16 +276,16 @@ log_validation_results() {
     local fixes_applied="${3:-0}"
     
     # Source session management
-    if [[ -f "${PROJECT_ROOT}/.carl/hooks/lib/carl-session.sh" ]]; then
-        source "${PROJECT_ROOT}/.carl/hooks/lib/carl-session.sh"
-        source "${PROJECT_ROOT}/.carl/hooks/lib/carl-git.sh"
-        source "${PROJECT_ROOT}/.carl/hooks/lib/carl-time.sh"
+    if [[ -f "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-session.sh" ]]; then
+        source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-session.sh"
+        source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-git.sh"
+        source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-time.sh"
         
         local git_user
         git_user=$(get_git_user)
         local date_str
         date_str=$(get_date_string)
-        local session_file="${PROJECT_ROOT}/.carl/sessions/session-${date_str}-${git_user}.carl"
+        local session_file="${CLAUDE_PROJECT_DIR}/.carl/sessions/session-${date_str}-${git_user}.carl"
         
         if [[ -f "$session_file" ]]; then
             local timestamp
@@ -328,11 +324,11 @@ main() {
     fi
     
     # Count fixes applied by checking for backup files
-    total_fixes=$(find "${PROJECT_ROOT}/.carl" -name "*.backup" 2>/dev/null | wc -l)
+    total_fixes=$(find "${CLAUDE_PROJECT_DIR}/.carl" -name "*.backup" 2>/dev/null | wc -l)
     
     # Clean up backup files if validation passed
     if [[ $validation_errors -eq 0 && $total_fixes -gt 0 ]]; then
-        find "${PROJECT_ROOT}/.carl" -name "*.backup" -delete 2>/dev/null
+        find "${CLAUDE_PROJECT_DIR}/.carl" -name "*.backup" -delete 2>/dev/null
         echo "🧹 Cleaned up backup files after successful auto-fixes"
     fi
     

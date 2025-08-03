@@ -3,14 +3,10 @@
 # carl-validation.sh - Schema validation utilities for CARL files
 # Provides YAML schema validation and error handling
 
-# Get project root with robust detection
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${SCRIPT_DIR}/carl-project-root.sh"
-
-PROJECT_ROOT=$(get_project_root)
-if [[ $? -ne 0 ]]; then
-    echo "Error: Could not determine CARL project root" >&2
-    exit 1
+# Use CLAUDE_PROJECT_DIR which is guaranteed by Claude Code
+if [[ -z "${CLAUDE_PROJECT_DIR:-}" ]]; then
+    echo "Error: CLAUDE_PROJECT_DIR not set. This library must be sourced by a Claude Code hook." >&2
+    return 1
 fi
 
 # Validate a CARL file against its schema
@@ -63,7 +59,7 @@ validate_carl_file() {
 validate_with_schema() {
     local file_path="$1"
     local schema_name="$2"
-    local schema_path="${PROJECT_ROOT}/.carl/schemas/${schema_name}.schema.yaml"
+    local schema_path="${CLAUDE_PROJECT_DIR}/.carl/schemas/${schema_name}.schema.yaml"
     
     # Check if file exists
     if [[ ! -f "$file_path" ]]; then
@@ -195,8 +191,8 @@ validate_all_carl_files() {
     
     # Find all CARL files
     local carl_files=(
-        $(find "${PROJECT_ROOT}/.carl" -name "*.carl" -type f)
-        "${PROJECT_ROOT}/.carl/carl-settings.json"
+        $(find "${CLAUDE_PROJECT_DIR}/.carl" -name "*.carl" -type f)
+        "${CLAUDE_PROJECT_DIR}/.carl/carl-settings.json"
     )
     
     for file in "${carl_files[@]}"; do
