@@ -225,10 +225,9 @@ download_carl() {
 install_system_files() {
     if [ "$DRY_RUN" = "1" ]; then
         log "🔍 DRY RUN - would install the following:"
-        echo "  📁 .carl/ directory (schemas, hooks, project structure)"
+        echo "  📁 .carl/ directory (schemas, hooks, project structure, CARL.md guide)"
         echo "  🤖 .claude/agents/carl-*.md files"
         echo "  📋 .claude/commands/carl/ directory"
-        echo "  📖 CARL.md user guide"
         echo "  🔧 Merge hooks into .claude/settings.json"
         return 0
     fi
@@ -253,10 +252,6 @@ install_system_files() {
         cp -r "$TEMP_DIR/.claude/commands/carl" .claude/commands/
     fi
     
-    # Copy CARL user guide
-    if [ -f "$TEMP_DIR/.carl/CARL.md" ]; then
-        cp "$TEMP_DIR/.carl/CARL.md" .
-    fi
     
     # Set executable permissions on hook scripts
     verbose "Setting executable permissions on hooks..."
