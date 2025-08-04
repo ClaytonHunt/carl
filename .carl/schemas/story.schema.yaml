@@ -7,6 +7,7 @@ additionalProperties: false
 required:
   - id
   - name
+  - status
   - completion_percentage
   - current_phase
   - parent_feature
@@ -28,6 +29,11 @@ properties:
     minLength: 1
     maxLength: 100
     description: "Human readable name for the story"
+    
+  status:
+    type: string
+    enum: ["pending", "active", "in_progress", "completed"]
+    description: "Current status of the story"
     
   completion_percentage:
     type: integer
