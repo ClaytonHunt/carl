@@ -20,6 +20,9 @@
 # CARL settings (personal preferences - should not be shared)
 .carl/carl-settings.json
 
+# Project-level agents (development-specific, not part of distributed system)
+.claude/agents/project-*.md
+
 # Keep CARL system files (schemas, hooks, agents, commands)
 !.carl/schemas/
 !.carl/hooks/
