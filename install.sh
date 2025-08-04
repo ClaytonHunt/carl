@@ -2,6 +2,10 @@
 # CARL Installation Script
 # Installs CARL (Context-Aware Requirements Language) system
 #
+# Prerequisites:
+#   - jq (JSON processor) - https://jqlang.github.io/jq/
+#   - yq (YAML processor) - https://github.com/mikefarah/yq
+#
 # Usage:
 #   curl -fsSL https://github.com/ClaytonHunt/carl/releases/latest/download/install.sh | bash
 #
@@ -54,28 +58,58 @@ check_dependencies() {
     verbose "Checking system dependencies..."
     
     local missing_deps=()
+    local missing_tools=()
     
+    # Check basic system tools
     command -v curl >/dev/null || missing_deps+=("curl")
     command -v tar >/dev/null || missing_deps+=("tar")
     command -v grep >/dev/null || missing_deps+=("grep")
     command -v sed >/dev/null || missing_deps+=("sed")
     
+    # Check CARL-specific requirements
+    command -v jq >/dev/null || missing_tools+=("jq")
+    command -v yq >/dev/null || missing_tools+=("yq")
+    
     if [ ${#missing_deps[@]} -ne 0 ]; then
-        error "Missing required dependencies: ${missing_deps[*]}"
-        echo "Please install the missing tools and try again."
+        error "Missing basic system dependencies: ${missing_deps[*]}"
+        echo "Please install the missing system tools and try again."
         exit 1
     fi
     
-    # Check for jq (optional but recommended)
-    if command -v jq >/dev/null; then
-        USE_JQ=1
-        verbose "jq found - will use for JSON processing"
-    else
-        USE_JQ=0
-        warn "jq not found - using basic JSON parsing (consider installing jq for better reliability)"
+    if [ ${#missing_tools[@]} -ne 0 ]; then
+        error "Missing CARL dependencies: ${missing_tools[*]}"
+        echo ""
+        echo "CARL requires jq and yq for JSON/YAML processing."
+        echo ""
+        echo "📦 Installation Instructions:"
+        echo ""
+        
+        if [[ " ${missing_tools[*]} " =~ " jq " ]]; then
+            echo "🔧 jq (JSON processor):"
+            echo "  macOS:    brew install jq"
+            echo "  Ubuntu:   sudo apt-get install jq"
+            echo "  CentOS:   sudo yum install jq"
+            echo "  Windows:  choco install jq"
+            echo "  Manual:   https://jqlang.github.io/jq/download/"
+            echo ""
+        fi
+        
+        if [[ " ${missing_tools[*]} " =~ " yq " ]]; then
+            echo "⚙️  yq (YAML processor):"
+            echo "  macOS:    brew install yq"
+            echo "  Ubuntu:   sudo snap install yq"
+            echo "  pip:      pip install yq"
+            echo "  go:       go install github.com/mikefarah/yq/v4@latest"
+            echo "  Manual:   https://github.com/mikefarah/yq/releases"
+            echo ""
+        fi
+        
+        echo "After installation, run this script again."
+        exit 1
     fi
     
-    verbose "All dependencies satisfied"
+    USE_JQ=1
+    verbose "All dependencies satisfied (jq and yq found)"
 }
 
 # Check write permissions
@@ -194,7 +228,7 @@ install_system_files() {
         echo "  📁 .carl/ directory (schemas, hooks, project structure)"
         echo "  🤖 .claude/agents/carl-*.md files"
         echo "  📋 .claude/commands/carl/ directory"
-        echo "  📄 CLAUDE.md file"
+        echo "  📖 CARL.md user guide"
         echo "  🔧 Merge hooks into .claude/settings.json"
         return 0
     fi
@@ -219,9 +253,9 @@ install_system_files() {
         cp -r "$TEMP_DIR/.claude/commands/carl" .claude/commands/
     fi
     
-    # Copy project instructions
-    if [ -f "$TEMP_DIR/CLAUDE.md" ]; then
-        cp "$TEMP_DIR/CLAUDE.md" .
+    # Copy CARL user guide
+    if [ -f "$TEMP_DIR/.carl/CARL.md" ]; then
+        cp "$TEMP_DIR/.carl/CARL.md" .
     fi
     
     # Set executable permissions on hook scripts

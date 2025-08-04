@@ -32,8 +32,26 @@ warn() {
     echo -e "${YELLOW}⚠️  $1${NC}"
 }
 
+# Check prerequisites
+check_test_prerequisites() {
+    log "Checking test prerequisites..."
+    
+    local missing_tools=()
+    command -v jq >/dev/null || missing_tools+=("jq")
+    command -v yq >/dev/null || missing_tools+=("yq")
+    
+    if [ ${#missing_tools[@]} -ne 0 ]; then
+        error "Missing required tools for testing: ${missing_tools[*]}"
+        echo "Install jq and yq before running installation tests."
+        exit 1
+    fi
+    
+    log "Prerequisites satisfied"
+}
+
 # Create test directory structure
 setup_test_env() {
+    check_test_prerequisites
     rm -rf "$TEST_BASE_DIR"
     mkdir -p "$TEST_BASE_DIR"
     cd "$TEST_BASE_DIR"
