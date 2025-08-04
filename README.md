@@ -8,7 +8,25 @@ CARL bridges the gap between human cognitive simplicity and AI context precision
 
 ## Quick Start
 
-### 1. Installation
+### 1. Prerequisites
+
+CARL requires the following tools:
+- **jq** - JSON processor ([install guide](https://jqlang.github.io/jq/download/))
+- **yq** - YAML processor ([install guide](https://github.com/mikefarah/yq/releases))
+
+**Quick install:**
+```bash
+# macOS
+brew install jq yq
+
+# Ubuntu/Debian  
+sudo apt-get install jq && sudo snap install yq
+
+# Windows
+choco install jq yq
+```
+
+### 2. Installation
 
 Install CARL with a single command:
 
@@ -28,28 +46,32 @@ curl -fsSL https://github.com/ClaytonHunt/carl/releases/latest/download/install.
 curl -fsSL https://github.com/ClaytonHunt/carl/releases/latest/download/install.sh | CARL_VERBOSE=1 bash
 ```
 
-### 2. Initialize Your Project
+### 3. Initialize Your Project
 
 ```bash
 # Let CARL analyze and set up your project
 /carl:analyze
 ```
 
-### 3. Start Planning
+### 4. Start Planning
 
 Create your first work item:
 ```bash
 /carl:plan "Add user authentication system"
 ```
 
-### 4. Execute Work
+### 5. Execute Work
 
 Start implementing:
 ```bash
+# Standard execution (with full breakdown)
 /carl:task user-authentication.feature.carl
+
+# Rapid prototyping (yolo mode)
+/carl:task user-authentication.feature.carl --yolo
 ```
 
-### 5. Monitor Progress
+### 6. Monitor Progress
 
 Check your progress:
 ```bash
@@ -77,6 +99,7 @@ Check your progress:
 | `/carl:analyze` | Set up project foundation | `/carl:analyze` |
 | `/carl:plan` | Create work items | `/carl:plan "Add user dashboard"` |
 | `/carl:task` | Execute work | `/carl:task dashboard.feature.carl` |
+| `/carl:task --yolo` | Rapid prototyping | `/carl:task dashboard.feature.carl --yolo` |
 | `/carl:status` | Monitor progress | `/carl:status --week` |
 
 ## Features
@@ -98,6 +121,31 @@ All CARL files validated against schemas with automatic error fixing.
 
 ### 👥 **Multi-Developer Support**
 Branch-aware session isolation with git integration for team coordination.
+
+### 🚀 **Yolo Mode (Rapid Prototyping)**
+Skip breakdown requirements for rapid prototyping and exploration:
+
+```bash
+# Full yolo - implement entire epic without breakdown
+/carl:task user-auth.epic.carl --yolo
+
+# Hybrid yolo - execute existing stories, yolo missing parts  
+/carl:task payment.feature.carl --yolo
+```
+
+**Key Features:**
+- **Smart Gap Analysis**: Identifies existing vs missing breakdown
+- **Hybrid Execution**: Preserves structured work, yolos only gaps
+- **Technical Debt Tracking**: Auto-creates cleanup tasks
+- **Coverage Reporting**: Shows % structured vs % yolo execution
+- **Ephemeral Mode**: No persistence beyond single execution
+
+**When to Use:**
+- ✅ Rapid prototyping and exploration
+- ✅ Solo development and hackathons  
+- ✅ Time-boxed proof of concepts
+- ❌ Team development (needs coordination)
+- ❌ Production systems (needs structure)
 
 ## Architecture
 

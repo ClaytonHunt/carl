@@ -11,16 +11,18 @@ CARL is a comprehensive development workflow system designed to bridge the gap b
 1. **`/carl:analyze`** - Understand your project and set up strategic artifacts
 2. **`/carl:plan`** - Create your first work items with proper scope  
 3. **`/carl:task`** - Execute work with automatic dependency handling
-4. **`/carl:status`** - Monitor progress and get actionable insights
+4. **`/carl:task --yolo`** - Rapid prototyping without breakdown requirements
+5. **`/carl:status`** - Monitor progress and get actionable insights
 
 ## Core Commands
 
-CARL operates through four primary commands:
+CARL operates through core commands:
 
 1. **`/carl:analyze`** - Establish project foundation and strategic context
 2. **`/carl:plan`** - Create work items with intelligent scope detection
 3. **`/carl:task`** - Execute work with full context and dependency analysis
-4. **`/carl:status`** - Monitor progress and project health
+4. **`/carl:task --yolo`** - Rapid prototyping mode for exploration and MVPs
+5. **`/carl:status`** - Monitor progress and project health
 
 ## Key Features
 
@@ -32,6 +34,7 @@ CARL operates through four primary commands:
 - **Multi-Developer Support**: Branch-based isolation with git-aware session tracking
 - **Schema Validation**: Automatic validation ensures CARL file consistency
 - **Hook Integration**: Minimal bash scripts for context injection and automation
+- **Yolo Mode**: Rapid prototyping with intelligent gap-filling and technical debt tracking
 
 ## How CARL Works
 
@@ -54,6 +57,74 @@ CARL integrates seamlessly with existing development workflows:
 - **Claude Code Hooks**: Automatic progress tracking and completion handling
 - **Schema Compliance**: All files validated against defined schemas with auto-fixing
 - **Quality Gates**: TDD enforcement and testing integration when configured
+
+## Yolo Mode - Rapid Prototyping
+
+CARL's yolo mode enables rapid prototyping and exploration by allowing direct execution of epics and features without requiring complete breakdown.
+
+### How Yolo Works
+
+```bash
+# Full yolo - implement entire epic without breakdown
+/carl:task user-auth.epic.carl --yolo
+
+# Hybrid yolo - execute existing stories, yolo missing parts
+/carl:task payment.feature.carl --yolo
+```
+
+### Smart Gap Analysis
+
+Yolo mode intelligently analyzes existing breakdown and fills gaps:
+
+- **Existing Features/Stories**: Execute normally with full quality gates
+- **Missing Breakdown**: Implement directly with relaxed standards
+- **Coverage Reporting**: Clear percentage of structured vs yolo execution
+- **User Confirmation**: Explicit approval required before proceeding
+
+### Technical Debt Management
+
+Yolo automatically creates technical debt items for later cleanup:
+
+```yaml
+# Auto-created: payment-yolo-debt.tech.carl
+title: "Formalize Payment Feature Breakdown"
+description: "Payment feature was implemented via yolo mode. Needs proper story breakdown."
+yolo_metadata:
+  parent_item: "payment.feature.carl"
+  yolo_date: "2024-01-15T10:00:00Z"
+  execution_mode: "yolo"
+  gap_type: "missing-breakdown"
+```
+
+### When to Use Yolo
+
+**✅ Good for:**
+- Rapid prototyping and exploration
+- Solo development and hackathons
+- Time-boxed proof of concepts
+- Learning unfamiliar problem spaces
+
+**❌ Avoid for:**
+- Team development (needs coordination)
+- Production systems (needs structure)
+- Complex integrations (high risk)
+- Security-critical features
+
+### Session Tracking
+
+Yolo executions are fully tracked in session files:
+
+```yaml
+commands:
+  - command: "task"
+    arguments: "user-auth.epic.carl --yolo"
+    execution_details:
+      mode: "hybrid-yolo"
+      coverage:
+        structured: "33%"
+        yolo: "67%"
+      debt_created: ["registration-yolo-debt.tech.carl"]
+```
 
 ## Detailed Documentation
 

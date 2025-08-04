@@ -2,13 +2,30 @@
 
 **Purpose**: Execute development work with full CARL context integration
 
+## Command Syntax
+
+```bash
+# Standard execution
+/carl:task work-item.carl
+
+# Yolo mode (rapid prototyping)
+/carl:task work-item.carl --yolo
+```
+
 ## Intelligent Scope Handling
 
+### Standard Mode
 - **Story/Technical Items**: Direct implementation (planning assumed complete)
 - **Feature with Stories**: Analyze dependencies, execute in optimal order (parallel when possible)
 - **Feature without Stories**: Invoke planning to break down into stories first
 - **Epic with Features**: Check feature completeness, handle mixed planning/execution
 - **Epic without Features**: Invoke planning to break down into features first
+
+### Yolo Mode
+- **Any Scope**: Skip breakdown requirements, implement directly
+- **Hybrid Execution**: Execute existing breakdown normally, yolo missing parts
+- **Gap Analysis**: Identify structured vs missing components
+- **Technical Debt**: Auto-create cleanup tasks for yolo'd work
 
 ## Implementation Workflow (for Story/Technical items)
 

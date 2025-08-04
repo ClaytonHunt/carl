@@ -20,6 +20,8 @@ Thank you for your interest in contributing to CARL! This guide will help you ge
 - [Claude Code](https://claude.ai/code) - Anthropic's official CLI
 - Git 2.20+ 
 - Bash 4.0+ (for hook system)
+- **jq** - JSON processor ([install guide](https://jqlang.github.io/jq/download/))
+- **yq** - YAML processor ([install guide](https://github.com/mikefarah/yq/releases))
 - Basic familiarity with YAML schemas
 
 ### First Time Setup
