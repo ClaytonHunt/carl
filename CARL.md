@@ -18,7 +18,7 @@ CARL is a comprehensive development workflow system designed to bridge the gap b
 
 CARL operates through core commands:
 
-1. **`/carl:analyze`** - Establish project foundation and strategic context
+1. **`/carl:analyze`** - Establish project foundation with automatic state detection and interactive planning
 2. **`/carl:plan`** - Create work items with intelligent scope detection
 3. **`/carl:task`** - Execute work with full context and dependency analysis
 4. **`/carl:task --yolo`** - Rapid prototyping mode for exploration and MVPs

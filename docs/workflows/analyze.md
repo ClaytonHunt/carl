@@ -8,7 +8,8 @@ The `/carl:analyze` command intelligently determines what analysis is needed:
 
 1. **Foundation Check**: If strategic files exist (vision.carl, process.carl, roadmap.carl) → **Sync Mode**
 2. **Agent Check**: If foundation missing but required agents exist → **Foundation Creation**
-3. **Bootstrap**: If foundation and agents missing → **Agent Creation** (restart required)
+3. **Technology Check**: If foundation and agents missing but tech stack detected → **Agent Creation** (restart required)
+4. **Interactive Planning**: If no foundation, no agents, and no tech stack → **Interactive Planning Mode**
 
 ## Execution Modes
 
@@ -32,6 +33,14 @@ The `/carl:analyze` command intelligently determines what analysis is needed:
 - Strategic artifact generation: vision.carl, process.carl, roadmap.carl
 - Monorepo detection and per-app configuration
 - **Output**: "🚀 CARL foundation complete! Ready for /carl:plan"
+
+### Interactive Planning Mode (3-5 minutes)
+**Triggers**: No foundation, no agents, no detectable tech stack
+- Analyzes existing files (CLAUDE.md, README.md, docs/) for project hints
+- Interactive Q&A to gather requirements and technology preferences
+- Creates schema-compliant foundation files (vision.carl, roadmap.carl, process.carl)
+- Generates required project agents based on chosen technology stack
+- **Output**: "🔄 Please restart with --resume to load new agents and complete foundation setup"
 
 ## Technology Stack Detection
 
