@@ -196,10 +196,18 @@ Load comprehensive execution context:
 - Quality gates and completion criteria
 
 ### Progress Tracking Integration
-Update work item status in real-time:
+**CRITICAL**: Use Edit/MultiEdit tools to update work item status in real-time throughout execution:
+
+**Required Progress Updates**:
+1. **Start Execution**: Update status to "in_progress", set current_phase, add start timestamp
+2. **Major Milestones**: Update progress_percentage (25%, 50%, 75%)
+3. **Phase Transitions**: Update current_phase and add implementation_notes
+4. **Completion**: Update status to "completed", set completion_percentage to 100, add completion timestamp
+
+**Example Progress Update using Edit tool**:
 ```yaml
 status: in_progress
-progress_percentage: 45
+completion_percentage: 45
 current_phase: "implementation"
 last_updated: "2024-01-15T14:30:00Z"
 implementation_notes:
@@ -207,6 +215,11 @@ implementation_notes:
   - phase: "API endpoint creation"
   - next: "Add validation and tests"
 ```
+
+**Implementation Pattern**:
+- Use Edit tool to update specific status fields during execution
+- Use MultiEdit tool for multiple field updates at major milestones
+- Always update last_updated timestamp with each change
 
 ### TDD Enforcement
 When TDD enabled in process.carl (skipped in yolo mode):
@@ -242,23 +255,41 @@ Automated validation at each phase:
 ## Completion and Validation
 
 ### Story/Technical Completion
+**MANDATORY**: Use Edit/MultiEdit tools to mark work items as completed:
+
 1. **Acceptance Criteria**: Verify all criteria met
 2. **Test Validation**: Ensure comprehensive test coverage
 3. **Integration Testing**: Verify compatibility with existing system
 4. **Documentation**: Update relevant documentation
-5. **Status Update**: Mark as completed with completion timestamp
+5. **File Update**: Use Edit/MultiEdit tool to update CARL file with:
+   ```yaml
+   status: completed
+   completion_percentage: 100
+   current_phase: "completed"
+   completion_date: "2024-01-15T16:30:00Z"
+   last_updated: "2024-01-15T16:30:00Z"
+   ```
+6. **Hook Processing**: Completion handler will automatically move file to completed/ directory
 
 ### Feature Completion  
+**MANDATORY**: Use Edit/MultiEdit tools to mark features as completed:
+
 1. **Child Story Verification**: All child stories completed
 2. **Feature Integration**: Overall feature functions as designed
 3. **Feature Testing**: End-to-end feature validation
 4. **Business Value**: Confirm feature delivers intended value
+5. **File Update**: Use Edit/MultiEdit tool to update feature CARL file with completion status
+6. **Hook Processing**: Completion handler will automatically move file to completed/ directory
 
 ### Epic Completion
+**MANDATORY**: Use Edit/MultiEdit tools to mark epics as completed:
+
 1. **Feature Verification**: All child features completed (or yolo'd)
 2. **Epic Integration**: Overall epic achieves strategic objectives
 3. **Epic Validation**: Comprehensive testing across all features
 4. **Strategic Value**: Confirm epic delivers business goals
+5. **File Update**: Use Edit/MultiEdit tool to update epic CARL file with completion status
+6. **Hook Processing**: Completion handler will automatically move file to completed/ directory
 
 ### Yolo Mode Completion
 When work item completed via yolo:
@@ -393,13 +424,17 @@ Use specialized agents when needed:
 ## Error Prevention
 
 ### Standard Mode:
+- ❌ **CRITICAL**: Never claim work is complete without using Edit/MultiEdit to update CARL file
 - ❌ Never execute work items with unmet dependencies
 - ❌ Never skip quality gates or TDD requirements
 - ❌ Never mark items complete without proper validation
 - ❌ Never proceed with circular dependency chains
+- ❌ Never skip progress updates during execution
+- ✅ **REQUIRED**: Always use Edit/MultiEdit tools to update progress and completion status
 - ✅ Always validate work items before execution
 - ✅ Always track progress and handle failures gracefully
 - ✅ Always maintain data integrity and schema compliance
+- ✅ Always update completion status - hooks will automatically handle file movement
 - ✅ Always provide clear error messages and recovery guidance
 
 ### Yolo Mode:
