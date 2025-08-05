@@ -1,0 +1,11 @@
+{
+  "session": {
+    "compact_format": true
+  },
+  "hooks": {
+    "schema_validation": {
+      "strict_mode": false,
+      "auto_fix": true
+    }
+  }
+}

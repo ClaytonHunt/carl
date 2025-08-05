@@ -85,5 +85,6 @@ CARL uses a **dual-layer architecture**:
 ## Claude Code Principles
 
 - **MANDATORY** Always push back on any request that I have if it is a bad idea, contradicts community best practices, principles or patterns.
+- **SOURCE CONTROL**: CARL uses git for version control - no backup files (.backup, .original) should be created as they create clutter and are redundant with git history.
 
 For complete documentation, architecture details, and implementation guides, see [CARL.md](CARL.md) and the [docs/](docs/) directory.

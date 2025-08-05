@@ -56,11 +56,42 @@ monthly_summaries=$(find .carl/sessions/archive -name "monthly-summary-*.carl" 2
 ```
 
 ### Session Data Extraction
-Extract key metrics from session files:
+Extract key metrics from session files (supports both verbose and compact formats):
+
+#### Format Detection and Parsing
+```bash
+# Detect session file format and parse accordingly
+if grep -q "^compact_work_periods:" "$session_file"; then
+    # Compact format: Parse pipe-delimited entries (work_id|start|end)
+    grep -A 1000 "^compact_work_periods:" "$session_file" | \
+    grep "^  - " | sed 's/^  - "//' | sed 's/"$//' | \
+    while IFS='|' read -r work_id start_time end_time; do
+        # Calculate duration if end_time exists
+        if [[ -n "$end_time" && "$end_time" != "" ]]; then
+            duration=$(calculate_duration "$start_time" "$end_time")
+            echo "Work: $work_id, Duration: $duration, Period: $start_time to $end_time"
+        else
+            echo "Work: $work_id, Status: Active since $start_time"
+        fi
+    done
+else
+    # Verbose YAML format: Parse work_periods array
+    # Extract progress events, activity patterns as before
+fi
+```
+
+#### Key Metrics Extraction
 - **Progress Events**: Work item progress increments and completions
 - **Activity Patterns**: Work periods, context switching, session duration
-- **Quality Metrics**: Validation events, auto-fixes applied, error rates
+- **Quality Metrics**: Validation events, auto-fixes applied, error rates  
 - **Completion Events**: Items completed, moved to completed/, timestamps
+
+#### Compact Format Work Period Processing
+For sessions using compact format:
+- **Parse Pipe Format**: Split `work_id|start_timestamp|end_timestamp` entries
+- **Duration Calculation**: Compute work duration from start/end timestamps
+- **Active Work Detection**: Identify incomplete entries (missing end timestamp)
+- **Time Aggregation**: Sum total time per work item across sessions
 
 ### Agent Integration
 Invoke carl-session-analyst with comprehensive context:
@@ -68,11 +99,17 @@ Invoke carl-session-analyst with comprehensive context:
 Use Task tool with subagent_type: carl-session-analyst
 
 Provide analysis context:
-- Current session data and recent activity
+- Current session data and recent activity (both compact and verbose formats)
 - Historical session data for requested timeframe
 - Active work items and their current status
 - Quality metrics and validation patterns
+- Session format information (for appropriate parsing strategy)
 - Specific analysis request (health dashboard vs historical vs work item)
+
+Session format context for agent:
+"Session files may use either verbose YAML or compact pipe-delimited format.
+Compact format uses: compact_work_periods with entries like 'work_id|start|end'.
+Parse accordingly and maintain identical analysis quality regardless of format."
 ```
 
 ## Dashboard Components

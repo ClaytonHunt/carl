@@ -1,6 +1,6 @@
 $schema: "http://json-schema.org/draft-07/schema#"
 title: "CARL Session File Schema"
-description: "Schema for session-YYYY-MM-DD-{user}.carl - Daily session tracking with optimized logging"
+description: "Schema for session-YYYY-MM-DD-{user}.carl - Daily session tracking with optimized logging. Supports both verbose format (full YAML) and compact format (pipe-delimited work periods only) for 90-95% size reduction."
 type: object
 additionalProperties: false
 
@@ -8,11 +8,11 @@ required:
   - developer
   - date
   - session_summary
-  - work_periods
-  - agent_performance
-  - command_metrics
-  - active_context_carryover
-  - cleanup_log
+  
+# Either verbose work_periods OR compact_work_periods required
+anyOf:
+  - required: ["work_periods", "agent_performance", "command_metrics", "active_context_carryover", "cleanup_log"]
+  - required: ["compact_work_periods"]
 
 properties:
   developer:
@@ -70,6 +70,14 @@ properties:
             pattern: "^[a-f0-9]{7,40}$"
           description: "Git commit hashes during this period"
     description: "Detailed work periods"
+    
+  compact_work_periods:
+    type: array
+    items:
+      type: string
+      pattern: "^[a-z][a-z0-9_-]*\\|\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z\\|\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
+      description: "Compact format: work_id|start_timestamp|end_timestamp"
+    description: "Work periods in compact pipe-delimited format for maximum efficiency (90-95% size reduction)"
     
   agent_performance:
     type: array

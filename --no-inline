@@ -1,0 +1,66 @@
+{
+  "metadata": {
+  "scan_timestamp": "2025-08-05T21:52:03Z",
+  "scan_root": "/home/clayton/projects/carl",
+  "files_scanned": 4,
+  "files_found": 4,
+  "scan_errors": 0,
+  "execution_time_seconds": 0,
+  "performance_budget_seconds": 10,
+  "within_budget": true,
+  "inline_docs_enabled": false
+},
+  "files": [{
+  "path": "CLAUDE.md",
+  "absolute_path": "/home/clayton/projects/carl/CLAUDE.md",
+  "size": 3633,
+  "modified_date": "2025-08-05T21:25:36Z",
+  "type": "documentation_claude",
+  "git_info": {
+  "tracked": true,
+  "last_commit": "027fa6a46e67594798ad57eafe2fc286e3a774c2",
+  "last_author": "Clayton Hunt",
+  "last_commit_date": "2025-08-03T17:25:42-04:00"
+
+
+, "inline_documentation": []},{
+  "path": "CONTRIBUTING.md",
+  "absolute_path": "/home/clayton/projects/carl/CONTRIBUTING.md",
+  "size": 9099,
+  "modified_date": "2025-08-04T17:03:42Z",
+  "type": "documentation_contributing",
+  "git_info": {
+  "tracked": true,
+  "last_commit": "2667f4c794a7d10409d91a0d0fd0d2cba8e2d647",
+  "last_author": "Clayton Hunt",
+  "last_commit_date": "2025-08-04T15:32:02-04:00"
+
+
+, "inline_documentation": []},{
+  "path": "LICENSE",
+  "absolute_path": "/home/clayton/projects/carl/LICENSE",
+  "size": 1077,
+  "modified_date": "2025-08-03T22:23:05Z",
+  "type": "documentation_license",
+  "git_info": {
+  "tracked": true,
+  "last_commit": "027fa6a46e67594798ad57eafe2fc286e3a774c2",
+  "last_author": "Clayton Hunt",
+  "last_commit_date": "2025-08-03T17:25:42-04:00"
+
+
+, "inline_documentation": []},{
+  "path": "README.md",
+  "absolute_path": "/home/clayton/projects/carl/README.md",
+  "size": 7341,
+  "modified_date": "2025-08-04T17:03:32Z",
+  "type": "documentation_readme",
+  "git_info": {
+  "tracked": true,
+  "last_commit": "2667f4c794a7d10409d91a0d0fd0d2cba8e2d647",
+  "last_author": "Clayton Hunt",
+  "last_commit_date": "2025-08-04T15:32:02-04:00"
+
+
+, "inline_documentation": []}]
+}

@@ -6,7 +6,7 @@
 .carl/project/features/*.carl  
 .carl/project/stories/*.carl
 .carl/project/technical/*.carl
-.carl/project/completed/
+.carl/project/**/completed/
 .carl/project/active.work.carl
 .carl/project/vision.carl
 .carl/project/process.carl
@@ -23,9 +23,10 @@
 # Project-level agents (development-specific, not part of distributed system)
 .claude/agents/project-*.md
 
-# Keep CARL system files (schemas, hooks, agents, commands)
+# Keep CARL system files (schemas, hooks, agents, commands, tools)
 !.carl/schemas/
 !.carl/hooks/
+!.carl/tools/
 !.claude/agents/
 !.claude/commands/
 
