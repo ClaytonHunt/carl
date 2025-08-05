@@ -26,7 +26,9 @@ When user provides a requirement description, conduct interactive requirements g
    - Timeline expectations and priorities
 3. **Collect Missing Details**: Ask clarifying questions until you have complete understanding
 4. **Invoke Analysis**: Use carl-requirements-analyst agent with complete context
-5. **Create CARL Files**: Generate files based on agent analysis in proper directories
+5. **Extract File Specification**: Parse agent's CARL file specification from analysis response
+6. **Create CARL Files**: Use Write tool to create files based on agent's specification in proper directories
+7. **Validate Creation**: Confirm files were created successfully and are schema-compliant
 
 ### Breakdown Mode (`--from` argument)
 When breaking down existing work items:
@@ -34,7 +36,9 @@ When breaking down existing work items:
 2. **Analyze Current Scope**: Understand what needs to be broken down  
 3. **Gather Breakdown Context**: What specific aspects need decomposition?
 4. **Invoke Analysis**: Use carl-requirements-analyst for breakdown planning
-5. **Create Child Items**: Generate appropriate child work items with proper relationships
+5. **Extract File Specifications**: Parse agent's CARL file specifications from analysis response
+6. **Create Child Items**: Use Write tool to generate appropriate child work items with proper relationships
+7. **Validate Creation**: Confirm all child files were created successfully and are schema-compliant
 
 ## Agent Integration
 
@@ -47,6 +51,48 @@ Provide complete context including:
 - Technical considerations discussed
 - Dependencies and relationships identified
 - Success criteria and acceptance tests
+```
+
+## File Creation Implementation
+
+**CRITICAL**: The carl-requirements-analyst agent provides specifications but cannot write files. The /carl:plan command MUST extract the file specification and create the actual files.
+
+### Step-by-Step File Creation Process
+
+1. **Parse Agent Response**: Extract the CARL file specification from agent's response
+   - Look for "**File Path:**" and "**File Content:**" sections
+   - Extract the complete YAML content between code blocks
+
+2. **Validate Specification**: Ensure the specification is complete
+   - Check that all required schema fields are present
+   - Verify proper naming conventions (kebab-case files, snake_case IDs)
+   - Confirm directory structure matches scope type
+
+3. **Create Directory Structure**: Ensure target directory exists
+   ```bash
+   # Use LS tool to check if directory exists
+   # Create directory if needed using Bash tool
+   ```
+
+4. **Write CARL File**: Use Write tool to create the file
+   ```yaml
+   # Extract exact YAML content from agent specification
+   # Write to proper path: .carl/project/[scope]/[name].[scope].carl
+   ```
+
+5. **Verify Creation**: Confirm file was created successfully
+   - Use Read tool to verify file contents match specification
+   - Check that schema validation passes (hooks will validate automatically)
+
+### Example Implementation Pattern
+
+```markdown
+After agent analysis:
+1. Extract file path: `.carl/project/features/user-auth.feature.carl`
+2. Extract YAML content from agent's "File Content:" section
+3. Use Write tool: Write(file_path="/path/to/file", content="YAML content")
+4. Verify with Read tool to confirm creation
+5. Report success: "✅ Created user-auth.feature.carl"
 ```
 
 ## File Organization Standards
@@ -95,13 +141,17 @@ Always provide actionable recommendations:
 
 ## Error Prevention
 
+- ❌ **CRITICAL**: Never claim files are created without actually using Write tool
+- ❌ Never rely on carl-requirements-analyst agent to create files (it can't write)
 - ❌ Never create CARL files without complete requirements
 - ❌ Never guess at scope - ask clarifying questions
 - ❌ Never create unrealistic timelines or estimates
 - ❌ Never skip dependency analysis
+- ✅ **REQUIRED**: Always use Write tool to create files after agent analysis
 - ✅ Always validate understanding before proceeding
 - ✅ Always use proper naming conventions
 - ✅ Always ensure schema compliance
+- ✅ Always verify file creation with Read tool
 - ✅ Always provide clear next steps
 
 Remember: Quality planning prevents execution problems. Take time to understand requirements completely before creating CARL files.
