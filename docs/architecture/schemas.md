@@ -7,6 +7,79 @@
 - **Required field validation** - Critical fields like `completion_percentage` and `acceptance_criteria` are mandatory
 - **Type safety** - All fields have strict type constraints
 
+## Vision Files (`.vision.carl`)
+**Schema**: `.carl/schemas/vision.schema.yaml`
+
+```yaml
+id: snake_case_id                    # Required: ^[a-z][a-z0-9_]*[a-z0-9]$ pattern
+name: "Human readable name"          # Required: 1-100 characters
+status: enum[draft|active|in_progress|achieved|superseded]  # Required
+vision_statement: "Clear future state" # Required: 50-500 characters
+strategic_goals:                     # Required: 3-7 goals
+  - goal: "Strategic goal"           # Required: min 10 characters
+    rationale: "Why this matters"    # Required: min 20 characters
+    priority: enum[critical|high|medium|low]  # Required
+target_outcomes:                     # Required: min 3 outcomes
+  - outcome: "Desired outcome"       # Required: min 10 characters
+    business_impact: "Impact"        # Required: min 20 characters
+    user_benefit: "User benefit"     # Required: min 20 characters
+success_metrics:                     # Required: min 3 metrics
+  - metric: "What to measure"        # Required: min 5 characters
+    current_value: "Baseline"        # Required
+    target_value: "Target"           # Required
+    measurement_method: "How"        # Required: min 10 characters
+roadmaps: [{id: roadmap_id, status: enum[pending|active|complete], focus_area: "area"}]  # Required
+constraints:                         # Required
+  technical: ["constraint1", ...]    # Required: array of constraints
+  resource: ["constraint1", ...]     # Required: array of constraints
+  market: ["constraint1", ...]       # Required: array of constraints
+timeline:                            # Required
+  start_date: YYYY-MM-DD            # Required: strict date format
+  target_date: YYYY-MM-DD           # Required: strict date format
+  review_frequency: enum[quarterly|bi-annual|annual]  # Required
+stakeholders: [{role: "role", interest: "interest", influence: enum[high|medium|low]}]  # Optional
+assumptions: ["assumption1", ...]    # Optional: min 20 characters each
+risks: [{risk: "risk", impact: enum[critical|high|medium|low], likelihood: enum[high|medium|low], mitigation: "strategy"}]  # Optional
+```
+
+## Roadmap Files (`.roadmap.carl`)
+**Schema**: `.carl/schemas/roadmap.schema.yaml`
+
+```yaml
+id: snake_case_id                    # Required: ^[a-z][a-z0-9_]*[a-z0-9]$ pattern
+name: "Human readable name"          # Required: 1-100 characters
+status: enum[pending|active|in_progress|completed|blocked]  # Required
+completion_percentage: 0-100         # Required: integer 0-100
+vision_id: parent_vision_id          # Required: snake_case pattern
+focus_area: "Primary focus area"     # Required: 10-200 characters
+milestones:                          # Required: 2-6 milestones
+  - id: milestone_id                 # Required: snake_case pattern
+    name: "Milestone name"           # Required: min 5 characters
+    target_date: YYYY-MM-DD          # Required: strict date format
+    status: enum[pending|in_progress|at_risk|completed|missed]  # Required
+    completion_percentage: 0-100     # Required: integer 0-100
+    deliverables: ["deliverable1"]   # Required: min 1 item, min 10 chars each
+    success_metrics: [{metric: "metric", target: "target"}]  # Required: min 1 item
+epics: [{id: epic_id, status: enum[pending|active|complete], milestone_id: id, priority: enum[critical|high|medium|low]}]  # Required
+dependencies:                        # Required
+  internal: [{roadmap_id: id, description: "dependency"}]  # Required
+  external: [{system: "system", description: "dependency", owner: "owner"}]  # Required
+timeline:                            # Required
+  start_date: YYYY-MM-DD            # Required: strict date format
+  end_date: YYYY-MM-DD              # Required: strict date format
+  phase: "Q1 2024"                  # Required: phase name
+success_criteria: ["criteria1", ...] # Required: min 3, min 20 chars each
+resource_allocation:                 # Optional
+  team_size: 5                      # Optional: integer >= 1
+  key_roles: ["role1", ...]         # Optional: array of roles
+  budget_estimate: "$100k-$500k"    # Optional: budget range
+risk_factors: [{risk: "risk", impact: enum[high|medium|low], mitigation_plan: "plan"}]  # Optional
+communication_plan:                  # Optional
+  stakeholder_updates: enum[weekly|bi-weekly|monthly]  # Optional
+  review_meetings: enum[weekly|bi-weekly|monthly|quarterly]  # Optional
+  escalation_path: "How to escalate" # Optional: min 20 characters
+```
+
 ## Epic Files (`.epic.carl`)
 **Schema**: `.carl/schemas/epic.schema.yaml`
 

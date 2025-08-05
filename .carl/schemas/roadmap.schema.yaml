@@ -1,0 +1,255 @@
+$schema: "http://json-schema.org/draft-07/schema#"
+title: "CARL Roadmap File Schema"
+description: "Schema for .roadmap.carl files - Strategic milestones and phase planning (6-12 months)"
+type: object
+additionalProperties: false
+
+required:
+  - id
+  - name
+  - status
+  - completion_percentage
+  - vision_id
+  - focus_area
+  - milestones
+  - epics
+  - dependencies
+  - timeline
+  - success_criteria
+
+properties:
+  id:
+    type: string
+    pattern: "^[a-z][a-z0-9_]*[a-z0-9]$"
+    description: "Unique identifier in snake_case format"
+    
+  name:
+    type: string
+    minLength: 1
+    maxLength: 100
+    description: "Human readable name for the roadmap"
+    
+  status:
+    type: string
+    enum: ["pending", "active", "in_progress", "completed", "blocked"]
+    description: "Current status of the roadmap"
+    
+  completion_percentage:
+    type: integer
+    minimum: 0
+    maximum: 100
+    description: "Overall completion percentage based on milestone progress"
+    
+  vision_id:
+    type: string
+    pattern: "^[a-z][a-z0-9_]*[a-z0-9]$"
+    description: "Parent vision ID this roadmap implements"
+    
+  focus_area:
+    type: string
+    minLength: 10
+    maxLength: 200
+    description: "Primary focus area or theme for this roadmap phase"
+    
+  milestones:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required: ["id", "name", "target_date", "status", "completion_percentage", "deliverables", "success_metrics"]
+      properties:
+        id:
+          type: string
+          pattern: "^[a-z][a-z0-9_]*[a-z0-9]$"
+          description: "Milestone identifier"
+        name:
+          type: string
+          minLength: 5
+          description: "Milestone name"
+        target_date:
+          type: string
+          pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+          description: "Target completion date in YYYY-MM-DD format"
+        status:
+          type: string
+          enum: ["pending", "in_progress", "at_risk", "completed", "missed"]
+          description: "Milestone status"
+        completion_percentage:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: "Milestone completion percentage"
+        deliverables:
+          type: array
+          items:
+            type: string
+            minLength: 10
+          minItems: 1
+          description: "Key deliverables for this milestone"
+        success_metrics:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: ["metric", "target"]
+            properties:
+              metric:
+                type: string
+                description: "What to measure"
+              target:
+                type: string
+                description: "Target value"
+          minItems: 1
+          description: "Measurable success criteria"
+    minItems: 2
+    maxItems: 6
+    description: "Major milestones in the roadmap"
+    
+  epics:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required: ["id", "status", "milestone_id"]
+      properties:
+        id:
+          type: string
+          pattern: "^[a-z][a-z0-9_]*[a-z0-9]$"
+          description: "Child epic ID in snake_case"
+        status:
+          type: string
+          enum: ["pending", "active", "complete"]
+          description: "Epic status"
+        milestone_id:
+          type: string
+          pattern: "^[a-z][a-z0-9_]*[a-z0-9]$"
+          description: "Which milestone this epic belongs to"
+        priority:
+          type: string
+          enum: ["critical", "high", "medium", "low"]
+          description: "Epic priority within the roadmap"
+    description: "Epics that implement this roadmap"
+    
+  dependencies:
+    type: object
+    additionalProperties: false
+    required: ["internal", "external"]
+    properties:
+      internal:
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          required: ["roadmap_id", "description"]
+          properties:
+            roadmap_id:
+              type: string
+              pattern: "^[a-z][a-z0-9_]*[a-z0-9]$"
+              description: "Other roadmap ID"
+            description:
+              type: string
+              minLength: 10
+              description: "Nature of the dependency"
+        description: "Dependencies on other roadmaps"
+      external:
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          required: ["system", "description", "owner"]
+          properties:
+            system:
+              type: string
+              description: "External system or component"
+            description:
+              type: string
+              minLength: 10
+              description: "Nature of the dependency"
+            owner:
+              type: string
+              description: "Who owns this dependency"
+        description: "External dependencies"
+    description: "Internal and external dependencies"
+    
+  timeline:
+    type: object
+    additionalProperties: false
+    required: ["start_date", "end_date", "phase"]
+    properties:
+      start_date:
+        type: string
+        pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+        description: "Roadmap start date in YYYY-MM-DD format"
+      end_date:
+        type: string
+        pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+        description: "Roadmap end date in YYYY-MM-DD format"
+      phase:
+        type: string
+        description: "Current phase name (e.g., 'Q1 2024', 'H2 2024')"
+    description: "Roadmap timeline boundaries"
+    
+  success_criteria:
+    type: array
+    items:
+      type: string
+      minLength: 20
+    minItems: 3
+    description: "Overall success criteria for the roadmap"
+    
+  resource_allocation:
+    type: object
+    additionalProperties: false
+    properties:
+      team_size:
+        type: integer
+        minimum: 1
+        description: "Expected team size"
+      key_roles:
+        type: array
+        items:
+          type: string
+        description: "Critical roles needed"
+      budget_estimate:
+        type: string
+        description: "Budget range or estimate"
+    description: "Resource requirements for the roadmap"
+    
+  risk_factors:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required: ["risk", "impact", "mitigation_plan"]
+      properties:
+        risk:
+          type: string
+          minLength: 10
+          description: "Risk description"
+        impact:
+          type: string
+          enum: ["high", "medium", "low"]
+          description: "Potential impact"
+        mitigation_plan:
+          type: string
+          minLength: 20
+          description: "How to mitigate this risk"
+    description: "Key risks to roadmap delivery"
+    
+  communication_plan:
+    type: object
+    additionalProperties: false
+    properties:
+      stakeholder_updates:
+        type: string
+        enum: ["weekly", "bi-weekly", "monthly"]
+        description: "Frequency of stakeholder updates"
+      review_meetings:
+        type: string
+        enum: ["weekly", "bi-weekly", "monthly", "quarterly"]
+        description: "Frequency of review meetings"
+      escalation_path:
+        type: string
+        minLength: 20
+        description: "How to escalate blockers"
+    description: "Communication and governance plan"

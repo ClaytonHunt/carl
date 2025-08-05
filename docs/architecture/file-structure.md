@@ -21,6 +21,8 @@
 │   ├── session-YYYY-MM-DD-{user}.carl  # Daily files (7 days)
 │   └── archive/         # Compacted: weekly → monthly → quarterly → yearly
 └── schemas/             # CARL file schema definitions
+    ├── vision.schema.yaml    # Vision file structure and validation rules
+    ├── roadmap.schema.yaml   # Roadmap file structure and validation rules
     ├── epic.schema.yaml      # Epic file structure and validation rules
     ├── feature.schema.yaml   # Feature file structure and validation rules
     ├── story.schema.yaml     # Story file structure and validation rules

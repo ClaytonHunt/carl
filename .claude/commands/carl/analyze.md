@@ -16,21 +16,25 @@ You are implementing intelligent project foundation analysis with automatic stat
 ## Smart State Detection
 
 ### Primary Decision Tree
-Execute checks in this exact order:
+Execute checks in this exact order for optimal performance:
 
-1. **Foundation State Check (Always First)**:
+1. **Foundation State Check (Always First - <100ms)**:
    - Read `.carl/project/vision.carl` (exists?)
    - Read `.carl/project/process.carl` (exists?)  
    - Read `.carl/project/roadmap.carl` (exists?)
-   - If **all exist** → Execute **Sync Mode**
+   - If **all exist** → Execute **Sync Mode** (skip all other checks)
    - If **any missing** → Continue to Agent Check
 
 2. **Agent Availability Check (Only if foundation missing)**:
    - Use Glob to detect technology stack (package.json, requirements.txt, etc.)
-   - Map detected technologies to required project agents
-   - Check if required agents exist in `.claude/agents/project-*.md`
-   - If **all agents exist** → Execute **Foundation Creation Phase**
-   - If **missing agents** → Execute **Agent Creation Phase**
+   - If **no technology detected**:
+     - Read existing files (CLAUDE.md, README.md, docs) for project hints
+     - Execute **Interactive Planning Mode** to gather requirements
+   - If **technology detected**:
+     - Map detected technologies to required project agents
+     - Check if required agents exist in `.claude/agents/project-*.md`
+     - If **all agents exist** → Execute **Foundation Creation Phase**
+     - If **missing agents** → Execute **Agent Creation Phase**
 
 ## Execution Modes
 
@@ -111,9 +115,9 @@ Execute checks in this exact order:
 
 3. **Strategic Artifact Generation**:
    - **carl-settings.json**: User-specific CARL configuration (generated from schema defaults)
-   - **vision.carl**: Project purpose, goals, success criteria
-   - **process.carl**: TDD settings, test commands, quality gates
-   - **roadmap.carl**: High-level development phases and milestones
+   - **.carl/project/vision.carl**: Project purpose, goals, success criteria
+   - **.carl/project/process.carl**: TDD settings, test commands, quality gates
+   - **.carl/project/roadmap.carl**: High-level development phases and milestones
    - Create files using Write tool with proper CARL schema compliance
 
 4. **Foundation Validation**:
@@ -133,6 +137,86 @@ Execute checks in this exact order:
 ✅ roadmap.carl - 3 development phases identified
 
 🚀 CARL foundation complete! Ready for /carl:plan to start work planning.
+```
+
+### Interactive Planning Mode (No Technology Stack)
+**Triggers**: Foundation missing AND no technology stack detected
+**Duration**: 3-5 minutes
+**Purpose**: Gather project requirements through user interview
+
+**Process**:
+1. **Existing File Analysis**:
+   - Read CLAUDE.md for project description and goals
+   - Read README.md for additional context
+   - Scan any docs/ directory for specifications
+   - Extract hints about intended technology, features, and scope
+
+2. **Interactive Requirements Gathering**:
+   ```
+   🔍 No technology stack detected. Let's plan your project foundation.
+   
+   📄 From CLAUDE.md, I understand this is: [extracted summary]
+   
+   Let me ask a few questions to create your project foundation:
+   ```
+   
+   **Essential Questions**:
+   - "What technology stack are you planning to use? (e.g., Node.js/Express, Python/Django, etc.)"
+   - "What type of application is this? (API, web app, CLI tool, library, etc.)"
+   - "Who are the primary users or consumers of this application?"
+   - "What are the main features or capabilities you want to build?"
+   - "Do you have any specific timeline or milestone goals?"
+   - "Are there any technical constraints or requirements? (database, deployment, etc.)"
+
+3. **Foundation Generation Strategy**:
+   - Based on answers, determine which project agents need creation
+   - Generate foundation files using Write tool with strict schema compliance:
+     * **vision.carl**: Must validate against `.carl/schemas/vision.schema.yaml`
+     * **roadmap.carl**: Must validate against `.carl/schemas/roadmap.schema.yaml`
+     * **process.carl**: Must validate against `.carl/schemas/process.schema.yaml`
+   - All files must be valid YAML following their respective schemas
+   - Schema validation will run automatically via hooks
+   - Provide guidance on next steps
+
+4. **Graceful Fallback**:
+   - If user is unsure about technology, suggest common stacks
+   - Create generic foundation that can be refined later
+   - Emphasize that everything can be updated as project evolves
+
+**Output Example**:
+```
+🔍 No technology stack detected. Let's plan your project foundation.
+
+📄 From CLAUDE.md, I understand this is: A task management API with user auth, 
+   categorization, and search capabilities.
+
+Let me ask a few questions to create your project foundation:
+
+Q: What technology stack are you planning to use?
+A: Node.js with TypeScript and Express
+
+Q: What type of application is this?
+A: RESTful API with PostgreSQL database
+
+[... additional Q&A ...]
+
+📊 Based on your requirements, I'll create:
+- Vision: API-first task management platform
+- Roadmap: 3 phases - MVP, User Features, Advanced Features  
+- Process: TDD with Jest, 85% coverage target
+
+📄 Generating schema-compliant CARL foundation files:
+✅ .carl/project/vision.carl (YAML format with vision_statement, strategic_goals, success_metrics)
+✅ .carl/project/roadmap.carl (YAML format with milestones, epics, timeline)
+✅ .carl/project/process.carl (YAML format with methodology, test commands, quality requirements)
+
+🤖 Creating required project agents:
+✅ project-nodejs.md
+✅ project-typescript.md  
+✅ project-express.md
+✅ project-postgresql.md
+
+🔄 Please restart with --resume to load new agents and complete foundation setup.
 ```
 
 ## Technology Stack Detection
@@ -194,7 +278,14 @@ Map detected technologies to required project agents:
 ### Technology Detection Issues
 - Handle edge cases like monorepos with multiple technology stacks
 - Provide manual override capabilities for misdetected technologies
-- Fall back to generic analysis if specific technologies can't be identified
+- Fall back to Interactive Planning Mode for empty projects
+- Use existing documentation files to infer project intent
+
+### Interactive Mode Considerations
+- Keep questions concise and focused on essential information
+- Provide sensible defaults and examples for each question
+- Allow users to skip questions with reasonable fallbacks
+- Save all gathered information for future reference
 
 ## Integration Points
 
