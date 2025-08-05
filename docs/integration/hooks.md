@@ -29,14 +29,22 @@ Review the official Claude Code hooks documentation:
 
 ## Production Hook System
 
-### 1. SessionStart Hook ✅ **OPERATIONAL**
+### 1. UserPromptSubmit Hook ✅ **OPERATIONAL**
+**File**: `.carl/hooks/context-inject.sh`
+- Injects minimal context (<100 tokens) before every user prompt
+- Provides current date, yesterday date to prevent hallucination
+- Includes active work status and completion percentage
+- References current session file for continuity
+- **Status**: Implemented and configured
+
+### 2. SessionStart Hook ✅ **OPERATIONAL**
 **File**: `.carl/hooks/session-start.sh`
 - Initializes daily session file (`session-YYYY-MM-DD-{git-user}.carl`)
 - Git user detection and session metadata setup
 - Handles session recovery and continuation
 - **Status**: Fully implemented and tested
 
-### 2. Stop Hook ✅ **OPERATIONAL** 
+### 3. Stop Hook ✅ **OPERATIONAL** 
 **File**: `.carl/hooks/stop.sh`
 - **Smart session event logging** with duplicate prevention
 - Captures meaningful work context (active items, git commits, modified files)
@@ -47,11 +55,11 @@ Review the official Claude Code hooks documentation:
   - Context detection for git commits and CARL file modifications
 - **Status**: Production ready with optimization enhancements
 
-### 3. PostToolUse Hook Array ✅ **OPERATIONAL**
+### 4. PostToolUse Hook Array ✅ **OPERATIONAL**
 **Triggered after**: Write/Edit/MultiEdit operations  
 **Execution**: Sequential processing with individual error handling
 
-#### 3a. Schema Validation Hook 🔧 **AUTO-FIXING & OPTIMIZED** ✅ **FIXED**
+#### 4a. Schema Validation Hook 🔧 **AUTO-FIXING & OPTIMIZED** ✅ **FIXED**
 **File**: `.carl/hooks/schema-validate.sh`
 - **Proactive auto-fixing** instead of just error reporting
 - **Auto-fixes applied**:
@@ -67,7 +75,7 @@ Review the official Claude Code hooks documentation:
 - **CLAUDE_PROJECT_DIR Usage**: Fixed to use proper environment variable pattern
 - **PostToolUse Integration**: Resolved execution errors and path resolution issues
 
-#### 3b. Progress Tracking Hook 📈 **INTELLIGENT & OPTIMIZED**  
+#### 4b. Progress Tracking Hook 📈 **INTELLIGENT & OPTIMIZED**  
 **File**: `.carl/hooks/progress-track.sh`
 - **Activity-based progress increments**:
   - Schema validation activity: +5% progress
@@ -82,7 +90,7 @@ Review the official Claude Code hooks documentation:
 - **Session metrics**: Aggregates work periods and velocity tracking
 - **Status**: Optimized and production-ready (71% reduction in session file size)
 
-#### 3c. Completion Handler Hook 🎯 **AUTOMATED**
+#### 4c. Completion Handler Hook 🎯 **AUTOMATED**
 **File**: `.carl/hooks/completion-handler.sh`  
 - **Automatic completion detection** based on percentage thresholds
 - **File organization**: Moves completed items to `completed/` subdirectories
@@ -90,7 +98,7 @@ Review the official Claude Code hooks documentation:
 - **Orphan cleanup**: Finds and organizes misplaced completed items
 - **Status**: Fully tested (automatically moved test items to completed/)
 
-### 4. Notification Hook ✅ **CROSS-PLATFORM**
+### 5. Notification Hook ✅ **CROSS-PLATFORM**
 **File**: `.carl/hooks/notify-attention.sh`
 - Cross-platform audio alerts (macOS/Linux/Windows)
 - ElevenLabs integration for enhanced voice notifications
@@ -134,6 +142,13 @@ All utility scripts are implemented and tested in production:
 ```json
 {
   "hooks": {
+    "UserPromptSubmit": [{
+      "matcher": ".*",
+      "hooks": [{
+        "type": "command",
+        "command": "bash ${CLAUDE_PROJECT_DIR}/.carl/hooks/context-inject.sh"
+      }]
+    }],
     "SessionStart": [{
       "matcher": ".*",
       "hooks": [{

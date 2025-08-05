@@ -37,6 +37,13 @@
           "command": "bash $CLAUDE_PROJECT_DIR/.carl/hooks/completion-handler.sh"
         }
       ]
+    }],
+    "UserPromptSubmit": [{
+      "matcher": ".*",
+      "hooks": [{
+        "type": "command",
+        "command": "bash $CLAUDE_PROJECT_DIR/.carl/hooks/context-inject.sh"
+      }]
     }]
   }
 }
