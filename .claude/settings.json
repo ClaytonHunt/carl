@@ -21,23 +21,34 @@
         "command": "bash $CLAUDE_PROJECT_DIR/.carl/hooks/stop.sh"
       }]
     }],
-    "PostToolUse": [{
-      "matcher": "Write|Edit|MultiEdit",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "bash $CLAUDE_PROJECT_DIR/.carl/hooks/schema-validate.sh"
-        },
-        {
-          "type": "command",
-          "command": "bash $CLAUDE_PROJECT_DIR/.carl/hooks/progress-track.sh"
-        },
-        {
-          "type": "command",
-          "command": "bash $CLAUDE_PROJECT_DIR/.carl/hooks/completion-handler.sh"
-        }
-      ]
-    }],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $CLAUDE_PROJECT_DIR/.carl/hooks/schema-validate.sh"
+          },
+          {
+            "type": "command",
+            "command": "bash $CLAUDE_PROJECT_DIR/.carl/hooks/progress-track.sh"
+          },
+          {
+            "type": "command",
+            "command": "bash $CLAUDE_PROJECT_DIR/.carl/hooks/completion-handler.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Write.*\\.md|Edit.*\\.md|Write.*README|Edit.*README|Write.*CONTRIBUTING|Edit.*CONTRIBUTING",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $CLAUDE_PROJECT_DIR/.carl/hooks/doc-quality-check.sh"
+          }
+        ]
+      }
+    ],
     "UserPromptSubmit": [{
       "matcher": ".*",
       "hooks": [{
