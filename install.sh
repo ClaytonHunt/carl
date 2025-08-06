@@ -280,18 +280,30 @@ merge_claude_settings() {
             # Use jq for proper JSON merging
             verbose "Using jq for JSON merging..."
             
-            # More sophisticated merge that handles arrays properly
+            # Smart merge that replaces CARL hooks and preserves non-CARL hooks
             if jq -s '
+                def is_carl_hook(hook):
+                    (hook.command // "") | contains("$CLAUDE_PROJECT_DIR/.carl/hooks");
+                
+                def filter_non_carl_hooks(hooks_array):
+                    hooks_array | map(select(.hooks | map(is_carl_hook(.)) | any | not));
+                
                 def merge_hooks(existing; new):
                     existing as $existing |
                     new as $new |
-                    $existing + ($new | to_entries | map(
-                        if $existing[.key] then
-                            {key: .key, value: ($existing[.key] + .value)}
-                        else
-                            .
-                        end
-                    ) | from_entries);
+                    ($new | to_entries | map({
+                        key: .key,
+                        value: (
+                            if $existing[.key] then
+                                # For existing hook types, keep non-CARL hooks and add new CARL hooks
+                                (filter_non_carl_hooks($existing[.key]) + .value)
+                            else
+                                # For new hook types, use as-is
+                                .value
+                            end
+                        )
+                    }) | from_entries) as $merged_new |
+                    $existing * $merged_new;
                     
                 .[0] * {
                     "hooks": merge_hooks(.[0].hooks // {}; .[1].hooks // {})
