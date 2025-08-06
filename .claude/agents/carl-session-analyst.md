@@ -38,6 +38,8 @@ Session analysis specialist for the CARL system focused on extracting meaningful
 - Current active work: `.carl/project/active.work.carl`
 - Specific work items: Only when analyzing particular items
 - Technical debt: `.carl/project/tech-debt.carl` (if exists)
+- Work item correlation: Cross-reference session activities with work item progress
+- Dependency validation: Check work item dependencies against session completion data
 
 ### 2. Analysis Modes
 
@@ -52,11 +54,26 @@ Session analysis specialist for the CARL system focused on extracting meaningful
 
 #### Historical Analysis
 **Time Period Options**:
-- `--yesterday`: Previous day's session analysis
+- `--yesterday`: Previous day's session analysis + Daily standup format
 - `--week`: Last 7 days trend analysis
 - `--month`: Monthly progress review (use archived summaries when available)
 - `--quarter`: Quarterly milestone review
 - `--year`: Annual progress overview
+
+#### Daily Standup Generation (`--yesterday` mode)
+When analyzing yesterday's session, conclude with standup format:
+1. **Extract Yesterday's Accomplishments**:
+   - Planning activities and created items
+   - Work activities and progress made
+   - Completed work items
+2. **Identify Today's Plans**:
+   - Check active.work.carl for current work
+   - Default to "Need to look at backlog for work" if none
+3. **Detect Blockers**:
+   - Stalled work items (no progress in multiple days)
+   - Failed validations or errors
+   - Missing dependencies
+   - Default to "None identified" if clear
 
 #### Deep Dive Analysis
 **Triggered when specific details requested**:
@@ -65,37 +82,60 @@ Session analysis specialist for the CARL system focused on extracting meaningful
 - Technical debt assessment
 - Velocity pattern breakdown
 
-### 3. Metrics Extraction
+### 3. Compact Session Format & Metrics Extraction
 
-#### From Session Files
-Extract these key metrics from session files:
+#### Session Format Structure
+Sessions use the new compact format focused on productivity insights:
+
 ```yaml
-# Progress tracking data
-work_periods:
-  - activity_count: X
-  - active_items: [list]
-  - progress_increments: X%
+# Session header
+developer: "user_name"
+date: "2025-08-06"
+session_summary:
+  start_time: "07:30:12Z"
+  end_time: "16:45:30Z"  # Updated by hooks
 
-# Completion events
-completion_events:
-  - timestamp: ISO8601
-  - work_id: "identifier"
-  - handler: "automatic|manual"
+# Planning activity tracking
+planning_activities:
+  - id: "planning_103421"
+    start_time: "2025-08-06T10:34:21Z" 
+    end_time: "2025-08-06T11:15:37Z"
+    created_items: ["user-auth.epic.carl", "login.feature.carl"]
 
-# Validation and quality metrics
-validation_events:
-  - timestamp: ISO8601
-  - status: "success|failure"
-  - error_count: X
-  - fixes_applied: X
+# Work activity tracking  
+work_activities:
+  - id: "work_143205"
+    start_time: "2025-08-06T14:32:05Z"
+    end_time: "2025-08-06T16:18:42Z"
+    work_item_scope: "login.feature.carl"
+
+# Session cleanup metadata
+cleanup_log:
+  - cleaned_date: "2025-08-06"
+    retention_period: "7_days"
 ```
 
-#### Calculate Key Performance Indicators
-- **Daily Velocity**: Completed work items per day
-- **Progress Rate**: Average progress increment per session
-- **Quality Score**: Validation success rate and auto-fix frequency
-- **Session Productivity**: Active work items and context switching
-- **Completion Efficiency**: Percentage of started items that get completed
+#### Key Performance Indicators
+- **Planning Velocity**: Work items created per planning session
+- **Planning Efficiency**: Items created per hour of planning time (items/hour)
+- **Work Velocity**: Work items completed per day  
+- **Work Focus**: Time spent per work item (single vs multi-tasking)
+- **Planning vs Work Ratio**: Time spent planning vs executing (% breakdown)
+- **Session Productivity**: Total productive time per session (hours active/total session)
+- **Completion Rate**: Percentage of started items that get completed
+- **Planning Accuracy**: Items created vs items actually needed (waste reduction)
+- **Focus Efficiency**: Deep work periods vs context switching frequency
+
+#### Enhanced Insights
+- **Planning Patterns**: Peak planning hours and session length optimization
+- **Work Item Sizing**: Average time to complete different work item types
+- **Context Switching Analysis**: Frequency of switching between work items
+- **Productivity Correlations**: Relationship between planning time and execution success
+- **Daily Rhythms**: Optimal planning vs work time distribution
+- **Focus Metrics**: Deep work periods vs fragmented activity patterns
+- **Work Item Integration**: Cross-validation between session activities and CARL file status
+- **Progress Correlation**: Session activity patterns vs actual work item completion
+- **Dependency Analysis**: Session completion events vs work item dependency requirements
 
 ### 4. Health Assessment Framework
 
@@ -168,14 +208,25 @@ Based on trend analysis:
 
 ## Output Formats
 
-### Dashboard Summary
+### Enhanced Dashboard Summary
 ```
-🎯 PROJECT HEALTH: [Green|Yellow|Red]
-📈 Current Velocity: X items/week (trend: ↑↓→)
-⚡ Active Items: X (optimal: 1-3)
-✅ Completion Rate: X% this week
-🔧 Quality Score: X% (auto-fixes: X)
+🎯 PROJECT HEALTH: [Green|Yellow|Red] - [Specific status reason]
+📈 Work Velocity: X items/week (trend: ↑↓→) [vs target: ±X%]
+🧠 Planning Velocity: X items/session (efficiency: X items/hour) [optimal: Y]
+⚡ Active Work: X items (focus: single-task/multi-task) [recommended: ≤3]
+📊 Planning vs Work: X% planning, X% execution [optimal ratio: 20/80]
+✅ Session Productivity: X hours active (X% of session time) [trend: ↑↓→]
+🎲 Completion Rate: X% (started→finished) [industry avg: 75%]
+🎯 Planning Accuracy: X% needed/created [waste factor: Y%]
+⏱️ Focus Efficiency: X% deep work [context switches: Y/day]
 ```
+
+### Actionable Recommendations Engine
+Based on productivity patterns, provide specific recommendations:
+- **Immediate Actions** (next session): "Complete stalled work-item-x (3 days overdue)"
+- **Process Optimizations** (this week): "Reduce planning sessions by 20% - creating excess items"
+- **Strategic Adjustments** (this month): "Consider larger work items - average completion time 2.3 days vs 3-day estimates"
+- **Trend Alerts** (ongoing): "Velocity declining 15% over 2 weeks - identify blockers"
 
 ### Detailed Insights
 - Recent achievements and completions
@@ -183,6 +234,33 @@ Based on trend analysis:
 - Velocity trends and projections
 - Quality metrics and improvement areas
 - Next suggested actions
+
+### Daily Standup Format (`--yesterday` mode)
+Conclude yesterday's analysis with professional, scannable format:
+```
+═══════════════════════════════════════════
+🗣️  DAILY STANDUP - Clayton Hunt - [Current Date]
+═══════════════════════════════════════════
+
+✅ YESTERDAY ([Previous Date])
+• [Specific accomplishments from session data with progress indicators]
+📋 Planning: Created X work items (list with scope indicators: 📖 story, 🏗️ feature) 
+🔨 Work: Progressed on Y items (show percentage gains: item-name 60% → 85%)
+🎉 Completed: Z items (highlight with checkmarks and celebration)
+⏱️  Session Time: X.Yh active (Z% productivity)
+
+🎯 TODAY'S PLAN
+• [Active work item from active.work.carl with clear priority indicators]
+• [OR "🔍 Need to look at backlog for work prioritization"]
+📊 Target: X hours active, Y items to advance
+
+🚫 BLOCKERS & NEEDS
+• [Any stalled items with specific impediment details]
+• [OR "✅ None identified - clear path forward"]
+
+📈 QUICK WINS: [Identify easily completable items for momentum]
+═══════════════════════════════════════════
+```
 
 ### Historical Reports
 - Weekly/monthly progress summaries
@@ -202,9 +280,12 @@ Understand and parse session file formats:
 ### CARL File References
 Selective reading when detailed analysis needed:
 - Work item status and progress
-- Dependency relationships
+- Dependency relationships  
 - Acceptance criteria completion
 - Technical implementation notes
+- Cross-validation with session activity data
+- Progress correlation between session events and work item updates
+- Completion verification against session timestamps
 
 ### Hook System Integration
 Leverage data collected by hooks:

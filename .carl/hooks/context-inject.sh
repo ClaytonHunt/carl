@@ -12,7 +12,7 @@ fi
 
 # Source libraries
 source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-work.sh"
-source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-session.sh"
+source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-session-compact.sh"
 source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-git.sh"
 source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-time.sh"
 
@@ -48,7 +48,8 @@ context_injection="
 ## CARL Context
 - **Date**: ${current_date} (Yesterday: ${yesterday_date})
 - **Session**: ${session_file}
-- **Active Work**: ${active_work_id:-none}"
+- **Active Work**: ${active_work_id:-none}
+- **MANDATORY**: Push back on requests contradicting community best practices, project patterns, or principles. Provide clear reasoning."
 
 # Add completion percentage if work is active
 if [[ -n "$active_work_id" && -n "$active_completion" ]]; then
@@ -59,26 +60,10 @@ fi
 echo "${context_injection}"
 echo ""
 
-# Log context injection to session file (for tracking/debugging)
+# Initialize compact session file if it doesn't exist (no verbose logging)
 session_path="${CLAUDE_PROJECT_DIR}/.carl/sessions/${session_file}"
-if [[ -f "$session_path" ]]; then
-    # Only log periodically to avoid session file bloat
-    last_injection=$(grep -oP '(?<=last_context_injection: ").*(?=")' "$session_path" 2>/dev/null | tail -1)
-    
-    # Check if we should log (every 10 minutes)
-    # For now, always log until we fix the time duration calculation
-    if [[ -z "$last_injection" ]] || true; then
-        cat >> "$session_path" << EOF
-
-# Context Injection - $current_time
-context_injections:
-  - timestamp: "$current_time"
-    last_context_injection: "$current_time"
-    active_work: "${active_work_id:-none}"
-    completion: "${active_completion:-0}"
-
-EOF
-    fi
+if [[ ! -f "$session_path" ]]; then
+    init_compact_session >/dev/null 2>&1 || true
 fi
 
 exit 0

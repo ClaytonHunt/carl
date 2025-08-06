@@ -1,4 +1,31 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(git add:*)",
+      "WebFetch(domain:docs.anthropic.com)",
+      "Bash(tree:*)",
+      "Bash(chmod:*)",
+      "Bash(ls:*)",
+      "Bash(export CLAUDE_PROJECT_DIR=\"/home/clayton/projects/carl\")",
+      "Bash(source:*)",
+      "Bash(calculate_time_duration \"10:08:47Z\")",
+      "Bash(grep:*)",
+      "Bash(for:*)",
+      "Bash(do echo \"Checking: $schema\")",
+      "Bash(yq eval:*)",
+      "Bash(echo:*)",
+      "Bash(done)",
+      "Bash(mkdir:*)",
+      "Bash(git init:*)",
+      "Bash(git commit:*)",
+      "Bash(../install.sh)",
+      "Bash(../../install.sh)"
+    ],
+    "deny": [
+      "Bash(git config:*)"
+    ]
+  },
   "hooks": {
     "SessionStart": [{
       "matcher": ".*",

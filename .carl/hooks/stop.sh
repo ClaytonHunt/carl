@@ -13,7 +13,7 @@ fi
 # Source libraries using CLAUDE_PROJECT_DIR
 source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-platform.sh"
 source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-git.sh"
-source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-session.sh"
+source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-session-compact.sh"
 source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-settings.sh"
 source "${CLAUDE_PROJECT_DIR}/.carl/hooks/lib/carl-time.sh"
 
@@ -88,52 +88,20 @@ find_active_work() {
     done | head -3 | tr '\n' '; ' | sed 's/; $//'
 }
 
-# Update session file with stop event
+# Update session file with compact stop handling
 update_session_stop() {
     # Ensure session file exists
     if [[ ! -f "$SESSION_FILE" ]]; then
         # Create session file if it doesn't exist
         mkdir -p "$(dirname "$SESSION_FILE")"
-        init_daily_session >/dev/null 2>&1 || true
+        init_compact_session >/dev/null 2>&1 || true
     fi
     
-    local timestamp
-    timestamp=$(get_iso_timestamp)
+    # Simply update session end time - no verbose stop events
+    update_session_end_time "$SESSION_FILE"
     
-    # Get meaningful context
-    local work_context
-    work_context=$(get_work_context)
-    
-    # Check if this is a duplicate stop event (prevent spam)
-    if [[ -f "$SESSION_FILE" ]]; then
-        local last_context
-        last_context=$(grep "context:" "$SESSION_FILE" | tail -1 | cut -d'"' -f2 2>/dev/null)
-        if [[ "$work_context" == "$last_context" ]]; then
-            # Same context as last stop event, check if within 2 minutes
-            local last_timestamp
-            last_timestamp=$(grep "# Stop Event" "$SESSION_FILE" | tail -1 | grep -o '[0-9T:-]*' | tail -1)
-            if [[ -n "$last_timestamp" ]]; then
-                local current_epoch last_epoch time_diff
-                current_epoch=$(date -d "${timestamp}" +%s 2>/dev/null)
-                last_epoch=$(date -d "${last_timestamp}" +%s 2>/dev/null)
-                time_diff=$((current_epoch - last_epoch))
-                
-                # Skip if within 120 seconds (2 minutes) with same context
-                if [[ $time_diff -lt 120 ]]; then
-                    return 0
-                fi
-            fi
-        fi
-    fi
-    
-    # Add stop event to session file (compact format)
-    cat >> "$SESSION_FILE" << EOF
-
-# Stop Event - $timestamp
-stop_events:
-  - $timestamp: "$work_context"
-
-EOF
+    # Optional: Check if documentation quality check is needed
+    trigger_doc_quality_check_if_needed "$SESSION_FILE"
 }
 
 

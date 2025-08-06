@@ -208,11 +208,14 @@ move_to_completed() {
         return 0
     fi
     
-    # Check if already completed
-    local status
+    # Check if work item meets completion criteria (same logic as completion-handler.sh)
+    local status completion
     status=$(get_work_item_details "$file_path" "status")
-    if [[ "$status" != "completed" ]]; then
-        echo "Work item not marked as completed: $file_path" >&2
+    completion=$(get_work_item_details "$file_path" "completion_percentage")
+    
+    # Work item is considered complete if status="completed" OR completion_percentage >= 100
+    if [[ "$status" != "completed" ]] && [[ "${completion:-0}" -lt 100 ]]; then
+        echo "Work item not completed: status='$status', completion=${completion:-0}%" >&2
         return 1
     fi
     

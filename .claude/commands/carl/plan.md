@@ -6,152 +6,137 @@ allowed-tools: Task, Read, Write, Glob, Grep, LS, MultiEdit
 
 # CARL Planning Command
 
-You are implementing intelligent work item planning for the CARL system.
+You are implementing intelligent work item planning with checklist-driven validation.
 
-## Current Context
-- **Project Structure**: `.carl/project/` directory structure
-- **Existing Work**: @.carl/project/active.work.carl (if exists)
-- **Arguments**: $ARGUMENTS
+## Execution Checklist
 
-## Command Modes
+- [ ] **Start Session Activity Tracking**
+  - [ ] Use Bash tool to start planning activity: `export CLAUDE_PROJECT_DIR=$(pwd) && source .carl/hooks/lib/carl-session-compact.sh && ACTIVITY_ID=$(start_planning_activity "$(get_current_session_file)") && echo "Planning activity started: $ACTIVITY_ID"`
+  - [ ] Store ACTIVITY_ID for completion tracking
 
-### New Work Item Planning
-When user provides a requirement description, conduct interactive requirements gathering:
+- [ ] **Load Shared Validation Framework**
+  - [ ] Source foundation validation: `.carl/commands/shared/foundation-validation.md`
+  - [ ] Source work item validation: `.carl/commands/shared/work-item-validation.md`
+  - [ ] Source error handling: `.carl/commands/shared/error-handling.md`
+  - [ ] Source progress tracking: `.carl/commands/shared/progress-tracking.md`
 
-1. **Understand the Request**: What does the user want to build/accomplish?
-2. **Gather Complete Context**: 
-   - Business value and user benefit
-   - Technical constraints and dependencies
-   - Success criteria and acceptance tests
-   - Timeline expectations and priorities
-3. **Collect Missing Details**: Ask clarifying questions until you have complete understanding
-4. **Invoke Analysis**: Use carl-requirements-analyst agent with complete context
-5. **Extract File Specification**: Parse agent's CARL file specification from analysis response
-6. **Create CARL Files**: Use Write tool to create files based on agent's specification in proper directories
-7. **Validate Creation**: Confirm files were created successfully and are schema-compliant
+- [ ] **Validate Prerequisites**
+  - [ ] Validate CARL foundation exists (vision.carl, process.carl, roadmap.carl)
+  - [ ] Validate project directory structure
+  - [ ] Handle validation failures with standardized error messages
 
-### Breakdown Mode (`--from` argument)
-When breaking down existing work items:
-1. **Read Existing File**: Load the specified work item
-2. **Analyze Current Scope**: Understand what needs to be broken down  
-3. **Gather Breakdown Context**: What specific aspects need decomposition?
-4. **Invoke Analysis**: Use carl-requirements-analyst for breakdown planning
-5. **Extract File Specifications**: Parse agent's CARL file specifications from analysis response
-6. **Create Child Items**: Use Write tool to generate appropriate child work items with proper relationships
-7. **Validate Creation**: Confirm all child files were created successfully and are schema-compliant
+- [ ] **Determine Planning Mode**
+  - [ ] Check for `--from` argument → Route to **Breakdown Mode**
+  - [ ] Check for requirement description → Route to **New Item Mode**
+  - [ ] Handle invalid arguments with clear usage guidance
 
-## Agent Integration
+- [ ] **Execute Planning Mode**
+  - [ ] New Item Creation: `.carl/commands/plan/new-item.md`
+  - [ ] Breakdown Mode: `.carl/commands/plan/breakdown.md`
 
-When requirements are complete, invoke the carl-requirements-analyst agent:
+- [ ] **Validate Results**
+  - [ ] Verify all created files are schema-compliant
+  - [ ] Check parent-child relationships are bidirectional
+  - [ ] Confirm no circular dependencies created
 
-```
-Use the Task tool with subagent_type: carl-requirements-analyst
-Provide complete context including:
-- All user requirements and constraints
-- Technical considerations discussed
-- Dependencies and relationships identified
-- Success criteria and acceptance tests
-```
+- [ ] **Complete Session Activity Tracking**
+  - [ ] Use Bash tool to end planning activity with created files: `export CLAUDE_PROJECT_DIR=$(pwd) && source .carl/hooks/lib/carl-session-compact.sh && end_planning_activity "$(get_current_session_file)" "$ACTIVITY_ID" "$(echo [created_file_list_comma_separated])" && echo "Planning activity completed"`
 
-## File Creation Implementation
+## Mode Detection Process
 
-**CRITICAL**: The carl-requirements-analyst agent provides specifications but cannot write files. The /carl:plan command MUST extract the file specification and create the actual files.
+### Argument Analysis
+- [ ] **Breakdown Mode Detection**:
+  - [ ] `--from` flag present in arguments
+  - [ ] Extract work item file path from arguments
+  - [ ] Validate source work item exists and is readable
+  - [ ] **Decision**: Route to Breakdown Mode processing
 
-### Step-by-Step File Creation Process
+- [ ] **New Item Mode Detection**:
+  - [ ] No `--from` flag present
+  - [ ] Requirements description provided in arguments
+  - [ ] **Decision**: Route to New Item Creation processing
 
-1. **Parse Agent Response**: Extract the CARL file specification from agent's response
-   - Look for "**File Path:**" and "**File Content:**" sections
-   - Extract the complete YAML content between code blocks
+- [ ] **Error Conditions**:
+  - [ ] No arguments provided → Show usage guidance
+  - [ ] Invalid `--from` file path → Handle file not found error
+  - [ ] Ambiguous arguments → Request clarification
 
-2. **Validate Specification**: Ensure the specification is complete
-   - Check that all required schema fields are present
-   - Verify proper naming conventions (kebab-case files, snake_case IDs)
-   - Confirm directory structure matches scope type
+## Mode-Specific Processing
 
-3. **Create Directory Structure**: Ensure target directory exists
-   ```bash
-   # Use LS tool to check if directory exists
-   # Create directory if needed using Bash tool
-   ```
+Each planning mode follows detailed checklists in carl commands:
 
-4. **Write CARL File**: Use Write tool to create the file
-   ```yaml
-   # Extract exact YAML content from agent specification
-   # Write to proper path: .carl/project/[scope]/[name].[scope].carl
-   ```
+### New Item Creation Mode
+**Reference**: `.carl/commands/plan/new-item.md`
+- Requirements gathering and validation
+- Scope classification (epic/feature/story/technical)
+- Agent-driven analysis with carl-requirements-analyst
+- Schema-compliant file creation and verification
 
-5. **Verify Creation**: Confirm file was created successfully
-   - Use Read tool to verify file contents match specification
-   - Check that schema validation passes (hooks will validate automatically)
+### Breakdown Mode  
+**Reference**: `.carl/commands/plan/breakdown.md`
+- Source work item analysis and validation
+- Child item generation with proper relationships
+- Parent-child link management
+- Coverage validation and quality assurance
 
-### Example Implementation Pattern
+## File Creation Standards
 
-```markdown
-After agent analysis:
-1. Extract file path: `.carl/project/features/user-auth.feature.carl`
-2. Extract YAML content from agent's "File Content:" section
-3. Use Write tool: Write(file_path="/path/to/file", content="YAML content")
-4. Verify with Read tool to confirm creation
-5. Report success: "✅ Created user-auth.feature.carl"
-```
+**CRITICAL**: All file creation follows these requirements:
+- [ ] **Agent Analysis First**: Use carl-requirements-analyst for specifications
+- [ ] **Extract Specifications**: Parse file paths and YAML content from agent response
+- [ ] **Create Files**: Use Write tool to create CARL files in proper directories
+- [ ] **Verify Creation**: Use Read tool to confirm file contents match specifications
+- [ ] **Schema Validation**: Allow hooks to validate automatically, handle failures
 
 ## File Organization Standards
 
-Create files in proper CARL directories:
-- **Epics** (3-6 months): `.carl/project/epics/[name].epic.carl`
-- **Features** (2-4 weeks): `.carl/project/features/[name].feature.carl`  
-- **Stories** (2-5 days): `.carl/project/stories/[name].story.carl`
-- **Technical** (variable): `.carl/project/technical/[name].tech.carl`
+File creation uses standard CARL directory structure:
+- `.carl/project/epics/` → Epic files (3-6 months scope)
+- `.carl/project/features/` → Feature files (2-4 weeks scope)  
+- `.carl/project/stories/` → Story files (2-5 days scope)
+- `.carl/project/technical/` → Technical work items (variable scope)
 
-## Quality Gates
+## Quality Standards
 
-Ensure all created CARL files meet standards:
-- ✅ **Schema Compliance**: All required fields per scope type
-- ✅ **Naming**: kebab-case files, snake_case IDs
-- ✅ **Testable Criteria**: Objective, measurable acceptance criteria
-- ✅ **Realistic Estimates**: Appropriate scope and timeline
-- ✅ **Clear Dependencies**: External requirements identified
-- ✅ **Parent-Child Links**: Proper hierarchical relationships
+All planning operations use shared validation framework:
+- **Schema Compliance**: `.carl/commands/shared/work-item-validation.md`
+- **Naming Conventions**: kebab-case files, snake_case IDs
+- **Content Quality**: Measurable acceptance criteria, realistic estimates
+- **Relationship Integrity**: Proper parent-child links, dependency validation
 
-## Requirements Gathering Strategy
+## Error Handling
 
-### Essential Information
-- **What**: Clear description of deliverable
-- **Why**: Business value or technical necessity  
-- **Who**: Target users or affected systems
-- **When**: Timeline constraints or priorities
-- **How**: Technical approach or integration points
-- **Definition of Done**: Success criteria and validation
+Error handling uses shared standardized framework:
+- **Validation Errors**: `.carl/commands/shared/error-handling.md`
+- **Recovery Operations**: Automatic file validation and correction guidance
+- **User Guidance**: Clear error messages with actionable next steps
 
-### Progressive Questioning
-Start broad, then drill down:
-1. **Purpose**: "What problem are we solving?"
-2. **Users**: "Who will use this and how?"
-3. **Constraints**: "What limitations do we need to consider?"
-4. **Integration**: "How does this connect to existing systems?"
-5. **Success**: "How will we know when this is complete?"
+## Execution Standards
 
-## Next Steps Guidance
+### Validation Requirements
+- [ ] **MANDATORY**: Use shared validation framework for all prerequisite checks
+- [ ] **MANDATORY**: Route to appropriate mode based on argument analysis
+- [ ] **MANDATORY**: Use commandlib references for mode-specific processing
+- [ ] **MANDATORY**: Extract agent specifications and create files with Write tool
+- [ ] **MANDATORY**: Verify file creation with Read tool and handle validation failures
+- [ ] **MANDATORY**: Update session tracking with planning results
 
-Always provide actionable recommendations:
-- **Further Planning**: "Break down `[epic/feature].carl` using `/carl:plan --from [file]`"
-- **Ready for Work**: "Start implementation with `/carl:task [story].carl`"
-- **Dependencies First**: "Complete `[dependency].carl` before starting this work"
-- **Validation Needed**: "Create a spike or prototype to validate approach"
+### Success Criteria
+- ✅ Smart mode detection eliminates user confusion
+- ✅ Checklist validation ensures schema compliance  
+- ✅ Agent integration provides comprehensive analysis
+- ✅ File creation verification prevents incomplete operations
 
-## Error Prevention
+## Usage Examples
 
-- ❌ **CRITICAL**: Never claim files are created without actually using Write tool
-- ❌ Never rely on carl-requirements-analyst agent to create files (it can't write)
-- ❌ Never create CARL files without complete requirements
-- ❌ Never guess at scope - ask clarifying questions
-- ❌ Never create unrealistic timelines or estimates
-- ❌ Never skip dependency analysis
-- ✅ **REQUIRED**: Always use Write tool to create files after agent analysis
-- ✅ Always validate understanding before proceeding
-- ✅ Always use proper naming conventions
-- ✅ Always ensure schema compliance
-- ✅ Always verify file creation with Read tool
-- ✅ Always provide clear next steps
+```bash
+# Create new work item from requirement
+/carl:plan "User authentication system with OAuth integration"
 
-Remember: Quality planning prevents execution problems. Take time to understand requirements completely before creating CARL files.
+# Break down existing work item into child items
+/carl:plan --from user-authentication-system.feature.carl
+
+# Results in schema-compliant CARL files with proper relationships
+```
+
+Remember: Planning quality directly impacts execution success. Use checklists to ensure complete requirements gathering and proper file creation.
