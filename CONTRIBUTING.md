@@ -28,7 +28,7 @@ Thank you for your interest in contributing to CARL! This guide will help you ge
 
 1. **Fork and Clone**
    ```bash
-   git fork https://github.com/carlsystem/carl
+   git fork https://github.com/ClaytonHunt/carl
    git clone https://github.com/yourusername/carl.git
    cd carl
    ```
@@ -343,7 +343,7 @@ Contributors are recognized through:
 ## Questions?
 
 - 📚 **Documentation**: [CARL.md](CARL.md)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/carlsystem/carl/discussions)  
-- 🐛 **Issues**: [GitHub Issues](https://github.com/carlsystem/carl/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/ClaytonHunt/carl/discussions)  
+- 🐛 **Issues**: [GitHub Issues](https://github.com/ClaytonHunt/carl/issues)
 
 Thank you for helping make CARL better! 🚀

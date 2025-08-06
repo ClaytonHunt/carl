@@ -216,12 +216,75 @@ CARL uses a **dual-layer architecture**:
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+## Troubleshooting
+
+### Common Installation Issues
+
+**Prerequisites not found:**
+```bash
+# macOS
+brew install jq yq
+
+# Ubuntu/Debian  
+sudo apt-get install jq && sudo snap install yq
+
+# Windows
+choco install jq yq
+```
+
+**Permission denied during installation:**
+```bash
+# Run with explicit bash
+curl -fsSL https://github.com/ClaytonHunt/carl/releases/latest/download/install.sh | sudo bash
+```
+
+**Claude Code not found:**
+- Ensure [Claude Code](https://claude.ai/code) is installed and accessible
+- Verify you can run `claude` command from terminal
+
+**CARL commands not recognized:**
+```bash
+# Verify CARL installation
+ls -la .carl/ .claude/
+# Should show CARL directory structure
+
+# Check Claude Code settings
+cat .claude/settings.json
+# Should show CARL hooks configuration
+```
+
+### Common Usage Issues
+
+**Schema validation errors:**
+```bash
+# Check file format
+cat your-file.carl | yq '.'
+
+# Validate against schema
+bash .carl/hooks/schema-validate.sh
+```
+
+**Session tracking not working:**
+```bash
+# Check git configuration
+git config --get user.name
+git config --get user.email
+
+# Verify session file exists
+ls -la .carl/sessions/
+```
+
+**Hook errors:**
+- Ensure bash scripts are executable: `chmod +x .carl/hooks/*.sh`
+- Check CLAUDE_PROJECT_DIR environment variable is set
+- Verify all dependencies (jq, yq) are available in PATH
+
 ## Support
 
 - **Documentation**: [CARL.md](CARL.md) and [docs/](docs/)
-- **Issues**: [GitHub Issues](https://github.com/yourusername/carl/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/carl/discussions)
+- **Issues**: [GitHub Issues](https://github.com/ClaytonHunt/carl/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/ClaytonHunt/carl/discussions)
 
 ---
 
-**Ready to transform your development workflow?** Start with `/carl:analyze` and let CARL handle the complexity while you focus on building great software.
+**Ready to transform your development workflow?** Start with `/carl:analyze` and let CARL handle the complexity while you focus on building great software.<!-- TEST CHANGE Tue Aug  5 18:40:18 EDT 2025 -->
