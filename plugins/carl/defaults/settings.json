@@ -1,0 +1,14 @@
+{
+  "$schema": "../schema/settings-schema.json",
+  "plugin": "carl",
+  "version": "1.0.0",
+  "settings": {
+    "feature_flags": {},
+    "configuration": {},
+    "agent_settings": {},
+    "command_settings": {},
+    "hook_settings": {},
+    "skill_settings": {},
+    "mcp_settings": {}
+  }
+}

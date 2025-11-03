@@ -5,5 +5,17 @@
     "url": "https://github.com/your-org/carl"
   },
   "description": "CARL (Coding Assistant for Rapid Launch) - A marketplace for AI-assisted development tools and workflows",
-  "plugins": []
+  "plugins": [
+    {
+      "name": "carl",
+      "description": "CARL (Coding Assistant for Rapid Launch) - An empty plugin template for AI-assisted development",
+      "version": "0.1.0",
+      "author": {
+        "name": "CARL Project",
+        "url": "https://github.com/your-org/carl"
+      },
+      "repository": "https://github.com/your-org/carl",
+      "source": "./plugins/carl"
+    }
+  ]
 }

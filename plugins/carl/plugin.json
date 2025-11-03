@@ -1,0 +1,18 @@
+{
+  "name": "carl",
+  "version": "0.1.0",
+  "description": "CARL (Coding Assistant for Rapid Launch) - An empty plugin template for AI-assisted development",
+  "author": {
+    "name": "CARL Project",
+    "url": "https://github.com/your-org/carl"
+  },
+  "homepage": "https://github.com/your-org/carl",
+  "repository": "https://github.com/your-org/carl",
+  "license": "MIT",
+  "keywords": ["development", "assistant", "rapid-launch", "coding"],
+  "commands": "./commands",
+  "hooks": "./hooks/hooks.json",
+  "skills": "./skills",
+  "agents": "./agents",
+  "mcpServers": "./.mcp.json"
+}

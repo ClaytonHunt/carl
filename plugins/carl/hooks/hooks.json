@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/lib/load-settings.cjs",
+            "description": "Load and validate CARL plugin settings, inject into environment"
+          }
+        ]
+      }
+    ]
+  }
+}
