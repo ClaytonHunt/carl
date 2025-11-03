@@ -1,0 +1,9 @@
+{
+  "name": "carl",
+  "owner": {
+    "name": "CARL Project",
+    "url": "https://github.com/your-org/carl"
+  },
+  "description": "CARL (Coding Assistant for Rapid Launch) - A marketplace for AI-assisted development tools and workflows",
+  "plugins": []
+}
