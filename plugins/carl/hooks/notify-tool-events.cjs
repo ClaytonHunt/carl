@@ -7,10 +7,54 @@
 
 const path = require('path');
 const fs = require('fs');
+const { execSync } = require('child_process');
 
 // Get environment variables
 const CLAUDE_PLUGIN_ROOT = process.env.CLAUDE_PLUGIN_ROOT;
 let CLAUDE_PROJECT_DIR = process.env.CLAUDE_PROJECT_DIR || process.cwd();
+
+/**
+ * Load settings from the settings file and inject into process.env
+ * This ensures hooks have access to settings even if CLAUDE_ENV_FILE persistence didn't work
+ */
+function loadSettingsIntoEnv(projectDir, pluginRoot) {
+  try {
+    const PLUGIN_NAME = path.basename(pluginRoot);
+    const CARL_DIR = path.join(projectDir, '.claude', '.carl');
+    const SETTINGS_FILE = path.join(CARL_DIR, `${PLUGIN_NAME}.settings.json`);
+
+    if (!fs.existsSync(SETTINGS_FILE)) {
+      return;
+    }
+
+    const settingsContent = fs.readFileSync(SETTINGS_FILE, 'utf8');
+    const settings = JSON.parse(settingsContent);
+
+    // Flatten settings and inject into environment
+    function flattenObject(obj, prefix = '') {
+      for (const key in obj) {
+        const value = obj[key];
+        const envKey = prefix ? `${prefix}_${key.toUpperCase()}` : key.toUpperCase();
+
+        if (value === null || value === undefined) {
+          process.env[envKey] = '';
+        } else if (Array.isArray(value)) {
+          process.env[envKey] = JSON.stringify(value);
+        } else if (typeof value === 'object') {
+          flattenObject(value, envKey);
+        } else {
+          process.env[envKey] = String(value);
+        }
+      }
+    }
+
+    if (settings.settings && typeof settings.settings === 'object') {
+      flattenObject(settings.settings, `CARL_${PLUGIN_NAME.toUpperCase()}`);
+    }
+  } catch (error) {
+    // Silently fail - settings may not be available
+  }
+}
 
 // Read stdin for hook input
 let input = '';
@@ -22,6 +66,10 @@ process.stdin.on('end', () => {
     if (hookData.cwd) {
       CLAUDE_PROJECT_DIR = hookData.cwd;
     }
+
+    // Load settings now that we have the correct paths
+    loadSettingsIntoEnv(CLAUDE_PROJECT_DIR, CLAUDE_PLUGIN_ROOT);
+
     processHook(hookData);
   } catch (error) {
     console.error('[CARL Notify] Failed to parse hook input:', error.message);
@@ -246,7 +294,6 @@ function processHook(hookData) {
   const notifyScript = path.join(CLAUDE_PLUGIN_ROOT, 'lib', 'notify.cjs');
 
   try {
-    const { execSync } = require('child_process');
     execSync(`node "${notifyScript}" "${finalMessage.replace(/"/g, '\\"')}" "${deliveryMethods}" "CARL"`, {
       stdio: 'inherit',
     });
