@@ -11,6 +11,22 @@ const path = require('path');
 const { execSync, exec } = require('child_process');
 const os = require('os');
 
+// Try to load the 'say' library if available
+let say = null;
+try {
+  say = require('say');
+} catch (error) {
+  // say library not available, will fall back to native commands
+}
+
+// Try to load node-notifier for desktop notifications
+let notifier = null;
+try {
+  notifier = require('node-notifier');
+} catch (error) {
+  // node-notifier not available, will fall back to native commands
+}
+
 // Get environment variables
 const CLAUDE_PLUGIN_ROOT = process.env.CLAUDE_PLUGIN_ROOT;
 const CLAUDE_PROJECT_DIR = process.env.CLAUDE_PROJECT_DIR;
@@ -28,7 +44,25 @@ function sendTTS(message) {
       return false;
     }
 
-    // Platform-specific TTS commands
+    // Get TTS configuration options from environment
+    const ttsVoice = process.env.CARL_CARL_CONFIGURATION_TTS_VOICE || null;
+    const ttsSpeed = parseFloat(process.env.CARL_CARL_CONFIGURATION_TTS_SPEED) || 1.0;
+
+    // Try to use the 'say' npm library first (cross-platform)
+    if (say) {
+      return new Promise((resolve) => {
+        say.speak(message, ttsVoice, ttsSpeed, (error) => {
+          if (error) {
+            console.error('[CARL Notify] Say library error:', error.message);
+            resolve(false);
+          } else {
+            resolve(true);
+          }
+        });
+      });
+    }
+
+    // Fallback to platform-specific TTS commands
     const platform = os.platform();
 
     if (platform === 'darwin') {
@@ -68,6 +102,29 @@ function sendTTS(message) {
  */
 function sendDesktopNotification(title, message) {
   try {
+    // Try node-notifier first (cross-platform, more reliable)
+    if (notifier) {
+      return new Promise((resolve) => {
+        notifier.notify(
+          {
+            title: title,
+            message: message,
+            sound: false, // Don't play sound
+            wait: false, // Don't wait for user interaction
+          },
+          (error, response) => {
+            if (error) {
+              console.error('[CARL Notify] node-notifier error:', error.message);
+              resolve(false);
+            } else {
+              resolve(true);
+            }
+          }
+        );
+      });
+    }
+
+    // Fallback to platform-specific commands
     const platform = os.platform();
 
     if (platform === 'darwin') {
@@ -115,7 +172,7 @@ function sendDesktopNotification(title, message) {
 /**
  * Main notification handler
  */
-function notify(message, deliveryMethods = ['desktop'], title = 'CARL') {
+async function notify(message, deliveryMethods = ['desktop'], title = 'CARL') {
   const methods = Array.isArray(deliveryMethods) ? deliveryMethods : deliveryMethods.split(',');
   const results = [];
 
@@ -123,9 +180,15 @@ function notify(message, deliveryMethods = ['desktop'], title = 'CARL') {
     const normalizedMethod = method.trim().toLowerCase();
 
     if (normalizedMethod === 'tts') {
-      results.push({ method: 'tts', success: sendTTS(message) });
+      const result = sendTTS(message);
+      // Handle both sync and async results
+      const success = result instanceof Promise ? await result : result;
+      results.push({ method: 'tts', success });
     } else if (normalizedMethod === 'desktop') {
-      results.push({ method: 'desktop', success: sendDesktopNotification(title, message) });
+      const result = sendDesktopNotification(title, message);
+      // Handle both sync and async results
+      const success = result instanceof Promise ? await result : result;
+      results.push({ method: 'desktop', success });
     } else {
       console.error(`[CARL Notify] Unknown delivery method: ${method}`);
     }
@@ -148,11 +211,19 @@ if (require.main === module) {
   const deliveryMethods = args[1] ? args[1].split(',') : ['desktop'];
   const title = args[2] || 'CARL';
 
-  const results = notify(message, deliveryMethods, title);
+  // Use async IIFE to handle async notify function
+  (async () => {
+    try {
+      const results = await notify(message, deliveryMethods, title);
 
-  // Exit with success if at least one method succeeded
-  const anySuccess = results.some(r => r.success);
-  process.exit(anySuccess ? 0 : 1);
+      // Exit with success if at least one method succeeded
+      const anySuccess = results.some(r => r.success);
+      process.exit(anySuccess ? 0 : 1);
+    } catch (error) {
+      console.error('[CARL Notify] Error:', error.message);
+      process.exit(1);
+    }
+  })();
 }
 
 // Export for use in other modules

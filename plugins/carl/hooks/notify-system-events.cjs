@@ -10,7 +10,7 @@ const { execSync } = require('child_process');
 
 // Get environment variables
 const CLAUDE_PLUGIN_ROOT = process.env.CLAUDE_PLUGIN_ROOT;
-const CLAUDE_PROJECT_DIR = process.env.CLAUDE_PROJECT_DIR;
+let CLAUDE_PROJECT_DIR = process.env.CLAUDE_PROJECT_DIR || process.cwd();
 
 // Read stdin for hook input
 let input = '';
@@ -18,6 +18,10 @@ process.stdin.on('data', chunk => { input += chunk; });
 process.stdin.on('end', () => {
   try {
     const hookData = JSON.parse(input);
+    // Get project directory from hook data if not in environment
+    if (hookData.cwd) {
+      CLAUDE_PROJECT_DIR = hookData.cwd;
+    }
     processHook(hookData);
   } catch (error) {
     console.error('[CARL Notify] Failed to parse hook input:', error.message);

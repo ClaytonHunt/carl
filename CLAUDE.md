@@ -4,6 +4,9 @@ CARL is an AI-powered coding assistant designed to help developers quickly launc
 ## Documentation
 For an overview of all documentation references, see the documentation index below: @docs/README.md
 
+## Settings
+Active CARL settings are in `.claude/.carl/carl.settings.json`
+
 ---
 
 ## Glossary

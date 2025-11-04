@@ -15,8 +15,10 @@
   ],
   "author": "CARL Project",
   "license": "MIT",
-  "dependencies": {},
-  "devDependencies": {},
+  "dependencies": {
+    "node-notifier": "^10.0.1",
+    "say": "^0.16.0"
+  },
   "engines": {
     "node": ">=14.0.0"
   }

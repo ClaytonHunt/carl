@@ -138,25 +138,63 @@ const expandedSettings = expandEnvVars(settings);
 // Example: settings.configuration.timeout_ms -> CARL_CARL_CONFIGURATION_TIMEOUT_MS
 const envExports = [];
 
-if (expandedSettings.settings && typeof expandedSettings.settings === 'object') {
-  for (const section in expandedSettings.settings) {
-    const sectionData = expandedSettings.settings[section];
-    if (typeof sectionData === 'object' && sectionData !== null) {
-      for (const key in sectionData) {
-        const value = sectionData[key];
-        const envKey = `CARL_${PLUGIN_NAME.toUpperCase()}_${section.toUpperCase()}_${key.toUpperCase()}`;
-        // Properly escape the value for shell export
-        const escapedValue = String(value).replace(/'/g, "'\\''");
-        envExports.push(`export ${envKey}='${escapedValue}'`);
-      }
+// Recursively flatten nested objects into environment variables
+function flattenObject(obj, prefix = '') {
+  const exports = [];
+
+  for (const key in obj) {
+    const value = obj[key];
+    const envKey = prefix ? `${prefix}_${key.toUpperCase()}` : key.toUpperCase();
+
+    if (value === null || value === undefined) {
+      exports.push({ key: envKey, value: '' });
+    } else if (Array.isArray(value)) {
+      // Convert arrays to JSON strings for parsing by hooks
+      const jsonValue = JSON.stringify(value);
+      exports.push({ key: envKey, value: jsonValue });
+    } else if (typeof value === 'object') {
+      // Recursively flatten nested objects
+      exports.push(...flattenObject(value, envKey));
+    } else {
+      // Primitive values (string, number, boolean)
+      exports.push({ key: envKey, value: String(value) });
     }
+  }
+
+  return exports;
+}
+
+if (expandedSettings.settings && typeof expandedSettings.settings === 'object') {
+  const flattened = flattenObject(expandedSettings.settings, `CARL_${PLUGIN_NAME.toUpperCase()}`);
+
+  for (const { key, value } of flattened) {
+    // Properly escape the value for shell export
+    const escapedValue = value.replace(/'/g, "'\\''");
+    envExports.push(`export ${key}='${escapedValue}'`);
   }
 }
 
-// Output exports to stdout for Claude Code to capture
-// Hooks inject environment variables by writing to stdout
-if (envExports.length > 0) {
-  console.log(envExports.join('\n'));
-}
+// Output exports to CLAUDE_ENV_FILE for persistence across the session
+// During SessionStart, Claude Code provides CLAUDE_ENV_FILE for environment variable persistence
+const CLAUDE_ENV_FILE = process.env.CLAUDE_ENV_FILE;
 
-console.error(`✓ Settings loaded for plugin: ${PLUGIN_NAME}`);
+if (envExports.length > 0) {
+  if (CLAUDE_ENV_FILE) {
+    // Write to CLAUDE_ENV_FILE for persistence (SessionStart hook)
+    try {
+      retryFileOperation(() =>
+        fs.appendFileSync(CLAUDE_ENV_FILE, envExports.join('\n') + '\n')
+      );
+      console.error(`✓ Settings loaded and persisted for plugin: ${PLUGIN_NAME}`);
+    } catch (error) {
+      console.error(`⚠ Warning: Could not write to CLAUDE_ENV_FILE: ${error.message}`);
+      console.error(`✓ Settings loaded for plugin: ${PLUGIN_NAME} (not persisted)`);
+    }
+  } else {
+    // Fallback: output to stdout (for backwards compatibility or non-SessionStart contexts)
+    console.log(envExports.join('\n'));
+    console.error(`✓ Settings loaded for plugin: ${PLUGIN_NAME}`);
+  }
+} else {
+  console.error(`✓ Settings loaded for plugin: ${PLUGIN_NAME} (no exports)`);
+}

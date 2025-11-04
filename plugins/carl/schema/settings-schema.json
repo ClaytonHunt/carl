@@ -40,6 +40,18 @@
               "description": "Text-to-speech provider",
               "enum": ["none", "say", "node-gtts", "coqui-tts", "elevenlabs"],
               "default": "none"
+            },
+            "tts_voice": {
+              "type": "string",
+              "description": "Voice name to use for TTS (platform-dependent). Examples: 'Alex' (macOS), 'Microsoft David' (Windows), 'espeak-default' (Linux). Use null for system default.",
+              "default": null
+            },
+            "tts_speed": {
+              "type": "number",
+              "description": "Speech rate multiplier (0.5 = 50%, 1.0 = 100%, 2.0 = 200%)",
+              "minimum": 0.1,
+              "maximum": 5.0,
+              "default": 1.0
             }
           },
           "additionalProperties": true
