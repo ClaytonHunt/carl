@@ -11,6 +11,244 @@
     "command_settings": {},
     "hook_settings": {},
     "skill_settings": {},
-    "mcp_settings": {}
+    "mcp_settings": {},
+    "notifications": {
+      "enabled": false,
+      "global_delivery_methods": ["desktop"],
+      "tool_events": {
+        "enabled": false,
+        "notify_before": false,
+        "notify_after": true,
+        "notify_on_failure": true,
+        "delivery_methods": ["desktop"],
+        "tools": {
+          "Bash": {
+            "enabled": false,
+            "delivery_methods": ["desktop"],
+            "messages": {
+              "before": "[${project_name}] Executing: ${command}",
+              "after_success": "[${project_name}] Command completed",
+              "after_failure": "[${project_name}] Command failed: ${error_message}"
+            }
+          },
+          "Read": {
+            "enabled": false,
+            "delivery_methods": ["desktop"],
+            "messages": {
+              "before": "[${project_name}] Reading ${file_name}",
+              "after_success": "[${project_name}] Read ${file_name}",
+              "after_failure": "[${project_name}] Failed to read ${file_name}"
+            }
+          },
+          "Write": {
+            "enabled": false,
+            "delivery_methods": ["desktop"],
+            "messages": {
+              "before": "[${project_name}] Writing ${file_name}",
+              "after_success": "[${project_name}] Wrote ${file_name}",
+              "after_failure": "[${project_name}] Failed to write ${file_name}"
+            }
+          },
+          "Edit": {
+            "enabled": false,
+            "delivery_methods": ["desktop"],
+            "messages": {
+              "before": "[${project_name}] Editing ${file_name}",
+              "after_success": "[${project_name}] Edited ${file_name}",
+              "after_failure": "[${project_name}] Failed to edit ${file_name}"
+            }
+          },
+          "Glob": {
+            "enabled": false,
+            "delivery_methods": ["desktop"],
+            "messages": {
+              "before": "[${project_name}] Searching files: ${pattern}",
+              "after_success": "[${project_name}] File search complete",
+              "after_failure": "[${project_name}] File search failed"
+            }
+          },
+          "Grep": {
+            "enabled": false,
+            "delivery_methods": ["desktop"],
+            "messages": {
+              "before": "[${project_name}] Searching code: ${pattern}",
+              "after_success": "[${project_name}] Code search complete",
+              "after_failure": "[${project_name}] Code search failed"
+            }
+          },
+          "WebFetch": {
+            "enabled": false,
+            "delivery_methods": ["desktop"],
+            "messages": {
+              "before": "[${project_name}] Fetching ${url}",
+              "after_success": "[${project_name}] Web fetch complete",
+              "after_failure": "[${project_name}] Web fetch failed"
+            }
+          },
+          "WebSearch": {
+            "enabled": false,
+            "delivery_methods": ["desktop"],
+            "messages": {
+              "before": "[${project_name}] Searching web",
+              "after_success": "[${project_name}] Web search complete",
+              "after_failure": "[${project_name}] Web search failed"
+            }
+          },
+          "Task": {
+            "enabled": false,
+            "delivery_methods": ["tts"],
+            "messages": {
+              "before": "[${project_name}] Launching agent",
+              "after_success": "[${project_name}] Agent task completed",
+              "after_failure": "[${project_name}] Agent task failed"
+            }
+          },
+          "git_operations": {
+            "enabled": false,
+            "pattern": "git\\s+(commit|push|pull|checkout|merge|rebase|clone|fetch)",
+            "delivery_methods": ["tts", "desktop"],
+            "messages": {
+              "before": "${project_name}: Starting git ${operation}",
+              "after_success": "${project_name}: Git ${operation} completed",
+              "after_failure": "${project_name}: Git ${operation} failed"
+            }
+          },
+          "build_operations": {
+            "enabled": false,
+            "pattern": "(npm|yarn|pnpm|bun)\\s+(run\\s+)?build",
+            "delivery_methods": ["tts"],
+            "messages": {
+              "before": "${project_name}: Starting build",
+              "after_success": "${project_name}: Build completed successfully",
+              "after_failure": "${project_name}: Build failed"
+            }
+          },
+          "test_operations": {
+            "enabled": false,
+            "pattern": "(npm|yarn|pnpm|bun)\\s+(run\\s+)?test|pytest|jest|vitest|mocha",
+            "delivery_methods": ["tts"],
+            "messages": {
+              "before": "${project_name}: Running tests",
+              "after_success": "${project_name}: All tests passed",
+              "after_failure": "${project_name}: Tests failed"
+            }
+          },
+          "install_operations": {
+            "enabled": false,
+            "pattern": "(npm|yarn|pnpm|bun)\\s+install|pip\\s+install",
+            "delivery_methods": ["desktop"],
+            "messages": {
+              "before": "${project_name}: Installing dependencies",
+              "after_success": "${project_name}: Dependencies installed",
+              "after_failure": "${project_name}: Installation failed"
+            }
+          }
+        }
+      },
+      "session_events": {
+        "enabled": false,
+        "delivery_methods": ["tts"],
+        "session_start": {
+          "enabled": false,
+          "matchers": {
+            "startup": {
+              "enabled": false,
+              "delivery_methods": ["tts"],
+              "message": "${project_name} session started"
+            },
+            "resume": {
+              "enabled": false,
+              "delivery_methods": ["tts"],
+              "message": "${project_name} session resumed"
+            },
+            "clear": {
+              "enabled": false,
+              "delivery_methods": ["desktop"],
+              "message": "${project_name} session cleared"
+            },
+            "compact": {
+              "enabled": false,
+              "delivery_methods": ["desktop"],
+              "message": "${project_name} session compacted"
+            }
+          }
+        },
+        "session_end": {
+          "enabled": false,
+          "reasons": {
+            "clear": {
+              "enabled": false,
+              "delivery_methods": ["desktop"],
+              "message": "${project_name} session cleared"
+            },
+            "logout": {
+              "enabled": false,
+              "delivery_methods": ["tts"],
+              "message": "${project_name} session ended"
+            },
+            "prompt_input_exit": {
+              "enabled": false,
+              "delivery_methods": ["desktop"],
+              "message": "${project_name} session exited"
+            },
+            "other": {
+              "enabled": false,
+              "delivery_methods": ["desktop"],
+              "message": "${project_name} session ended"
+            }
+          }
+        }
+      },
+      "user_events": {
+        "enabled": false,
+        "delivery_methods": ["desktop"],
+        "user_prompt_submit": {
+          "enabled": false,
+          "include_prompt_preview": true,
+          "max_preview_length": 50,
+          "delivery_methods": ["desktop"],
+          "message": "[${project_name}] Processing: ${prompt_preview}"
+        }
+      },
+      "agent_events": {
+        "enabled": false,
+        "delivery_methods": ["tts"],
+        "agent_stop": {
+          "enabled": false,
+          "delivery_methods": ["tts"],
+          "message": "${project_name}: Task completed"
+        },
+        "subagent_stop": {
+          "enabled": false,
+          "delivery_methods": ["desktop"],
+          "message": "${project_name}: Subagent task completed"
+        }
+      },
+      "system_events": {
+        "enabled": false,
+        "delivery_methods": ["desktop"],
+        "notification": {
+          "enabled": false,
+          "delivery_methods": ["desktop"],
+          "message": "[${project_name}] System notification"
+        }
+      },
+      "compact_events": {
+        "enabled": false,
+        "delivery_methods": ["desktop"],
+        "matchers": {
+          "manual": {
+            "enabled": false,
+            "delivery_methods": ["desktop"],
+            "message": "[${project_name}] Manual compact starting"
+          },
+          "auto": {
+            "enabled": false,
+            "delivery_methods": ["desktop"],
+            "message": "[${project_name}] Auto-compact starting"
+          }
+        }
+      }
+    }
   }
 }

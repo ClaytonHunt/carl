@@ -24,3 +24,8 @@ This directory contains cached local versions of external documentation for AI R
 - **Local Copy**: [plugins-reference.md](./claude-code/plugins-reference.md)
 - **Description**: Technical reference for plugin component types, manifest structure, and development tools.
 
+### Hooks
+- **External Documentation**: [Claude Code - Hooks](https://docs.claude.com/en/docs/claude-code/hooks.md)
+- **Local Copy**: [hooks.md](./claude-code/hooks.md)
+- **Description**: Complete reference for hooks system including event types (PreToolUse, PostToolUse, SessionStart, etc.), configuration, input/output formats, and security best practices.
+

@@ -68,6 +68,51 @@
           "type": "object",
           "description": "Settings specific to MCP servers",
           "additionalProperties": true
+        },
+        "notifications": {
+          "type": "object",
+          "description": "Notification system settings",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Master toggle for all notifications",
+              "default": false
+            },
+            "global_delivery_methods": {
+              "type": "array",
+              "description": "Default delivery methods for notifications",
+              "items": {
+                "type": "string",
+                "enum": ["tts", "desktop"]
+              },
+              "default": ["desktop"]
+            },
+            "tool_events": {
+              "type": "object",
+              "description": "Tool execution notifications"
+            },
+            "session_events": {
+              "type": "object",
+              "description": "Session lifecycle notifications"
+            },
+            "user_events": {
+              "type": "object",
+              "description": "User interaction notifications"
+            },
+            "agent_events": {
+              "type": "object",
+              "description": "Agent lifecycle notifications"
+            },
+            "system_events": {
+              "type": "object",
+              "description": "System event notifications"
+            },
+            "compact_events": {
+              "type": "object",
+              "description": "Context compaction notifications"
+            }
+          },
+          "additionalProperties": false
         }
       },
       "additionalProperties": {
