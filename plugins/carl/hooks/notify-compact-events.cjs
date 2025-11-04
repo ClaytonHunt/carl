@@ -7,6 +7,7 @@
 
 const path = require('path');
 const { execSync } = require('child_process');
+const { loadSettingsIntoEnv } = require('./lib/settings-loader.cjs');
 
 // Get environment variables
 const CLAUDE_PLUGIN_ROOT = process.env.CLAUDE_PLUGIN_ROOT;
@@ -22,6 +23,8 @@ process.stdin.on('end', () => {
     if (hookData.cwd) {
       CLAUDE_PROJECT_DIR = hookData.cwd;
     }
+    // Load settings now that we have the correct paths
+    loadSettingsIntoEnv(CLAUDE_PROJECT_DIR, CLAUDE_PLUGIN_ROOT);
     processHook(hookData);
   } catch (error) {
     console.error('[CARL Notify] Failed to parse hook input:', error.message);
