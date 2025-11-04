@@ -4,7 +4,9 @@
   "version": "1.0.0",
   "settings": {
     "feature_flags": {},
-    "configuration": {},
+    "configuration": {
+      "tts_provider": "none"
+    },
     "agent_settings": {},
     "command_settings": {},
     "hook_settings": {},

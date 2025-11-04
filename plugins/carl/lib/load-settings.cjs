@@ -29,16 +29,43 @@ const SETTINGS_FILE = path.join(CARL_DIR, `${PLUGIN_NAME}.settings.json`);
 const SCHEMA_FILE_SRC = path.join(CLAUDE_PLUGIN_ROOT, 'schema', 'settings-schema.json');
 const SCHEMA_FILE_DEST = path.join(CARL_DIR, `${PLUGIN_NAME}.settings-schema.json`);
 const DEFAULTS_FILE = path.join(CLAUDE_PLUGIN_ROOT, 'defaults', 'settings.json');
+const README_FILE_SRC = path.join(CLAUDE_PLUGIN_ROOT, 'README.md');
+const README_FILE_DEST = path.join(CARL_DIR, 'README.md');
 
 // Ensure .carl directory exists
 if (!fs.existsSync(CARL_DIR)) {
   fs.mkdirSync(CARL_DIR, { recursive: true });
 }
 
+// Helper function for retrying file operations on Windows EBUSY errors
+function retryFileOperation(operation, maxRetries = 3) {
+  let retries = maxRetries;
+  while (retries > 0) {
+    try {
+      return operation();
+    } catch (e) {
+      if (e.code === 'EBUSY' && retries > 1) {
+        retries--;
+        const delay = 50 * (maxRetries - retries + 1); // 50ms, 100ms, 150ms
+        const start = Date.now();
+        while (Date.now() - start < delay) { /* busy wait */ }
+        continue;
+      }
+      throw e; // Re-throw if not EBUSY or out of retries
+    }
+  }
+}
+
 // Copy schema file to .carl directory if it exists and hasn't been copied yet
 if (fs.existsSync(SCHEMA_FILE_SRC) && !fs.existsSync(SCHEMA_FILE_DEST)) {
-  fs.copyFileSync(SCHEMA_FILE_SRC, SCHEMA_FILE_DEST);
+  retryFileOperation(() => fs.copyFileSync(SCHEMA_FILE_SRC, SCHEMA_FILE_DEST));
   console.error(`✓ Copied schema to: ${SCHEMA_FILE_DEST}`);
+}
+
+// Copy README to .carl directory for user access (always update to get latest version)
+if (fs.existsSync(README_FILE_SRC)) {
+  retryFileOperation(() => fs.copyFileSync(README_FILE_SRC, README_FILE_DEST));
+  console.error(`✓ Copied README to: ${README_FILE_DEST}`);
 }
 
 // Check if settings file exists, if not copy defaults
@@ -58,10 +85,10 @@ if (!fs.existsSync(SETTINGS_FILE)) {
   }
 }
 
-// Validate JSON syntax
+// Validate JSON syntax with retry logic for Windows file locking
 let settings;
 try {
-  const settingsContent = fs.readFileSync(SETTINGS_FILE, 'utf8');
+  const settingsContent = retryFileOperation(() => fs.readFileSync(SETTINGS_FILE, 'utf8'));
   settings = JSON.parse(settingsContent);
 } catch (e) {
   console.error(`ERROR: Invalid JSON in settings file: ${SETTINGS_FILE}`);

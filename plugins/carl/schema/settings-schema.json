@@ -34,6 +34,14 @@
         "configuration": {
           "type": "object",
           "description": "General configuration values (strings, numbers, etc.)",
+          "properties": {
+            "tts_provider": {
+              "type": "string",
+              "description": "Text-to-speech provider",
+              "enum": ["none", "say", "node-gtts", "coqui-tts", "elevenlabs"],
+              "default": "none"
+            }
+          },
           "additionalProperties": true
         },
         "agent_settings": {

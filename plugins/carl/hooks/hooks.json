@@ -5,6 +5,11 @@
         "hooks": [
           {
             "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/lib/install-deps.cjs",
+            "description": "Check and install required npm dependencies for CARL plugin"
+          },
+          {
+            "type": "command",
             "command": "node ${CLAUDE_PLUGIN_ROOT}/lib/load-settings.cjs",
             "description": "Load and validate CARL plugin settings, inject into environment"
           }

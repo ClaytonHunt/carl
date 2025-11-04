@@ -1,0 +1,24 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# Plugin development artifacts
+plugins/*/node_modules/
+plugins/*/.deps-installed
+
+# Claude Code project-specific settings (auto-generated, not part of plugin)
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
