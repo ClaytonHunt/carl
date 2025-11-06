@@ -1,0 +1,37 @@
+{
+  "work_orchestration": {
+    "cascade_dir": ".cascade",
+    "registry_path": ".cascade/work-item-registry.json",
+    "adapters": {
+      "ado": {
+        "enabled": false,
+        "sync_direction": "bidirectional",
+        "workflow": {
+          "planned": "New",
+          "in-progress": "Active",
+          "completed": "Resolved",
+          "blocked": "Blocked"
+        },
+        "connection": {
+          "organization": "",
+          "project": "",
+          "pat_env_var": "ADO_PAT"
+        }
+      },
+      "github": {
+        "enabled": false,
+        "sync_direction": "import_only",
+        "workflow": {
+          "planned": "open",
+          "in-progress": "in progress",
+          "completed": "closed"
+        },
+        "connection": {
+          "owner": "",
+          "repo": "",
+          "token_env_var": "GITHUB_TOKEN"
+        }
+      }
+    }
+  }
+}

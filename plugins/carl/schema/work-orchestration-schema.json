@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Work Orchestration Settings",
+  "description": "Schema for work item orchestration and Cascade system settings",
+  "type": "object",
+  "properties": {
+    "cascade_dir": {
+      "type": "string",
+      "description": "Directory for Cascade work items",
+      "default": ".cascade"
+    },
+    "registry_path": {
+      "type": "string",
+      "description": "Path to work item registry file",
+      "default": ".cascade/work-item-registry.json"
+    },
+    "adapters": {
+      "type": "object",
+      "description": "External system adapters (ADO, GitHub, etc.)",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Enable this adapter",
+            "default": false
+          },
+          "sync_direction": {
+            "type": "string",
+            "enum": ["import_only", "export_only", "bidirectional"],
+            "description": "Sync direction between Cascade and external system",
+            "default": "bidirectional"
+          },
+          "workflow": {
+            "type": "object",
+            "description": "Status mapping from Cascade to external system (e.g., { 'completed': 'Resolved', 'in-progress': 'Active' })",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "connection": {
+            "type": "object",
+            "description": "Connection configuration for external system",
+            "additionalProperties": true
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "id": "E0001",
+  "status": "planned",
+  "progress": {
+    "total_items": 0,
+    "completed": 0,
+    "in_progress": 0,
+    "planned": 0,
+    "percentage": 0
+  },
+  "children": {},
+  "updated": "2025-01-05T00:00:00Z"
+}

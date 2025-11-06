@@ -29,3 +29,20 @@ This directory contains cached local versions of external documentation for AI R
 - **Local Copy**: [hooks.md](./claude-code/hooks.md)
 - **Description**: Complete reference for hooks system including event types (PreToolUse, PostToolUse, SessionStart, etc.), configuration, input/output formats, and security best practices.
 
+### Skills
+- **External Documentation**: [Claude Code - Skills](https://docs.claude.com/en/docs/claude-code/skills)
+- **Local Copy**: [skills.md](./claude-code/skills.md)
+- **Description**: Guide to creating modular, model-invoked capabilities that extend Claude's functionality with custom instructions, scripts, and templates.
+
+### SubAgents
+- **External Documentation**: [Claude Code - SubAgents](https://docs.claude.com/en/docs/claude-code/sub-agents)
+- **Local Copy**: [sub-agents.md](./claude-code/sub-agents.md)
+- **Description**: Complete reference for creating specialized AI assistants with custom system prompts, separate context windows, and configurable tool access for domain-specific tasks.
+
+## Agentic Engineering Patterns
+
+### IndyDevDan's Agentic Orchestration Patterns
+- **Source**: [IndyDevDan (Agentic Engineer)](https://agenticengineer.com)
+- **Local Copy**: [agentic-orchestration-patterns.md](./indydevdan/agentic-orchestration-patterns.md)
+- **Description**: Comprehensive guide to orchestrator patterns, multi-agent coordination, HOP/LOP architecture, async execution strategies, and tactical agentic coding principles from IndyDevDan's work on autonomous agent systems.
+
