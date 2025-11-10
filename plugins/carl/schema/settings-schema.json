@@ -38,7 +38,7 @@
             "tts_provider": {
               "type": "string",
               "description": "Text-to-speech provider",
-              "enum": ["none", "say", "node-gtts", "coqui-tts", "elevenlabs"],
+              "enum": ["none", "say", "google-tts-api", "google-cloud-tts", "coqui-tts", "elevenlabs"],
               "default": "none"
             },
             "tts_voice": {

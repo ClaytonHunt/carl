@@ -241,10 +241,11 @@ class CascadeManager {
   async getNextId(type) {
     // TODO: Implement
     // 1. Load registry
-    // 2. Get counter for type from registry.id_counters
+    // 2. Get global counter from registry.global_id_counter
     // 3. Increment counter
     // 4. Save registry
     // 5. Return formatted ID (e.g., E0001)
+    // NOTE: Uses global counter to ensure unique numeric IDs across all work item types
     throw new Error('getNextId() not yet implemented - see TODO in cascade-manager.js');
   }
 
@@ -275,7 +276,7 @@ class CascadeManager {
     // TODO: Implement
     // 1. Check if registry file exists
     // 2. If not, create empty registry with structure:
-    //    { version, last_updated, work_items: {}, id_counters: { P:0, E:0, ... } }
+    //    { version, last_updated, work_items: {}, global_id_counter: 0 }
     // 3. Read and parse JSON
     // 4. Return registry object
     throw new Error('loadRegistry() not yet implemented - see TODO in cascade-manager.js');
@@ -404,7 +405,7 @@ class CascadeManager {
     // TODO: Implement
     // 1. Create .cascade/ directory
     // 2. Create empty registry with structure:
-    //    { version: "1.0.0", last_updated, work_items: {}, id_counters: { P:0, E:0, F:0, S:0, B:0, PH:0, T:0 } }
+    //    { version: "1.0.0", last_updated, work_items: {}, global_id_counter: 0 }
     // 3. Create root state.json (empty project state)
     // 4. Return success
     throw new Error('initialize() not yet implemented - see TODO in cascade-manager.js');

@@ -10,6 +10,7 @@
 const path = require('path');
 const { execSync, exec } = require('child_process');
 const os = require('os');
+const { readSettings, getTTSConfig } = require('./read-settings.cjs');
 
 // Try to load the 'say' library if available
 let say = null;
@@ -17,6 +18,23 @@ try {
   say = require('say');
 } catch (error) {
   // say library not available, will fall back to native commands
+}
+
+// Try to load google-tts-api for Google TTS
+let googleTTS = null;
+try {
+  googleTTS = require('google-tts-api');
+} catch (error) {
+  // google-tts-api library not available
+}
+
+// Try to load Google Cloud Text-to-Speech
+let googleCloudTTS = null;
+try {
+  const { TextToSpeechClient } = require('@google-cloud/text-to-speech');
+  googleCloudTTS = TextToSpeechClient;
+} catch (error) {
+  // @google-cloud/text-to-speech library not available
 }
 
 // Try to load node-notifier for desktop notifications
@@ -27,44 +45,125 @@ try {
   // node-notifier not available, will fall back to native commands
 }
 
-// Get environment variables
-const CLAUDE_PLUGIN_ROOT = process.env.CLAUDE_PLUGIN_ROOT;
-const CLAUDE_PROJECT_DIR = process.env.CLAUDE_PROJECT_DIR;
+// Try to load sound-play for audio playback
+let soundPlay = null;
+try {
+  soundPlay = require('sound-play');
+} catch (error) {
+  // sound-play not available, will fall back to platform-specific commands
+}
+
+// Get environment variables with fallbacks for direct execution
+const CLAUDE_PLUGIN_ROOT = process.env.CLAUDE_PLUGIN_ROOT || path.resolve(__dirname, '..');
+
+// For CLAUDE_PROJECT_DIR, check if we're in a plugin subdirectory and go up to the real project root
+let CLAUDE_PROJECT_DIR = process.env.CLAUDE_PROJECT_DIR;
+if (!CLAUDE_PROJECT_DIR) {
+  const cwd = process.cwd();
+  // If we're in plugins/carl, go up two levels to get to the project root
+  if (cwd.endsWith('plugins/carl') || cwd.endsWith('plugins\\carl')) {
+    CLAUDE_PROJECT_DIR = path.resolve(cwd, '../..');
+  } else if (cwd.includes('plugins/carl') || cwd.includes('plugins\\carl')) {
+    // Find the plugins/carl part and go up from there
+    const parts = cwd.split(path.sep);
+    const pluginIndex = parts.indexOf('plugins');
+    if (pluginIndex >= 0) {
+      CLAUDE_PROJECT_DIR = parts.slice(0, pluginIndex).join(path.sep);
+    } else {
+      CLAUDE_PROJECT_DIR = cwd;
+    }
+  } else {
+    CLAUDE_PROJECT_DIR = cwd;
+  }
+}
+
+/**
+ * Get TTS configuration from settings or environment
+ */
+function getTTSConfiguration() {
+  // Try to read from settings file first
+  if (CLAUDE_PROJECT_DIR && CLAUDE_PLUGIN_ROOT) {
+    const settings = readSettings(CLAUDE_PROJECT_DIR, CLAUDE_PLUGIN_ROOT);
+    if (settings) {
+      const ttsConfig = getTTSConfig(settings);
+      return {
+        provider: ttsConfig.provider,
+        voice: ttsConfig.voice,
+        speed: ttsConfig.speed,
+      };
+    }
+  }
+
+  // Fallback to environment variables (for testing/backwards compatibility)
+  return {
+    provider: process.env.CARL_CARL_CONFIGURATION_TTS_PROVIDER || 'none',
+    voice: process.env.CARL_CARL_CONFIGURATION_TTS_VOICE || null,
+    speed: parseFloat(process.env.CARL_CARL_CONFIGURATION_TTS_SPEED) || 1.0,
+  };
+}
 
 /**
  * Send TTS notification using configured provider
  */
 function sendTTS(message) {
   try {
-    // Get TTS provider from environment
-    const ttsProvider = process.env.CARL_CARL_CONFIGURATION_TTS_PROVIDER || 'none';
+    // Get TTS configuration
+    const config = getTTSConfiguration();
+    let ttsProvider = config.provider;
+    const ttsVoice = config.voice;
+    const ttsSpeed = config.speed;
+
+    // Backward compatibility: map old node-gtts to new google-tts-api
+    if (ttsProvider === 'node-gtts') {
+      console.error('[CARL Notify] node-gtts is deprecated. Using google-tts-api instead. Please update your settings.');
+      ttsProvider = 'google-tts-api';
+    }
 
     if (ttsProvider === 'none') {
       console.error('[CARL Notify] TTS provider is set to "none", skipping TTS notification');
       return false;
     }
 
-    // Get TTS configuration options from environment
-    const ttsVoice = process.env.CARL_CARL_CONFIGURATION_TTS_VOICE || null;
-    const ttsSpeed = parseFloat(process.env.CARL_CARL_CONFIGURATION_TTS_SPEED) || 1.0;
-
-    // Try to use the 'say' npm library first (cross-platform)
-    if (say) {
-      return new Promise((resolve) => {
-        say.speak(message, ttsVoice, ttsSpeed, (error) => {
-          if (error) {
-            console.error('[CARL Notify] Say library error:', error.message);
-            resolve(false);
-          } else {
-            resolve(true);
-          }
-        });
-      });
+    // Handle provider-specific implementations
+    if (ttsProvider === 'say') {
+      return sendTTS_Say(message, ttsVoice, ttsSpeed);
+    } else if (ttsProvider === 'google-tts-api') {
+      return sendTTS_GoogleTTSAPI(message, ttsVoice, ttsSpeed);
+    } else if (ttsProvider === 'google-cloud-tts') {
+      return sendTTS_GoogleCloudTTS(message, ttsVoice, ttsSpeed);
     }
 
-    // Fallback to platform-specific TTS commands
-    const platform = os.platform();
+    // Unknown provider
+    console.error(`[CARL Notify] Unknown TTS provider: ${ttsProvider}`);
+    return false;
+  } catch (error) {
+    console.error('[CARL Notify] TTS error:', error.message);
+    return false;
+  }
+}
 
+/**
+ * Send TTS using the 'say' library
+ */
+function sendTTS_Say(message, voice, speed) {
+  // Try to use the 'say' npm library first (cross-platform)
+  if (say) {
+    return new Promise((resolve) => {
+      say.speak(message, voice, speed, (error) => {
+        if (error) {
+          console.error('[CARL Notify] Say library error:', error.message);
+          resolve(false);
+        } else {
+          resolve(true);
+        }
+      });
+    });
+  }
+
+  // Fallback to platform-specific TTS commands
+  const platform = os.platform();
+
+  try {
     if (platform === 'darwin') {
       // macOS: Use 'say' command
       execSync(`say "${message.replace(/"/g, '\\"')}"`, { stdio: 'ignore' });
@@ -89,10 +188,157 @@ function sendTTS(message) {
         }
       }
     }
-
-    return false;
   } catch (error) {
-    console.error('[CARL Notify] TTS error:', error.message);
+    console.error('[CARL Notify] Say TTS error:', error.message);
+    return false;
+  }
+
+  return false;
+}
+
+/**
+ * Send TTS using google-tts-api (Google Text-to-Speech - Unofficial)
+ */
+async function sendTTS_GoogleTTSAPI(message, voice, speed) {
+  if (!googleTTS) {
+    console.error('[CARL Notify] google-tts-api library not available. Install with: npm install google-tts-api');
+    return false;
+  }
+
+  try {
+    const fs = require('fs');
+    const https = require('https');
+    const http = require('http');
+    const tmpDir = os.tmpdir();
+    const tmpFile = path.join(tmpDir, `carl-tts-${Date.now()}.mp3`);
+
+    // Language code (e.g., 'en', 'es', 'fr')
+    const lang = voice || 'en';
+
+    // Get audio URL from google-tts-api
+    // Returns array of URLs if text is long, single URL if short
+    const audioUrls = await googleTTS.getAllAudioUrls(message, {
+      lang: lang,
+      slow: false,
+      host: 'https://translate.google.com',
+    });
+
+    // Get the first URL (for short messages, there will be only one)
+    const audioUrl = Array.isArray(audioUrls) && audioUrls.length > 0 ? audioUrls[0].url : audioUrls.url;
+
+    // Download the audio file
+    await new Promise((resolve, reject) => {
+      const protocol = audioUrl.startsWith('https') ? https : http;
+      const file = fs.createWriteStream(tmpFile);
+
+      protocol.get(audioUrl, (response) => {
+        response.pipe(file);
+        file.on('finish', () => {
+          file.close();
+          resolve();
+        });
+      }).on('error', (err) => {
+        fs.unlinkSync(tmpFile);
+        reject(err);
+      });
+    });
+
+    // Play the audio file using sound-play
+    if (!soundPlay) {
+      console.error('[CARL Notify] sound-play library not available. Install with: npm install sound-play');
+      return false;
+    }
+
+    await soundPlay.play(tmpFile);
+
+    // Clean up temp file after playing
+    try {
+      fs.unlinkSync(tmpFile);
+    } catch (cleanupError) {
+      console.error('[CARL Notify] Failed to clean up temp file:', cleanupError.message);
+    }
+
+    return true;
+  } catch (error) {
+    console.error('[CARL Notify] google-tts-api error:', error.message);
+    return false;
+  }
+}
+
+/**
+ * Send TTS using Google Cloud Text-to-Speech API (Official)
+ */
+async function sendTTS_GoogleCloudTTS(message, voice, speed) {
+  if (!googleCloudTTS) {
+    console.error('[CARL Notify] @google-cloud/text-to-speech library not available. Install with: npm install @google-cloud/text-to-speech');
+    return false;
+  }
+
+  try {
+    const fs = require('fs');
+    const tmpDir = os.tmpdir();
+    const tmpFile = path.join(tmpDir, `carl-tts-${Date.now()}.mp3`);
+
+    // Create client
+    const client = new googleCloudTTS();
+
+    // Parse voice name if provided
+    // Format: "en-US-Chirp-HD-D" or just "en-US"
+    let languageCode = 'en-US';
+    let voiceName = null;
+
+    if (voice) {
+      if (voice.includes('-')) {
+        // Full voice name provided (e.g., "en-US-Chirp-HD-D")
+        const parts = voice.split('-');
+        languageCode = `${parts[0]}-${parts[1]}`; // e.g., "en-US"
+        voiceName = voice; // Full voice name
+      } else {
+        // Just language code (e.g., "en")
+        languageCode = voice;
+      }
+    }
+
+    // Construct request
+    const request = {
+      input: { text: message },
+      voice: {
+        languageCode: languageCode,
+        ...(voiceName && { name: voiceName }),
+      },
+      audioConfig: {
+        audioEncoding: 'MP3',
+        ...(speed && speed !== 1.0 && { speakingRate: speed }),
+      },
+    };
+
+    // Perform TTS request
+    const [response] = await client.synthesizeSpeech(request);
+
+    // Write audio content to file
+    fs.writeFileSync(tmpFile, response.audioContent, 'binary');
+
+    // Play the audio file using sound-play
+    if (!soundPlay) {
+      console.error('[CARL Notify] sound-play library not available. Install with: npm install sound-play');
+      return false;
+    }
+
+    await soundPlay.play(tmpFile);
+
+    // Clean up temp file after playing
+    try {
+      fs.unlinkSync(tmpFile);
+    } catch (cleanupError) {
+      console.error('[CARL Notify] Failed to clean up temp file:', cleanupError.message);
+    }
+
+    return true;
+  } catch (error) {
+    console.error('[CARL Notify] Google Cloud TTS error:', error.message);
+    if (error.message.includes('GOOGLE_APPLICATION_CREDENTIALS')) {
+      console.error('[CARL Notify] Google Cloud TTS requires authentication. Set GOOGLE_APPLICATION_CREDENTIALS environment variable.');
+    }
     return false;
   }
 }

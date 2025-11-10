@@ -18,7 +18,8 @@ const PACKAGE_JSON_PATH = path.join(PLUGIN_ROOT, 'package.json');
 const TTS_PACKAGES = {
   none: [],
   say: [{ name: 'say', version: '^0.16.0' }],
-  'node-gtts': [{ name: 'node-gtts', version: '^2.0.2' }],
+  'google-tts-api': [{ name: 'google-tts-api', version: '^0.0.4' }],
+  'google-cloud-tts': [{ name: '@google-cloud/text-to-speech', version: '^5.0.0' }],
   'coqui-tts': [
     { name: '@coqui-ai/tts', version: '^0.1.0' },
     // Note: Coqui TTS also requires Python and additional setup

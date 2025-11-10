@@ -1,7 +1,7 @@
 ---
 description: Plan and break down work items using structured Cascade format
 allowed-tools: Task, Read, Write, Grep, Glob
-argument-hint: [work-item-id-or-description]
+argument-hint: [work-item-id|description]
 ---
 
 # CARL Planning Command

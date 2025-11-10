@@ -16,8 +16,11 @@
   "author": "CARL Project",
   "license": "MIT",
   "dependencies": {
+    "@google-cloud/text-to-speech": "^6.4.0",
+    "google-tts-api": "^2.0.2",
     "node-notifier": "^10.0.1",
-    "say": "^0.16.0"
+    "say": "^0.16.0",
+    "sound-play": "^1.1.0"
   },
   "engines": {
     "node": ">=14.0.0"
