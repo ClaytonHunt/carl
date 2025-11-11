@@ -12,9 +12,9 @@ Orchestrates the planning and breakdown of work items into structured Cascade fo
 
 This command acts as the **Higher Order Prompt (HOP)** that delegates planning work to the specialized `planning-orchestrator` agent. It follows IndyDevDan's orchestration patterns for clean separation of concerns.
 
-## Arguments
+## Variables
 
-- `$ARGUMENTS` - Either a work item ID (e.g., `E1234`) or a description for a new work item
+- `${WORK_ITEM_INPUT}` - Either a work item ID (e.g., `E1234`) or a description for a new work item
 
 ## Workflow
 
@@ -38,10 +38,10 @@ Use the Task tool to invoke the planning orchestrator agent:
 ```
 Task(
   subagent_type: "planning-orchestrator",
-  description: "Plan work item: $ARGUMENTS",
+  description: "Plan work item: ${WORK_ITEM_INPUT}",
   prompt: "Plan the following work item using Cascade format:
 
-  Input: $ARGUMENTS
+  Input: ${WORK_ITEM_INPUT}
 
   Please:
   1. Determine if this is an existing item or new item

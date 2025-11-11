@@ -12,9 +12,9 @@ Orchestrates the execution of planned work items using async delegation and spec
 
 This command acts as the **Higher Order Prompt (HOP)** that delegates work execution to the specialized `work-orchestrator` agent. It follows IndyDevDan's async-first orchestration patterns for maximum parallelization.
 
-## Arguments
+## Variables
 
-- `$ARGUMENTS` - Work item ID to execute (e.g., `E1234`, `F5678`, `S9012`)
+- `${WORK_ITEM_ID}` - Work item ID to execute (e.g., `E1234`, `F5678`, `S9012`)
 
 ## Workflow
 
@@ -45,10 +45,10 @@ Use the Task tool to invoke the work orchestrator agent:
 ```
 Task(
   subagent_type: "work-orchestrator",
-  description: "Execute work item: $ARGUMENTS",
+  description: "Execute work item: ${WORK_ITEM_ID}",
   prompt: "Execute the following work item using async orchestration:
 
-  Work Item ID: $ARGUMENTS
+  Work Item ID: ${WORK_ITEM_ID}
 
   Please:
   1. Load the work item and all children from .cascade/
