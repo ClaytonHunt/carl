@@ -32,9 +32,10 @@ const fs = require('fs').promises;
 const path = require('path');
 
 class CascadeManager {
-  constructor(cascadeDir = '.cascade', registryPath = '.cascade/work-item-registry.json') {
+  constructor(cascadeDir = '.cascade', registryPath = null) {
     this.cascadeDir = cascadeDir;
-    this.registryPath = registryPath;
+    // If registry path not specified, use cascadeDir/work-item-registry.json
+    this.registryPath = registryPath || path.join(cascadeDir, 'work-item-registry.json');
     this.workItemTypes = {
       P: { name: 'Project', hasDirectory: false },  // P stays in root
       E: { name: 'Epic', hasDirectory: true },
@@ -52,57 +53,318 @@ class CascadeManager {
 
   /**
    * Create a new work item
-   * TODO: Full implementation
    * @param {string} type - Work item type (P, E, F, S, B, PH, T)
-   * @param {Object} data - Work item data (must include: title, parent)
+   * @param {Object} data - Work item data (must include: title, parent for non-Project)
    * @returns {Promise<Object>} - Created work item with ID and path
    */
   async createWorkItem(type, data) {
-    // TODO: Implement
-    // 1. Get next ID for type
-    // 2. Generate directory path based on parent hierarchy
-    // 3. Create directory if needed (Epic/Feature/Story/Bug/Phase)
-    // 4. Generate markdown file with frontmatter
-    // 5. Create initial state.json with status "planned"
-    // 6. Write files
-    // 7. Update registry with ID and path
-    // 8. Return created work item with ID and full path
-    throw new Error('createWorkItem() not yet implemented - see TODO in cascade-manager.js');
+    try {
+      // Validate type
+      if (!this.isValidType(type)) {
+        throw new Error(`Invalid work item type: ${type}`);
+      }
+
+      // Validate required fields
+      if (!data.title) {
+        throw new Error('Work item title is required');
+      }
+
+      if (type !== 'P' && !data.parent) {
+        throw new Error(`Parent is required for ${type} work items`);
+      }
+
+      // 1. Get next ID for type
+      const id = await this.getNextId(type);
+
+      // 2. Generate directory path based on parent hierarchy
+      const dirPath = await this.getWorkItemPath(id, data.title, data.parent || null);
+
+      // 3. Create directory if needed (Epic/Feature/Story/Bug/Phase have directories)
+      if (this.hasDirectory(type)) {
+        await fs.mkdir(dirPath, { recursive: true });
+      }
+
+      // 4. Generate markdown file with frontmatter
+      const now = new Date().toISOString();
+      const frontmatter = {
+        id,
+        type,  // Use the type code (P, E, F, etc.), not the name
+        title: data.title,
+        status: data.status || 'planned',
+        priority: data.priority || 'medium',
+        complexity: data.complexity || 'medium',
+        ...(data.parent && { parent: data.parent }),
+        created: now,
+        updated: now
+      };
+
+      // Add optional fields
+      if (data.description) frontmatter.description = data.description;
+      if (data.assignee) frontmatter.assignee = data.assignee;
+      if (data.tags) frontmatter.tags = data.tags;
+
+      // Generate markdown content
+      const markdown = this._generateMarkdown(frontmatter, data);
+
+      // Determine file path
+      const fileName = `${id}.md`;
+      const filePath = path.join(dirPath, fileName);
+
+      // Write markdown file
+      await fs.writeFile(filePath, markdown, 'utf-8');
+
+      // 5. Create initial state.json (except for Tasks - they don't have state.json)
+      if (type !== 'T') {
+        const statePath = path.join(dirPath, 'state.json');
+        const state = {
+          id,
+          status: data.status || 'planned',
+          progress: {
+            total_items: 0,
+            completed: 0,
+            in_progress: 0,
+            planned: 0,
+            blocked: 0
+          },
+          children: {},
+          updated: now
+        };
+        await fs.writeFile(statePath, JSON.stringify(state, null, 2), 'utf-8');
+      }
+
+      // 7. Update registry with ID and path
+      const metadata = {
+        type,
+        path: dirPath,
+        title: data.title,
+        status: data.status || 'planned',
+        ...(data.parent && { parent: data.parent }),
+        created: now,
+        updated: now
+      };
+      await this.addToRegistry(id, metadata);
+
+      // 8. Return created work item with ID and full path
+      return {
+        id,
+        type,
+        title: data.title,
+        status: data.status || 'planned',
+        path: dirPath,
+        filePath,
+        ...frontmatter
+      };
+    } catch (error) {
+      throw new Error(`Failed to create work item: ${error.message}`);
+    }
+  }
+
+  /**
+   * Generate markdown content from frontmatter and data
+   * @private
+   * @param {Object} frontmatter - Frontmatter fields
+   * @param {Object} data - Additional data
+   * @returns {string} - Markdown content
+   */
+  _generateMarkdown(frontmatter, data) {
+    // Generate frontmatter
+    const frontmatterLines = Object.entries(frontmatter)
+      .map(([key, value]) => {
+        if (Array.isArray(value)) {
+          return `${key}: [${value.join(', ')}]`;
+        }
+        return `${key}: ${value}`;
+      });
+
+    const frontmatterBlock = `---\n${frontmatterLines.join('\n')}\n---\n\n`;
+
+    // Generate content
+    let content = `# ${frontmatter.title}\n\n`;
+
+    if (data.description) {
+      content += `## Description\n\n${data.description}\n\n`;
+    } else {
+      content += `## Description\n\n[Description goes here]\n\n`;
+    }
+
+    content += `## Acceptance Criteria\n\n`;
+    if (data.acceptanceCriteria && Array.isArray(data.acceptanceCriteria)) {
+      data.acceptanceCriteria.forEach(criterion => {
+        content += `- [ ] ${criterion}\n`;
+      });
+    } else {
+      content += `- [ ] Criterion 1\n- [ ] Criterion 2\n- [ ] Criterion 3\n`;
+    }
+    content += `\n`;
+
+    if (data.dependencies && data.dependencies.length > 0) {
+      content += `## Dependencies\n\n`;
+      data.dependencies.forEach(dep => {
+        content += `- Depends on: ${dep}\n`;
+      });
+      content += `\n`;
+    }
+
+    content += `## Notes\n\n`;
+    if (data.notes) {
+      content += `${data.notes}\n`;
+    } else {
+      content += `Additional notes and context go here.\n`;
+    }
+
+    return frontmatterBlock + content;
   }
 
   /**
    * Read a work item
-   * TODO: Full implementation
    * @param {string} id - Work item ID (e.g., E1234)
    * @returns {Promise<Object>} - Work item data with markdown content and state
    */
   async getWorkItem(id) {
-    // TODO: Implement
-    // 1. Parse ID to get type and number
-    // 2. Look up path in registry
-    // 3. Read markdown file
-    // 4. Parse frontmatter and content
-    // 5. Read state.json from same directory
-    // 6. Return combined object with markdown data + state
-    throw new Error('getWorkItem() not yet implemented - see TODO in cascade-manager.js');
+    try {
+      // 1. Parse ID to get type and number
+      this.parseId(id); // Validates format
+
+      // 2. Look up path in registry
+      const registry = await this.loadRegistry();
+      const metadata = registry.work_items[id];
+
+      if (!metadata) {
+        throw new Error(`Work item not found: ${id}`);
+      }
+
+      if (metadata.deleted) {
+        throw new Error(`Work item has been deleted: ${id}`);
+      }
+
+      // 3. Read markdown file
+      const fileName = `${id}.md`;
+      const filePath = path.join(metadata.path, fileName);
+      const markdownContent = await fs.readFile(filePath, 'utf-8');
+
+      // 4. Parse frontmatter and content
+      const parsed = this._parseMarkdown(markdownContent);
+
+      // 5. Read state.json from same directory (if it exists - Tasks don't have state.json)
+      let state = null;
+      const { type } = this.parseId(id);
+      if (type !== 'T') {
+        const statePath = path.join(metadata.path, 'state.json');
+        try {
+          const stateContent = await fs.readFile(statePath, 'utf-8');
+          state = JSON.parse(stateContent);
+        } catch (error) {
+          // State file might not exist for older work items
+          console.warn(`State file not found for ${id}: ${error.message}`);
+        }
+      }
+
+      // 6. Return combined object with markdown data + state
+      return {
+        id,
+        ...parsed.frontmatter,
+        content: parsed.content,
+        state,
+        filePath,
+        ...metadata
+      };
+    } catch (error) {
+      throw new Error(`Failed to get work item: ${error.message}`);
+    }
+  }
+
+  /**
+   * Parse markdown with frontmatter
+   * @private
+   * @param {string} markdown - Markdown content
+   * @returns {Object} - { frontmatter, content }
+   */
+  _parseMarkdown(markdown) {
+    // Match frontmatter block
+    const frontmatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n([\s\S]*)$/;
+    const match = markdown.match(frontmatterRegex);
+
+    if (!match) {
+      // No frontmatter
+      return {
+        frontmatter: {},
+        content: markdown
+      };
+    }
+
+    // Parse frontmatter
+    const frontmatterText = match[1];
+    const content = match[2];
+
+    const frontmatter = {};
+    const lines = frontmatterText.split('\n');
+
+    for (const line of lines) {
+      const colonIndex = line.indexOf(':');
+      if (colonIndex > 0) {
+        const key = line.substring(0, colonIndex).trim();
+        let value = line.substring(colonIndex + 1).trim();
+
+        // Parse arrays
+        if (value.startsWith('[') && value.endsWith(']')) {
+          value = value
+            .slice(1, -1)
+            .split(',')
+            .map(item => item.trim())
+            .filter(item => item.length > 0);
+        }
+
+        frontmatter[key] = value;
+      }
+    }
+
+    return { frontmatter, content };
   }
 
   /**
    * Update a work item (markdown only)
-   * TODO: Full implementation
    * @param {string} id - Work item ID
    * @param {Object} updates - Fields to update in frontmatter
    * @returns {Promise<Object>} - Updated work item
    */
   async updateWorkItem(id, updates) {
-    // TODO: Implement
-    // 1. Load current work item markdown
-    // 2. Merge updates into frontmatter
-    // 3. Update 'updated' timestamp
-    // 4. Write markdown file
-    // 5. Return updated work item
-    // NOTE: Does NOT update state.json - use updateStatus() for that
-    throw new Error('updateWorkItem() not yet implemented - see TODO in cascade-manager.js');
+    try {
+      // 1. Load current work item
+      const workItem = await this.getWorkItem(id);
+
+      // 2. Merge updates into frontmatter
+      const updatedFrontmatter = {
+        ...workItem,
+        ...updates,
+        updated: new Date().toISOString()
+      };
+
+      // Remove properties that shouldn't be in frontmatter
+      delete updatedFrontmatter.content;
+      delete updatedFrontmatter.state;
+      delete updatedFrontmatter.filePath;
+      delete updatedFrontmatter.path;
+
+      // 3. Generate updated markdown
+      const markdown = this._generateMarkdown(updatedFrontmatter, updates);
+
+      // 4. Write markdown file
+      await fs.writeFile(workItem.filePath, markdown, 'utf-8');
+
+      // 5. Update registry
+      const registry = await this.loadRegistry();
+      if (registry.work_items[id]) {
+        registry.work_items[id].updated = updatedFrontmatter.updated;
+        if (updates.title) registry.work_items[id].title = updates.title;
+        if (updates.status) registry.work_items[id].status = updates.status;
+        await this.saveRegistry(registry);
+      }
+
+      // 6. Return updated work item
+      return await this.getWorkItem(id);
+    } catch (error) {
+      throw new Error(`Failed to update work item: ${error.message}`);
+    }
   }
 
   /**
@@ -110,37 +372,90 @@ class CascadeManager {
    * This is what CARL calls when completing work
    * Cascade VSCode extension watches state.json and cascades to parents
    *
-   * TODO: Full implementation
    * @param {string} id - Work item ID
    * @param {string} status - New status (planned, in-progress, completed, blocked)
    * @returns {Promise<boolean>} - Success indicator
    */
   async updateStatus(id, status) {
-    // TODO: Implement
-    // 1. Validate status value
-    // 2. Look up work item path in registry
-    // 3. Update markdown frontmatter: status, updated fields
-    // 4. Update local state.json: status, updated fields
-    // 5. Write both files
-    // 6. Return success
-    // NOTE: Cascade VSCode extension handles parent state updates
-    throw new Error('updateStatus() not yet implemented - see TODO in cascade-manager.js');
+    try {
+      // 1. Validate status value
+      if (!this.isValidStatus(status)) {
+        throw new Error(`Invalid status: ${status}`);
+      }
+
+      const { type } = this.parseId(id);
+
+      // 2. Update markdown frontmatter
+      await this.updateWorkItem(id, { status });
+
+      // 3. Update state.json (Tasks don't have state.json)
+      if (type !== 'T') {
+        // Load current state
+        const state = await this.getState(id);
+
+        // Update status and timestamp
+        state.status = status;
+        state.updated = new Date().toISOString();
+
+        // Write updated state
+        const registry = await this.loadRegistry();
+        const metadata = registry.work_items[id];
+        const statePath = path.join(metadata.path, 'state.json');
+
+        await fs.writeFile(statePath, JSON.stringify(state, null, 2), 'utf-8');
+      }
+
+      // 4. Update registry
+      const registry = await this.loadRegistry();
+      if (registry.work_items[id]) {
+        registry.work_items[id].status = status;
+        registry.work_items[id].updated = new Date().toISOString();
+        await this.saveRegistry(registry);
+      }
+
+      // NOTE: Cascade VSCode extension watches state.json and cascades to parents
+      return true;
+    } catch (error) {
+      throw new Error(`Failed to update status: ${error.message}`);
+    }
   }
 
   /**
    * Delete a work item
-   * TODO: Full implementation
    * @param {string} id - Work item ID
    * @returns {Promise<boolean>} - Success indicator
    */
   async deleteWorkItem(id) {
-    // TODO: Implement
-    // 1. Check for children (warn if deleting parent)
-    // 2. Remove directory (if has directory) or file (if Task)
-    // 3. Remove state.json
-    // 4. Update registry (mark as deleted, don't actually remove)
-    // 5. Return success
-    throw new Error('deleteWorkItem() not yet implemented - see TODO in cascade-manager.js');
+    try {
+      // Get work item to find path
+      const workItem = await this.getWorkItem(id);
+      const { type } = this.parseId(id);
+
+      // 1. Check for children (warn if deleting parent with children)
+      if (workItem.state && workItem.state.children) {
+        const childCount = Object.keys(workItem.state.children).length;
+        if (childCount > 0) {
+          console.warn(`Warning: Deleting ${id} which has ${childCount} children`);
+        }
+      }
+
+      // 2. Remove directory (if has directory) or file (if Task)
+      if (this.hasDirectory(type)) {
+        // Remove entire directory
+        await fs.rm(workItem.path, { recursive: true, force: true });
+      } else {
+        // Remove just the file (Task)
+        await fs.unlink(workItem.filePath);
+      }
+
+      // 4. Update registry (mark as deleted, don't actually remove - audit trail)
+      await this.removeFromRegistry(id);
+
+      // 5. Return success
+      return true;
+    } catch (error) {
+      throw new Error(`Failed to delete work item: ${error.message}`);
+    }
   }
 
   /**
@@ -149,48 +464,156 @@ class CascadeManager {
 
   /**
    * Get all children of a work item
-   * TODO: Full implementation
    * @param {string} parentId - Parent work item ID
    * @returns {Promise<Array>} - Array of child work items
    */
   async getChildren(parentId) {
-    // TODO: Implement
-    // 1. Look up parent path in registry
-    // 2. List subdirectories (for Epics/Features/Stories/Bugs/Phases)
-    // 3. List markdown files (for Tasks)
-    // 4. Load each child work item
-    // 5. Return array of children
-    throw new Error('getChildren() not yet implemented - see TODO in cascade-manager.js');
+    try {
+      // Validate ID format
+      this.parseId(parentId);
+
+      // 1. Look up parent path in registry
+      const registry = await this.loadRegistry();
+      const parentMetadata = registry.work_items[parentId];
+
+      if (!parentMetadata) {
+        return []; // Parent not found - return empty array
+      }
+
+      const parentPath = parentMetadata.path;
+      const children = [];
+
+      // 2. List items in parent directory
+      const items = await fs.readdir(parentPath, { withFileTypes: true });
+
+      // 3. Process subdirectories (Epics/Features/Stories/Bugs/Phases)
+      for (const item of items) {
+        if (item.isDirectory()) {
+          // Directory names are like: E0001-slug, F0002-slug, etc.
+          const match = item.name.match(/^([A-Z]+\d+)-/);
+          if (match) {
+            const childId = match[1];
+            try {
+              const child = await this.getWorkItem(childId);
+              children.push(child);
+            } catch (error) {
+              console.warn(`Skipping invalid child directory: ${item.name}`);
+            }
+          }
+        } else if (item.isFile() && item.name.endsWith('.md')) {
+          // Markdown files (Tasks or Projects in root)
+          const match = item.name.match(/^([A-Z]+\d+)\.md$/);
+          if (match) {
+            const childId = match[1];
+            // Skip parent's own file
+            if (childId !== parentId) {
+              try {
+                const child = await this.getWorkItem(childId);
+                // Only include if this is actually a child of the parent
+                if (child.parent === parentId) {
+                  children.push(child);
+                }
+              } catch (error) {
+                console.warn(`Skipping invalid child file: ${item.name}`);
+              }
+            }
+          }
+        }
+      }
+
+      // 5. Return array of children
+      return children;
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        return []; // Directory doesn't exist, no children
+      }
+      if (error.message.includes('Invalid work item ID format')) {
+        throw error; // Re-throw validation errors
+      }
+      throw new Error(`Failed to get children: ${error.message}`);
+    }
   }
 
   /**
    * Get complete hierarchy tree for a work item
-   * TODO: Full implementation
    * @param {string} id - Work item ID
    * @returns {Promise<Object>} - Work item with nested children
    */
   async getHierarchy(id) {
-    // TODO: Implement
-    // 1. Load work item
-    // 2. Recursively load all children
-    // 3. Build tree structure
-    // 4. Return complete hierarchy
-    throw new Error('getHierarchy() not yet implemented - see TODO in cascade-manager.js');
+    try {
+      // Validate ID format
+      this.parseId(id);
+
+      // 1. Load work item
+      const workItem = await this.getWorkItem(id);
+
+      if (!workItem) {
+        return null; // Work item not found
+      }
+
+      // 2. Recursively load all children
+      const children = await this.getChildren(id);
+
+      // 3. Build tree structure - recursively load hierarchy for each child
+      const childrenWithHierarchy = await Promise.all(
+        children.map(async (child) => {
+          return await this.getHierarchy(child.id);
+        })
+      );
+
+      // 4. Return complete hierarchy
+      return {
+        ...workItem,
+        children: childrenWithHierarchy
+      };
+    } catch (error) {
+      if (error.message.includes('not found')) {
+        return null; // Work item not found - return null
+      }
+      if (error.message.includes('Invalid work item ID format')) {
+        throw error; // Re-throw validation errors
+      }
+      throw new Error(`Failed to get hierarchy: ${error.message}`);
+    }
   }
 
   /**
    * Get parent of a work item
-   * TODO: Full implementation
    * @param {string} id - Work item ID
    * @returns {Promise<Object|null>} - Parent work item or null
    */
   async getParent(id) {
-    // TODO: Implement
-    // 1. Load work item
-    // 2. Get parent ID from frontmatter
-    // 3. Load parent work item
-    // 4. Return parent or null
-    throw new Error('getParent() not yet implemented - see TODO in cascade-manager.js');
+    try {
+      // 1. Load work item
+      const workItem = await this.getWorkItem(id);
+
+      // 2. Get parent ID from frontmatter or registry
+      const parentId = workItem.parent;
+
+      if (!parentId) {
+        return null; // No parent (e.g., Project)
+      }
+
+      // 3. Load parent work item
+      try {
+        const parent = await this.getWorkItem(parentId);
+        return parent;
+      } catch (parentError) {
+        // Parent not found or deleted - return null
+        if (parentError.message.includes('not found') ||
+            parentError.message.includes('deleted') ||
+            parentError.message.includes('ENOENT')) {
+          return null;
+        }
+        throw parentError;
+      }
+    } catch (error) {
+      if (error.message.includes('not found') ||
+          error.message.includes('ENOENT')) {
+        return null;
+      }
+      throw new Error(`Failed to get parent: ${error.message}`);
+    }
   }
 
   /**
@@ -199,33 +622,80 @@ class CascadeManager {
 
   /**
    * Get work item state from state.json
-   * TODO: Full implementation
    * @param {string} id - Work item ID
    * @returns {Promise<Object>} - State object { status, progress, children, updated }
    */
   async getState(id) {
-    // TODO: Implement
-    // 1. Look up work item path in registry
-    // 2. Read state.json from work item directory
-    // 3. Return state object
-    throw new Error('getState() not yet implemented - see TODO in cascade-manager.js');
+    try {
+      // Tasks don't have state.json
+      const { type } = this.parseId(id);
+      if (type === 'T') {
+        return null;
+      }
+
+      // 1. Look up work item path in registry
+      const registry = await this.loadRegistry();
+      const metadata = registry.work_items[id];
+
+      if (!metadata) {
+        return null;  // Work item not found - return null
+      }
+
+      // 2. Read state.json from work item directory
+      const statePath = path.join(metadata.path, 'state.json');
+      const stateContent = await fs.readFile(statePath, 'utf-8');
+
+      // 3. Return state object
+      return JSON.parse(stateContent);
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        return null;  // State file not found - return null
+      }
+      throw new Error(`Failed to get state: ${error.message}`);
+    }
   }
 
   /**
    * Create initial state.json for a work item
-   * TODO: Full implementation
    * @param {string} dirPath - Directory path where state.json should be created
    * @param {string} id - Work item ID
    * @param {string} status - Initial status
    * @returns {Promise<boolean>} - Success indicator
    */
   async createState(dirPath, id, status = 'planned') {
-    // TODO: Implement
-    // 1. Create state object:
-    //    { id, status, progress: { total_items: 0, completed: 0, ... }, children: {}, updated: timestamp }
-    // 2. Write to state.json in dirPath
-    // 3. Return success
-    throw new Error('createState() not yet implemented - see TODO in cascade-manager.js');
+    try {
+      // Validate status
+      if (!this.isValidStatus(status)) {
+        throw new Error(`Invalid status: ${status}`);
+      }
+
+      // Ensure directory exists
+      await fs.mkdir(dirPath, { recursive: true });
+
+      // 1. Create state object
+      const state = {
+        id,
+        status,
+        progress: {
+          total_items: 0,
+          completed: 0,
+          in_progress: 0,
+          planned: 0,
+          blocked: 0
+        },
+        children: {},
+        updated: new Date().toISOString()
+      };
+
+      // 2. Write to state.json in dirPath
+      const statePath = path.join(dirPath, 'state.json');
+      await fs.writeFile(statePath, JSON.stringify(state, null, 2), 'utf-8');
+
+      // 3. Return success
+      return true;
+    } catch (error) {
+      throw new Error(`Failed to create state: ${error.message}`);
+    }
   }
 
   /**
@@ -234,33 +704,55 @@ class CascadeManager {
 
   /**
    * Get next available ID for work item type
-   * TODO: Full implementation
    * @param {string} type - Work item type (P, E, F, S, B, PH, T)
    * @returns {Promise<string>} - Next ID (e.g., E0001)
    */
   async getNextId(type) {
-    // TODO: Implement
-    // 1. Load registry
-    // 2. Get global counter from registry.global_id_counter
-    // 3. Increment counter
-    // 4. Save registry
-    // 5. Return formatted ID (e.g., E0001)
-    // NOTE: Uses global counter to ensure unique numeric IDs across all work item types
-    throw new Error('getNextId() not yet implemented - see TODO in cascade-manager.js');
+    try {
+      // Validate type
+      if (!this.isValidType(type)) {
+        throw new Error(`Invalid work item type: ${type}`);
+      }
+
+      // Load registry
+      const registry = await this.loadRegistry();
+
+      // Increment global counter
+      registry.global_id_counter += 1;
+      const idNumber = registry.global_id_counter;
+
+      // Save registry with updated counter
+      await this.saveRegistry(registry);
+
+      // Return formatted ID (e.g., E0001)
+      return `${type}${String(idNumber).padStart(4, '0')}`;
+    } catch (error) {
+      throw new Error(`Failed to get next ID: ${error.message}`);
+    }
   }
 
   /**
    * Validate that ID is unique
-   * TODO: Full implementation
    * @param {string} id - Work item ID to validate
    * @returns {Promise<boolean>} - True if unique
    */
   async validateId(id) {
-    // TODO: Implement
-    // 1. Load registry
-    // 2. Check if ID exists in registry.work_items
-    // 3. Return true if unique, false if exists
-    throw new Error('validateId() not yet implemented - see TODO in cascade-manager.js');
+    try {
+      // Parse and validate ID format
+      this.parseId(id);
+
+      // Load registry
+      const registry = await this.loadRegistry();
+
+      // Check if ID exists in registry.work_items
+      // Also check if not marked as deleted
+      const exists = id in registry.work_items && !registry.work_items[id].deleted;
+
+      // Return true if unique (doesn't exist), false if exists
+      return !exists;
+    } catch (error) {
+      throw new Error(`Failed to validate ID: ${error.message}`);
+    }
   }
 
   /**
@@ -269,64 +761,106 @@ class CascadeManager {
 
   /**
    * Load the work item registry
-   * TODO: Full implementation
    * @returns {Promise<Object>} - Registry object
    */
   async loadRegistry() {
-    // TODO: Implement
-    // 1. Check if registry file exists
-    // 2. If not, create empty registry with structure:
-    //    { version, last_updated, work_items: {}, global_id_counter: 0 }
-    // 3. Read and parse JSON
-    // 4. Return registry object
-    throw new Error('loadRegistry() not yet implemented - see TODO in cascade-manager.js');
+    try {
+      // Check if registry file exists
+      await fs.access(this.registryPath);
+
+      // Read and parse JSON
+      const data = await fs.readFile(this.registryPath, 'utf-8');
+      return JSON.parse(data);
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        // Registry doesn't exist, create empty one
+        const emptyRegistry = {
+          version: '1.0.0',
+          last_updated: new Date().toISOString(),
+          work_items: {},
+          global_id_counter: 0
+        };
+        return emptyRegistry;
+      }
+      throw new Error(`Failed to load registry: ${error.message}`);
+    }
   }
 
   /**
    * Save the work item registry
-   * TODO: Full implementation
    * @param {Object} registry - Registry object
    * @returns {Promise<boolean>} - Success indicator
    */
   async saveRegistry(registry) {
-    // TODO: Implement
-    // 1. Update last_updated timestamp
-    // 2. Validate registry structure
-    // 3. Write JSON to file (pretty-printed with 2 spaces)
-    // 4. Return success
-    throw new Error('saveRegistry() not yet implemented - see TODO in cascade-manager.js');
+    try {
+      // Update last_updated timestamp
+      registry.last_updated = new Date().toISOString();
+
+      // Validate registry structure
+      if (!registry.version || !registry.work_items || typeof registry.global_id_counter !== 'number') {
+        throw new Error('Invalid registry structure');
+      }
+
+      // Ensure .cascade directory exists
+      await fs.mkdir(path.dirname(this.registryPath), { recursive: true });
+
+      // Write JSON to file (pretty-printed with 2 spaces)
+      await fs.writeFile(this.registryPath, JSON.stringify(registry, null, 2), 'utf-8');
+
+      return true;
+    } catch (error) {
+      throw new Error(`Failed to save registry: ${error.message}`);
+    }
   }
 
   /**
    * Add work item to registry
-   * TODO: Full implementation
    * @param {string} id - Work item ID
    * @param {Object} metadata - Work item metadata { type, path, title, status, parent, created, updated }
    * @returns {Promise<boolean>} - Success indicator
    */
   async addToRegistry(id, metadata) {
-    // TODO: Implement
-    // 1. Load registry
-    // 2. Add entry: registry.work_items[id] = metadata
-    // 3. Save registry
-    // 4. Return success
-    throw new Error('addToRegistry() not yet implemented - see TODO in cascade-manager.js');
+    try {
+      // Load registry
+      const registry = await this.loadRegistry();
+
+      // Add entry
+      registry.work_items[id] = metadata;
+
+      // Save registry
+      await this.saveRegistry(registry);
+
+      return true;
+    } catch (error) {
+      throw new Error(`Failed to add to registry: ${error.message}`);
+    }
   }
 
   /**
    * Remove work item from registry (marks as deleted, doesn't actually remove)
-   * TODO: Full implementation
    * @param {string} id - Work item ID
    * @returns {Promise<boolean>} - Success indicator
    */
   async removeFromRegistry(id) {
-    // TODO: Implement
-    // 1. Load registry
-    // 2. Mark as deleted: registry.work_items[id].deleted = true
-    // 3. Don't actually remove (audit trail)
-    // 4. Save registry
-    // 5. Return success
-    throw new Error('removeFromRegistry() not yet implemented - see TODO in cascade-manager.js');
+    try {
+      // Load registry
+      const registry = await this.loadRegistry();
+
+      if (!registry.work_items[id]) {
+        throw new Error(`Work item not found in registry: ${id}`);
+      }
+
+      // Mark as deleted (audit trail - don't actually remove)
+      registry.work_items[id].deleted = true;
+      registry.work_items[id].deleted_at = new Date().toISOString();
+
+      // Save registry
+      await this.saveRegistry(registry);
+
+      return true;
+    } catch (error) {
+      throw new Error(`Failed to remove from registry: ${error.message}`);
+    }
   }
 
   /**
@@ -335,32 +869,104 @@ class CascadeManager {
 
   /**
    * Search work items by criteria
-   * TODO: Full implementation
-   * @param {Object} criteria - Search criteria { type, status, parent, etc. }
+   * @param {Object} criteria - Search criteria { type, status, parent, title, deleted }
    * @returns {Promise<Array>} - Matching work items
+   *
+   * Examples:
+   * - searchWorkItems({ type: 'F' }) - All Features
+   * - searchWorkItems({ status: 'in-progress' }) - All in-progress items
+   * - searchWorkItems({ parent: 'E0001' }) - All children of E0001
+   * - searchWorkItems({ type: 'S', status: 'completed' }) - All completed Stories
+   * - searchWorkItems({ deleted: false }) - All active items (default)
    */
-  async searchWorkItems(criteria) {
-    // TODO: Implement
-    // 1. Load registry
-    // 2. Filter registry.work_items by criteria
-    // 3. Load matching work items
-    // 4. Return array of matches
-    throw new Error('searchWorkItems() not yet implemented - see TODO in cascade-manager.js');
+  async searchWorkItems(criteria = {}) {
+    try {
+      // 1. Load registry
+      const registry = await this.loadRegistry();
+
+      // 2. Filter registry.work_items by criteria
+      const matchingIds = Object.keys(registry.work_items).filter(id => {
+        const metadata = registry.work_items[id];
+
+        // By default, exclude deleted items unless explicitly requested
+        if (criteria.deleted === undefined && metadata.deleted) {
+          return false;
+        }
+
+        // Check each criterion
+        for (const [key, value] of Object.entries(criteria)) {
+          // Skip if value is undefined/null
+          if (value === undefined || value === null) continue;
+
+          // Special handling for 'deleted' criterion
+          if (key === 'deleted') {
+            const isDeleted = !!metadata.deleted;
+            if (isDeleted !== value) {
+              return false;
+            }
+            continue;
+          }
+
+          // Check if metadata matches criterion
+          if (metadata[key] !== value) {
+            return false;
+          }
+        }
+
+        return true;
+      });
+
+      // 3. Load matching work items in parallel
+      // For deleted items, return registry metadata directly
+      // For active items, load full work item data
+      const workItems = await Promise.all(
+        matchingIds.map(async id => {
+          const metadata = registry.work_items[id];
+
+          // If deleted, return registry metadata only
+          if (metadata.deleted) {
+            return {
+              id,
+              ...metadata,
+              state: null,
+              content: null
+            };
+          }
+
+          // Otherwise load full work item
+          return await this.getWorkItem(id);
+        })
+      );
+
+      // 4. Return array of matches
+      return workItems;
+    } catch (error) {
+      throw new Error(`Failed to search work items: ${error.message}`);
+    }
   }
 
   /**
    * Get all work items of a type
-   * TODO: Full implementation
-   * @param {string} type - Work item type
+   * @param {string} type - Work item type (P, E, F, S, B, PH, T)
    * @returns {Promise<Array>} - All work items of type
+   *
+   * Examples:
+   * - getWorkItemsByType('E') - All Epics
+   * - getWorkItemsByType('S') - All Stories
+   * - getWorkItemsByType('T') - All Tasks
    */
   async getWorkItemsByType(type) {
-    // TODO: Implement
-    // 1. Load registry
-    // 2. Filter by type
-    // 3. Load work items
-    // 4. Return array
-    throw new Error('getWorkItemsByType() not yet implemented - see TODO in cascade-manager.js');
+    try {
+      // Validate type
+      if (!this.isValidType(type)) {
+        throw new Error(`Invalid work item type: ${type}`);
+      }
+
+      // Use searchWorkItems with type criterion
+      return await this.searchWorkItems({ type });
+    } catch (error) {
+      throw new Error(`Failed to get work items by type: ${error.message}`);
+    }
   }
 
   /**
@@ -369,7 +975,6 @@ class CascadeManager {
 
   /**
    * Get the directory path for a work item based on parent hierarchy
-   * TODO: Full implementation
    * @param {string} id - Work item ID
    * @param {string} title - Work item title (for slug generation)
    * @param {string} parentId - Parent work item ID (null for Project)
@@ -383,13 +988,38 @@ class CascadeManager {
    * - T0001 (parent: S0001) → .cascade/E0001-.../F0001-.../S0001-login-form/
    */
   async getWorkItemPath(id, title, parentId) {
-    // TODO: Implement
-    // 1. If parentId is null, return root (.cascade/)
-    // 2. Look up parent path in registry
-    // 3. Generate directory name: {id}-{slug}
-    // 4. Combine parent path + directory name
-    // 5. Return full path
-    throw new Error('getWorkItemPath() not yet implemented - see TODO in cascade-manager.js');
+    try {
+      const { type } = this.parseId(id);
+
+      // Projects live in root
+      if (!parentId || type === 'P') {
+        return this.cascadeDir;
+      }
+
+      // Load registry to get parent path
+      const registry = await this.loadRegistry();
+      const parentEntry = registry.work_items[parentId];
+
+      if (!parentEntry) {
+        throw new Error(`Parent work item not found: ${parentId}`);
+      }
+
+      // Get parent directory
+      const parentPath = parentEntry.path;
+
+      // Tasks don't have their own directory - they live in parent directory
+      if (type === 'T') {
+        return parentPath;
+      }
+
+      // Generate directory name for this work item
+      const dirName = this.generateDirectoryName(id, title);
+
+      // Combine parent path + directory name
+      return path.join(parentPath, dirName);
+    } catch (error) {
+      throw new Error(`Failed to get work item path: ${error.message}`);
+    }
   }
 
   /**
@@ -398,17 +1028,43 @@ class CascadeManager {
 
   /**
    * Initialize Cascade directory structure
-   * TODO: Full implementation
    * @returns {Promise<boolean>} - Success indicator
    */
   async initialize() {
-    // TODO: Implement
-    // 1. Create .cascade/ directory
-    // 2. Create empty registry with structure:
-    //    { version: "1.0.0", last_updated, work_items: {}, global_id_counter: 0 }
-    // 3. Create root state.json (empty project state)
-    // 4. Return success
-    throw new Error('initialize() not yet implemented - see TODO in cascade-manager.js');
+    try {
+      // 1. Create .cascade/ directory
+      await fs.mkdir(this.cascadeDir, { recursive: true });
+
+      // 2. Create empty registry with structure
+      const registry = {
+        version: '1.0.0',
+        last_updated: new Date().toISOString(),
+        work_items: {},
+        global_id_counter: 0
+      };
+      await this.saveRegistry(registry);
+
+      // 3. Create root state.json (empty project state)
+      const rootStatePath = path.join(this.cascadeDir, 'state.json');
+      const rootState = {
+        id: 'root',
+        status: 'in-progress',
+        progress: {
+          total_items: 0,
+          completed: 0,
+          in_progress: 0,
+          planned: 0,
+          blocked: 0
+        },
+        children: {},
+        updated: new Date().toISOString()
+      };
+      await fs.writeFile(rootStatePath, JSON.stringify(rootState, null, 2), 'utf-8');
+
+      return true;
+    } catch (error) {
+      throw new Error(`Failed to initialize Cascade directory: ${error.message}`);
+    }
   }
 
   /**
