@@ -1,0 +1,23 @@
+{
+  "name": "my-plugin",
+  "version": "1.0.0",
+  "description": "Brief description of what this plugin provides (1-2 sentences)",
+  "author": {
+    "name": "Your Name",
+    "email": "you@example.com",
+    "url": "https://yourwebsite.com"
+  },
+  "homepage": "https://github.com/username/my-plugin",
+  "repository": "https://github.com/username/my-plugin",
+  "license": "MIT",
+  "keywords": [
+    "keyword1",
+    "keyword2",
+    "keyword3"
+  ],
+  "commands": "./commands",
+  "agents": "./agents",
+  "skills": "./skills",
+  "hooks": "./hooks/hooks.json",
+  "mcpServers": "./.mcp.json"
+}

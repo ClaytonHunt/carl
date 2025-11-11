@@ -46,3 +46,9 @@ This directory contains cached local versions of external documentation for AI R
 - **Local Copy**: [agentic-orchestration-patterns.md](./indydevdan/agentic-orchestration-patterns.md)
 - **Description**: Comprehensive guide to orchestrator patterns, multi-agent coordination, HOP/LOP architecture, async execution strategies, and tactical agentic coding principles from IndyDevDan's work on autonomous agent systems.
 
+## CARL Templates
+
+### Feature Templates
+- **Local Copy**: [templates/README.md](./templates/README.md)
+- **Description**: Comprehensive template library for Claude Code extensibility features (Commands, SubAgents, Skills, Hooks, Workflows, MCP servers, Plugins). Includes starting point templates, reference examples, best practices, and when-to-use guidance following IndyDevDan's agentic orchestration patterns.
+

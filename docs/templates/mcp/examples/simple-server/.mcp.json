@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "simple": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/examples/simple-server/server.js"],
+      "env": {
+        "LOG_LEVEL": "info"
+      }
+    }
+  }
+}

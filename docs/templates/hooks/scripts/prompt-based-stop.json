@@ -1,0 +1,296 @@
+{
+  "// Prompt-Based Hook Template - Stop Event": "",
+  "// This template demonstrates using LLM evaluation for Stop hooks": "",
+  "// instead of bash commands. The LLM evaluates context and makes decisions.": "",
+
+  "hooks": {
+    "Stop": [
+      {
+        "// === LLM-Based Completion Validation ===": "",
+        "// Use Claude Haiku to evaluate if work is truly complete": "",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "You are evaluating whether a Claude Code session should complete.\n\nReview the session information provided in the input JSON and determine if all user requests have been properly addressed.\n\nConsider:\n1. Were all explicit user requests completed?\n2. Were any errors or warnings left unaddressed?\n3. Are there obvious next steps that should be handled?\n4. Is the work in a good stopping point?\n\nInput data: $ARGUMENTS\n\nRespond with JSON:\n{\n  \"decision\": \"approve\" or \"block\",\n  \"reason\": \"Explanation for your decision\",\n  \"continue\": false (only if blocking),\n  \"stopReason\": \"Message shown to user if blocking\",\n  \"systemMessage\": \"Optional additional context\"\n}\n\nIf approving, set decision to \"approve\".\nIf blocking, set decision to \"block\", continue to false, and provide stopReason.",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+
+    "SubagentStop": [
+      {
+        "// === LLM-Based Subagent Validation ===": "",
+        "// Evaluate if subagent completed its assigned task": "",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "You are evaluating whether a Claude Code subagent has completed its task.\n\nReview the subagent's work in the input JSON and determine if the delegated task was properly completed.\n\nConsider:\n1. Did the subagent address its specific assignment?\n2. Were there any errors or incomplete work?\n3. Does the result meet quality standards?\n4. Should the subagent continue working?\n\nInput data: $ARGUMENTS\n\nRespond with JSON:\n{\n  \"decision\": \"approve\" or \"block\",\n  \"reason\": \"Explanation for your decision\",\n  \"continue\": false (if subagent should stop),\n  \"stopReason\": \"Why the subagent should continue working\"\n}\n\nIf the work is complete and satisfactory, approve.\nIf the subagent needs to continue, block with a clear reason.",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  },
+
+  "// === Prompt-Based Hook Details ===": "",
+
+  "// Supported Events:": "",
+  "// - Stop: Main agent completion": "",
+  "// - SubagentStop: Subagent completion": "",
+  "// (Other events only support 'command' type, not 'prompt' type)": "",
+
+  "// $ARGUMENTS Placeholder:": "",
+  "// - Replaced with actual hook input JSON": "",
+  "// - Contains session_id, hook_event_name, and event-specific fields": "",
+  "// - Available to the LLM for evaluation": "",
+
+  "// LLM Response Schema:": "",
+  "// {": "",
+  "//   \"decision\": \"approve\" | \"block\",": "",
+  "//   \"reason\": \"Explanation for decision\",": "",
+  "//   \"continue\": false,  // If false, stops Claude": "",
+  "//   \"stopReason\": \"Message shown to user\",": "",
+  "//   \"systemMessage\": \"Additional warning or context\"": "",
+  "// }": "",
+
+  "// Response Fields:": "",
+  "// - decision: \"approve\" allows completion, \"block\" prevents it": "",
+  "// - reason: Shown to Claude when blocking (helps understand why)": "",
+  "// - continue: If false, stops Claude execution entirely": "",
+  "// - stopReason: Custom message shown to user when stopping": "",
+  "// - systemMessage: Additional message shown to user": "",
+
+  "// === Use Cases ===": "",
+
+  "// 1. Quality Assurance": "",
+  "// - Verify all tests pass before completing": "",
+  "// - Check that documentation is updated": "",
+  "// - Ensure code follows standards": "",
+  "// - Validate commit messages": "",
+
+  "// 2. Completeness Checking": "",
+  "// - Confirm all user requests addressed": "",
+  "// - Verify no errors or warnings ignored": "",
+  "// - Check for obvious next steps": "",
+  "// - Ensure proper cleanup": "",
+
+  "// 3. Workflow Enforcement": "",
+  "// - Require specific steps completed": "",
+  "// - Enforce review processes": "",
+  "// - Validate deployment readiness": "",
+  "// - Check security requirements": "",
+
+  "// 4. Subagent Coordination": "",
+  "// - Validate subagent output quality": "",
+  "// - Ensure task delegation succeeded": "",
+  "// - Coordinate multi-agent workflows": "",
+  "// - Prevent premature completion": "",
+
+  "// === Example Prompts ===": "",
+
+  "// Minimal Prompt:": "",
+  "// \"Evaluate if the session should complete. Input: $ARGUMENTS\"": "",
+
+  "// Detailed Quality Check:": "",
+  "// \"Review the session transcript and verify:": "",
+  "// 1. All files modified successfully": "",
+  "// 2. Tests pass if applicable": "",
+  "// 3. No errors in command outputs": "",
+  "// 4. User requests fully addressed": "",
+  "// Input: $ARGUMENTS": "",
+  "// Respond with decision JSON.\"": "",
+
+  "// Workflow-Specific:": "",
+  "// \"Check if deployment workflow is complete:": "",
+  "// - Code reviewed": "",
+  "// - Tests passing": "",
+  "// - Build successful": "",
+  "// - Documentation updated": "",
+  "// Input: $ARGUMENTS\"": "",
+
+  "// === Advantages of Prompt-Based Hooks ===": "",
+
+  "// 1. Context-Aware": "",
+  "// - LLM understands semantic meaning": "",
+  "// - Can interpret complex situations": "",
+  "// - Makes nuanced decisions": "",
+
+  "// 2. Flexible": "",
+  "// - Adapt to different scenarios": "",
+  "// - Handle edge cases naturally": "",
+  "// - No rigid rule programming": "",
+
+  "// 3. Natural Language": "",
+  "// - Write policies in plain English": "",
+  "// - Easy to understand and modify": "",
+  "// - Non-technical stakeholders can contribute": "",
+
+  "// 4. Intelligent": "",
+  "// - Can reason about quality": "",
+  "// - Understand user intent": "",
+  "// - Make judgment calls": "",
+
+  "// === Disadvantages ===": "",
+
+  "// 1. Performance": "",
+  "// - Slower than bash commands": "",
+  "// - Requires LLM inference": "",
+  "// - Network latency (if remote)": "",
+
+  "// 2. Cost": "",
+  "// - API calls cost money": "",
+  "// - More expensive than scripts": "",
+
+  "// 3. Determinism": "",
+  "// - May vary between runs": "",
+  "// - Harder to test exhaustively": "",
+  "// - Less predictable": "",
+
+  "// 4. Complexity": "",
+  "// - Prompt engineering required": "",
+  "// - Harder to debug": "",
+  "// - Need to validate LLM responses": "",
+
+  "// === When to Use Prompt-Based Hooks ===": "",
+
+  "// ✅ Use When:": "",
+  "// - Need semantic understanding": "",
+  "// - Quality judgments required": "",
+  "// - Complex decision logic": "",
+  "// - Natural language policies": "",
+  "// - Flexible evaluation needed": "",
+
+  "// ❌ Don't Use When:": "",
+  "// - Simple rule-based checks": "",
+  "// - Performance is critical": "",
+  "// - Determinism required": "",
+  "// - High-frequency events": "",
+  "// - Clear programmatic logic": "",
+
+  "// === Best Practices ===": "",
+
+  "// 1. Clear Instructions:": "",
+  "// - Specify exact evaluation criteria": "",
+  "// - List what to check": "",
+  "// - Define approval/blocking conditions": "",
+  "// - Provide examples if helpful": "",
+
+  "// 2. Structured Output:": "",
+  "// - Always request JSON response": "",
+  "// - Define exact schema expected": "",
+  "// - Validate response format": "",
+
+  "// 3. Appropriate Timeout:": "",
+  "// - 30-60 seconds typical": "",
+  "// - Allow for LLM inference time": "",
+  "// - Consider network latency": "",
+
+  "// 4. Error Handling:": "",
+  "// - Handle timeout gracefully": "",
+  "// - Default to safe behavior": "",
+  "// - Log LLM responses": "",
+
+  "// 5. Testing:": "",
+  "// - Test with various scenarios": "",
+  "// - Verify JSON parsing": "",
+  "// - Check decision quality": "",
+  "// - Monitor false positives/negatives": "",
+
+  "// === Example Implementation ===": "",
+
+  "// Complete Stop hook with quality checks:": "",
+  "// {": "",
+  "//   \"hooks\": {": "",
+  "//     \"Stop\": [": "",
+  "//       {": "",
+  "//         \"hooks\": [": "",
+  "//           {": "",
+  "//             \"type\": \"prompt\",": "",
+  "//             \"prompt\": \"You are a quality assurance reviewer for a Claude Code session.\\n\\nReview the session and verify:\\n1. All user requests completed\\n2. No unresolved errors\\n3. Code compiles/runs\\n4. Tests pass (if applicable)\\n5. Good stopping point\\n\\nSession data: $ARGUMENTS\\n\\nRespond with JSON:\\n{\\\"decision\\\": \\\"approve\\\" or \\\"block\\\", \\\"reason\\\": \\\"...\\\", \\\"continue\\\": true/false, \\\"stopReason\\\": \\\"...\\\"}\\n\\nApprove if quality standards met, block otherwise.\",": "",
+  "//             \"timeout\": 45": "",
+  "//           }": "",
+  "//         ]": "",
+  "//       }": "",
+  "//     ]": "",
+  "//   }": "",
+  "// }": "",
+
+  "// === Debugging Prompt-Based Hooks ===": "",
+
+  "// 1. View Execution:": "",
+  "// - Run with --debug flag": "",
+  "// - See prompt sent to LLM": "",
+  "// - See LLM response": "",
+
+  "// 2. Test Prompts:": "",
+  "// - Test prompt with sample data": "",
+  "// - Verify JSON response format": "",
+  "// - Check decision logic": "",
+
+  "// 3. Monitor Responses:": "",
+  "// - Log all LLM responses": "",
+  "// - Track approval/block rates": "",
+  "// - Identify false positives": "",
+
+  "// 4. Iterate Prompts:": "",
+  "// - Refine based on results": "",
+  "// - Add more specific criteria": "",
+  "// - Clarify ambiguous instructions": "",
+
+  "// === Security Considerations ===": "",
+
+  "// 1. Input Validation:": "",
+  "// - LLM receives session data": "",
+  "// - May contain sensitive info": "",
+  "// - Consider data exposure": "",
+
+  "// 2. Response Validation:": "",
+  "// - Validate JSON structure": "",
+  "// - Check required fields": "",
+  "// - Handle malformed responses": "",
+
+  "// 3. Prompt Injection:": "",
+  "// - Session data could contain instructions": "",
+  "// - LLM might be manipulated": "",
+  "// - Use clear system/user separation": "",
+
+  "// 4. Rate Limiting:": "",
+  "// - Prevent excessive LLM calls": "",
+  "// - Set appropriate timeouts": "",
+  "// - Monitor API usage": "",
+
+  "// === Migration from Command Hooks ===": "",
+
+  "// Before (bash command):": "",
+  "// {": "",
+  "//   \"type\": \"command\",": "",
+  "//   \"command\": \"check-completion.sh\"": "",
+  "// }": "",
+
+  "// After (prompt-based):": "",
+  "// {": "",
+  "//   \"type\": \"prompt\",": "",
+  "//   \"prompt\": \"Evaluate completion: $ARGUMENTS\",": "",
+  "//   \"timeout\": 30": "",
+  "// }": "",
+
+  "// Hybrid Approach:": "",
+  "// Use both for comprehensive validation:": "",
+  "// {": "",
+  "//   \"Stop\": [": "",
+  "//     {": "",
+  "//       \"hooks\": [": "",
+  "//         {": "",
+  "//           \"type\": \"command\",": "",
+  "//           \"command\": \"check-tests.sh\"  // Fast, deterministic": "",
+  "//         },": "",
+  "//         {": "",
+  "//           \"type\": \"prompt\",": "",
+  "//           \"prompt\": \"Quality review: $ARGUMENTS\"  // Semantic, flexible": "",
+  "//         }": "",
+  "//       ]": "",
+  "//     }": "",
+  "//   ]": "",
+  "// }": ""
+}

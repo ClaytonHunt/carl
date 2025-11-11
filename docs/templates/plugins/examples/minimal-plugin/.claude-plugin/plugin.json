@@ -1,0 +1,10 @@
+{
+  "name": "minimal-plugin",
+  "version": "1.0.0",
+  "description": "A minimal example plugin with a single command",
+  "author": {
+    "name": "CARL Project"
+  },
+  "license": "MIT",
+  "commands": "./commands"
+}

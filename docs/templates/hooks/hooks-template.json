@@ -1,0 +1,271 @@
+{
+  "hooks": {
+    "// PreToolUse - Before tool execution": "Validate, modify, or block tool calls",
+    "PreToolUse": [
+      {
+        "// Validate file writes": "",
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/validate-file-write.sh",
+            "timeout": 60
+          }
+        ]
+      },
+      {
+        "// Security check for bash commands": "",
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/validate-bash.sh",
+            "timeout": 30
+          }
+        ]
+      },
+      {
+        "// Log all tool usage": "",
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/log-tool-usage.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+
+    "// PostToolUse - After tool completes successfully": "Notify, format, or trigger actions",
+    "PostToolUse": [
+      {
+        "// Auto-format code after writing": "",
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/format-code.sh",
+            "timeout": 60
+          }
+        ]
+      },
+      {
+        "// Send notification after file changes": "",
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/notify-file-change.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+
+    "// UserPromptSubmit - Before Claude processes prompt": "Validate, inject context, or block",
+    "UserPromptSubmit": [
+      {
+        "// Inject project context": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/inject-context.sh",
+            "timeout": 30
+          }
+        ]
+      },
+      {
+        "// Validate prompt content": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/validate-prompt.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+
+    "// SessionStart - On session startup/resume": "Setup environment, load context",
+    "SessionStart": [
+      {
+        "// Setup development environment on startup": "",
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/setup-env.sh",
+            "timeout": 60
+          }
+        ]
+      },
+      {
+        "// Load context on resume": "",
+        "matcher": "resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/load-context.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+
+    "// SessionEnd - On session termination": "Cleanup, save state",
+    "SessionEnd": [
+      {
+        "// Save session metrics": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/save-metrics.sh",
+            "timeout": 30
+          }
+        ]
+      },
+      {
+        "// Cleanup temporary files": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/cleanup.sh",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
+
+    "// Stop - Main agent completes": "Validate completion, trigger follow-up",
+    "Stop": [
+      {
+        "// Validate work completion with LLM": "",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Review the session transcript and determine if all user requests were completed successfully. Return JSON with 'decision': 'approve' or 'block' and 'reason'. Input: $ARGUMENTS",
+            "timeout": 30
+          }
+        ]
+      },
+      {
+        "// Log completion": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/log-completion.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+
+    "// SubagentStop - Subagent completes": "Orchestration coordination",
+    "SubagentStop": [
+      {
+        "// Publish agent completion event (IndyDevDan pattern)": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/publish-agent-event.sh",
+            "timeout": 30
+          }
+        ]
+      },
+      {
+        "// Log subagent metrics": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/log-subagent-metrics.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+
+    "// Notification - Claude sends notification": "Custom notification handling",
+    "Notification": [
+      {
+        "// Send to external notification system": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/external-notify.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+
+    "// PreCompact - Before compacting transcript": "Backup, validate",
+    "PreCompact": [
+      {
+        "// Backup transcript before compact": "",
+        "matcher": "manual|auto",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/backup-transcript.sh",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  },
+
+  "// === Hook Configuration Notes ===": "",
+  "// 1. Matcher Patterns:": "",
+  "//    - Exact: 'Write' (matches only Write tool)": "",
+  "//    - Regex: 'Write|Edit' (matches Write OR Edit)": "",
+  "//    - Wildcard: '*' or '' (matches all tools)": "",
+  "//    - MCP: 'mcp__memory__.*' (all memory server tools)": "",
+  "//": "",
+  "// 2. Hook Types:": "",
+  "//    - command: Execute bash command": "",
+  "//    - prompt: Send to Claude Haiku for LLM evaluation (Stop/SubagentStop only)": "",
+  "//": "",
+  "// 3. Exit Codes:": "",
+  "//    - 0: Success (stdout shown to user or added to context)": "",
+  "//    - 2: Blocking error (stderr to Claude, may block operation)": "",
+  "//    - Other: Non-blocking error (stderr to user, continues)": "",
+  "//": "",
+  "// 4. Environment Variables:": "",
+  "//    - CLAUDE_PROJECT_DIR: Project root directory": "",
+  "//    - CLAUDE_CODE_REMOTE: 'true' for web, empty for CLI": "",
+  "//    - CLAUDE_ENV_FILE: Path to persist env vars (SessionStart only)": "",
+  "//    - CLAUDE_PLUGIN_ROOT: Plugin directory (plugin hooks only)": "",
+  "//": "",
+  "// 5. Security:": "",
+  "//    - Always validate inputs": "",
+  "//    - Quote variables: \"$VAR\" not $VAR": "",
+  "//    - Block path traversal (..)": "",
+  "//    - Use absolute paths": "",
+  "//    - Skip sensitive files (.env, .git/, keys)": "",
+  "//    - Test in safe environment first": "",
+  "//": "",
+  "// 6. JSON Output Format (optional):": "",
+  "//    {": "",
+  "//      \"continue\": true,": "",
+  "//      \"stopReason\": \"Message when continue=false\",": "",
+  "//      \"suppressOutput\": false,": "",
+  "//      \"systemMessage\": \"Warning to user\",": "",
+  "//      \"hookSpecificOutput\": {": "",
+  "//        \"hookEventName\": \"PreToolUse\",": "",
+  "//        \"permissionDecision\": \"allow|deny|ask\",": "",
+  "//        \"updatedInput\": {\"field\": \"new_value\"}": "",
+  "//      }": "",
+  "//    }": "",
+  "//": "",
+  "// 7. Testing:": "",
+  "//    - Test scripts manually first": "",
+  "//    - Use /hooks command to verify registration": "",
+  "//    - Run with --debug flag for detailed logging": "",
+  "//    - Validate exit codes and JSON output": "",
+  "//": "",
+  "// 8. Plugin Distribution:": "",
+  "//    - Place in plugins/{name}/hooks/hooks.json": "",
+  "//    - Reference in plugin.json": "",
+  "//    - Use ${CLAUDE_PLUGIN_ROOT} for plugin paths": ""
+}

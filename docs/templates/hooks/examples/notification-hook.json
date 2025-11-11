@@ -1,0 +1,276 @@
+{
+  "// Complete Notification Hook Example": "",
+  "// This example demonstrates notification patterns for various events": "",
+  "// including external webhooks, logging, and metrics collection.": "",
+
+  "hooks": {
+    "PostToolUse": [
+      {
+        "// === File Change Notifications ===": "",
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/notify-file-change.sh",
+            "timeout": 30
+          }
+        ]
+      },
+
+      {
+        "// === Command Execution Logging ===": "",
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/log-command.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+
+    "SubagentStop": [
+      {
+        "// === Agent Completion Events (IndyDevDan Pattern) ===": "",
+        "// Publish events to external orchestration system": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/publish-agent-event.sh",
+            "timeout": 30
+          }
+        ]
+      },
+
+      {
+        "// === Agent Metrics Collection ===": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/collect-agent-metrics.sh",
+            "timeout": 20
+          }
+        ]
+      }
+    ],
+
+    "Stop": [
+      {
+        "// === Session Completion Notification ===": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/notify-session-complete.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+
+    "Notification": [
+      {
+        "// === Custom Notification Handler ===": "",
+        "// Forward Claude notifications to external system": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/handle-notification.sh",
+            "timeout": 20
+          }
+        ]
+      }
+    ],
+
+    "SessionStart": [
+      {
+        "// === Session Start Notification ===": "",
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/notify-session-start.sh",
+            "timeout": 20
+          }
+        ]
+      }
+    ],
+
+    "SessionEnd": [
+      {
+        "// === Session End Cleanup & Notification ===": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/notify-session-end.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  },
+
+  "// === Notification Script Examples ===": "",
+
+  "// 1. notify-file-change.sh": "",
+  "// Purpose: Send notifications when files are modified": "",
+  "// Capabilities:": "",
+  "//   - Desktop notifications (notify-send, osascript)": "",
+  "//   - Webhook to external system": "",
+  "//   - Slack/Discord/Teams integration": "",
+  "//   - Email notifications": "",
+  "//   - File change logging": "",
+  "//   - Auto-formatting trigger": "",
+
+  "// Example webhook payload:": "",
+  "// {": "",
+  "//   \"event\": \"file_change\",": "",
+  "//   \"session_id\": \"abc123\",": "",
+  "//   \"file_path\": \"/path/to/file.ts\",": "",
+  "//   \"tool\": \"Write\",": "",
+  "//   \"timestamp\": \"2025-11-11T10:00:00Z\",": "",
+  "//   \"project\": \"my-project\"": "",
+  "// }": "",
+
+  "// 2. publish-agent-event.sh": "",
+  "// Purpose: Publish subagent completion events for orchestration": "",
+  "// Implementation: IndyDevDan's async event architecture": "",
+  "//   - Parse subagent result from stdin": "",
+  "//   - HTTP POST to webhook server": "",
+  "//   - Server stores in SQLite": "",
+  "//   - WebSocket broadcasts to clients": "",
+  "//   - External orchestrator coordinates based on events": "",
+
+  "// Example event payload:": "",
+  "// {": "",
+  "//   \"event\": \"subagent_complete\",": "",
+  "//   \"session_id\": \"abc123\",": "",
+  "//   \"subagent_type\": \"code-reviewer\",": "",
+  "//   \"timestamp\": \"2025-11-11T10:00:00Z\",": "",
+  "//   \"status\": \"success\",": "",
+  "//   \"duration_ms\": 5000": "",
+  "// }": "",
+
+  "// 3. collect-agent-metrics.sh": "",
+  "// Purpose: Collect performance metrics for agents": "",
+  "// Metrics collected:": "",
+  "//   - Execution duration": "",
+  "//   - Tool usage counts": "",
+  "//   - Success/failure rates": "",
+  "//   - Context window usage": "",
+  "//   - Token consumption": "",
+  "//   - Error rates": "",
+
+  "// 4. notify-session-complete.sh": "",
+  "// Purpose: Send notification when main agent completes": "",
+  "// Actions:": "",
+  "//   - Summary of session activity": "",
+  "//   - Files modified count": "",
+  "//   - Commands executed count": "",
+  "//   - Duration statistics": "",
+  "//   - Status (success/error)": "",
+
+  "// 5. handle-notification.sh": "",
+  "// Purpose: Forward Claude notifications to external systems": "",
+  "// Notification types:": "",
+  "//   - Permission requests": "",
+  "//   - Idle waiting": "",
+  "//   - User input needed": "",
+  "//   - System warnings": "",
+
+  "// === Notification Patterns ===": "",
+
+  "// Pattern 1: Desktop Notifications": "",
+  "// - Use notify-send (Linux)": "",
+  "// - Use osascript (macOS)": "",
+  "// - Use Windows toast notifications": "",
+  "// - Include relevant context (file name, action)": "",
+
+  "// Pattern 2: Webhook Integration": "",
+  "// - HTTP POST to webhook URL": "",
+  "// - Include authentication headers": "",
+  "// - Handle timeouts gracefully": "",
+  "// - Retry on failure (with backoff)": "",
+
+  "// Pattern 3: Chat Platform Integration": "",
+  "// Slack:": "",
+  "//   curl -X POST https://hooks.slack.com/services/YOUR/WEBHOOK/URL \\": "",
+  "//     -H 'Content-Type: application/json' \\": "",
+  "//     -d '{\"text\":\"File modified: file.ts\"}'": "",
+  "// Discord:": "",
+  "//   curl -X POST https://discord.com/api/webhooks/YOUR/WEBHOOK \\": "",
+  "//     -H 'Content-Type: application/json' \\": "",
+  "//     -d '{\"content\":\"File modified: file.ts\"}'": "",
+
+  "// Pattern 4: Metrics & Analytics": "",
+  "// - Write to time-series database": "",
+  "// - Send to analytics platform": "",
+  "// - Store in local SQLite": "",
+  "// - Export to CSV/JSON": "",
+
+  "// Pattern 5: Event Sourcing (IndyDevDan)": "",
+  "// - Publish all events to central log": "",
+  "// - Enable event replay": "",
+  "// - Support temporal queries": "",
+  "// - Coordinate distributed agents": "",
+
+  "// === Webhook Server Example ===": "",
+  "// Simple Node.js webhook receiver:": "",
+  "// const express = require('express');": "",
+  "// const app = express();": "",
+  "// app.use(express.json());": "",
+  "// app.post('/webhook', (req, res) => {": "",
+  "//   console.log('Event received:', req.body);": "",
+  "//   // Store in database, broadcast via WebSocket, etc.": "",
+  "//   res.json({ success: true });": "",
+  "// });": "",
+  "// app.listen(3000);": "",
+
+  "// === Security Considerations ===": "",
+  "// 1. Validate webhook URLs": "",
+  "// 2. Use HTTPS for external webhooks": "",
+  "// 3. Include authentication tokens": "",
+  "// 4. Don't send sensitive data in notifications": "",
+  "// 5. Rate limit notification sending": "",
+  "// 6. Handle webhook failures gracefully": "",
+  "// 7. Log notification errors": "",
+
+  "// === Performance Best Practices ===": "",
+  "// 1. Make notifications non-blocking": "",
+  "// 2. Use background processes for slow operations": "",
+  "// 3. Batch notifications when possible": "",
+  "// 4. Cache notification configurations": "",
+  "// 5. Set appropriate timeouts": "",
+  "// 6. Handle network failures gracefully": "",
+
+  "// === Testing Notifications ===": "",
+  "// 1. Test with mock webhook server": "",
+  "// 2. Verify payload format": "",
+  "// 3. Test error handling": "",
+  "// 4. Test timeout behavior": "",
+  "// 5. Test with various event types": "",
+  "// 6. Verify notification deduplication": "",
+
+  "// === Multi-Agent Observability (IndyDevDan) ===": "",
+  "// Complete event flow for orchestration:": "",
+  "// 1. SubagentStop hook publishes event": "",
+  "// 2. Webhook server receives and stores": "",
+  "// 3. WebSocket broadcasts to clients": "",
+  "// 4. Orchestrator reacts to events": "",
+  "// 5. New agents spawned based on state": "",
+  "// 6. Cycle continues until workflow complete": "",
+
+  "// Example orchestrator logic:": "",
+  "// - Wait for planning-agent completion": "",
+  "// - Spawn parallel worker agents": "",
+  "// - Collect results from all workers": "",
+  "// - Spawn aggregator agent": "",
+  "// - Complete workflow": "",
+
+  "// === Configuration via Environment ===": "",
+  "// Set these in .env or session environment:": "",
+  "// CLAUDE_WEBHOOK_URL=https://api.example.com/webhook": "",
+  "// CLAUDE_SLACK_WEBHOOK=https://hooks.slack.com/...": "",
+  "// CLAUDE_NOTIFICATION_ENABLED=true": "",
+  "// CLAUDE_METRICS_DB=/path/to/metrics.db": ""
+}

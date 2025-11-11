@@ -1,0 +1,47 @@
+{
+  "mcpServers": {
+    "server-name": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/servers/server.js"],
+      "env": {
+        "API_KEY": "${API_KEY}",
+        "CONFIG_PATH": "${CLAUDE_PLUGIN_ROOT}/config.json",
+        "LOG_LEVEL": "info"
+      }
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "${PWD}"
+      ],
+      "env": {}
+    },
+    "github": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      }
+    },
+    "custom-python-server": {
+      "command": "python",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/servers/my_server.py"],
+      "env": {
+        "DATABASE_URL": "${DATABASE_URL}",
+        "MAX_CONNECTIONS": "10"
+      }
+    },
+    "binary-server": {
+      "command": "${CLAUDE_PLUGIN_ROOT}/bin/server",
+      "args": ["--port", "8080"],
+      "env": {
+        "SERVER_MODE": "production"
+      }
+    }
+  }
+}

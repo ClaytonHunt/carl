@@ -1,0 +1,147 @@
+{
+  "// Complete Validation Hook Example": "",
+  "// This example demonstrates a comprehensive validation pattern": "",
+  "// that enforces security policies and coding standards.": "",
+
+  "hooks": {
+    "PreToolUse": [
+      {
+        "// === File Write Validation ===": "",
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/validate-file-write.sh",
+            "timeout": 60
+          }
+        ]
+      },
+
+      {
+        "// === Bash Command Security Validation ===": "",
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/validate-bash-command.sh",
+            "timeout": 30
+          }
+        ]
+      },
+
+      {
+        "// === Notebook Edit Validation ===": "",
+        "matcher": "NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/validate-notebook.sh",
+            "timeout": 30
+          }
+        ]
+      },
+
+      {
+        "// === Web Request Validation ===": "",
+        "matcher": "WebFetch|WebSearch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/validate-web-request.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+
+    "UserPromptSubmit": [
+      {
+        "// === Prompt Content Validation ===": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scripts/validate-prompt.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
+
+  "// === Validation Script Examples ===": "",
+  "// Below are example implementations for each validation script": "",
+
+  "// 1. validate-file-write.sh": "",
+  "// - Block path traversal (..)": "",
+  "// - Block sensitive files (.env, keys, credentials)": "",
+  "// - Block files outside project directory": "",
+  "// - Enforce file size limits": "",
+  "// - Check file permissions": "",
+
+  "// 2. validate-bash-command.sh": "",
+  "// - Block dangerous commands (rm -rf /, dd, mkfs)": "",
+  "// - Block privilege escalation (sudo, su)": "",
+  "// - Block network commands if policy requires": "",
+  "// - Validate command syntax": "",
+  "// - Log all bash commands": "",
+
+  "// 3. validate-notebook.sh": "",
+  "// - Validate notebook JSON structure": "",
+  "// - Check for malicious code patterns": "",
+  "// - Enforce cell size limits": "",
+  "// - Validate kernel compatibility": "",
+
+  "// 4. validate-web-request.sh": "",
+  "// - Whitelist allowed domains": "",
+  "// - Block internal network access": "",
+  "// - Rate limit requests": "",
+  "// - Log all web requests": "",
+
+  "// 5. validate-prompt.sh": "",
+  "// - Block prompts with sensitive data patterns": "",
+  "// - Check prompt length": "",
+  "// - Log prompt analytics": "",
+  "// - Inject context based on keywords": "",
+
+  "// === Exit Codes ===": "",
+  "// 0  - Validation passed, allow operation": "",
+  "// 2  - Validation failed, block operation (error to Claude/user)": "",
+  "// 1+ - Warning, operation continues (shown to user)": "",
+
+  "// === JSON Output for Advanced Control ===": "",
+  "// Scripts can return JSON for fine-grained control:": "",
+  "// {": "",
+  "//   \"continue\": true,": "",
+  "//   \"hookSpecificOutput\": {": "",
+  "//     \"hookEventName\": \"PreToolUse\",": "",
+  "//     \"permissionDecision\": \"allow|deny|ask\",": "",
+  "//     \"permissionDecisionReason\": \"Explanation\",": "",
+  "//     \"updatedInput\": {\"field\": \"new_value\"}": "",
+  "//   }": "",
+  "// }": "",
+
+  "// === Security Best Practices ===": "",
+  "// 1. Always validate inputs - never trust data": "",
+  "// 2. Quote all variables - \"$VAR\" not $VAR": "",
+  "// 3. Use absolute paths for scripts": "",
+  "// 4. Block path traversal attempts": "",
+  "// 5. Maintain whitelist of safe operations": "",
+  "// 6. Log all security events": "",
+  "// 7. Test validation logic thoroughly": "",
+  "// 8. Review and update validation rules regularly": "",
+
+  "// === Testing Validation Hooks ===": "",
+  "// 1. Test with safe operations (should pass)": "",
+  "// 2. Test with blocked patterns (should fail with exit 2)": "",
+  "// 3. Test edge cases (empty input, special characters)": "",
+  "// 4. Verify error messages are clear": "",
+  "// 5. Test performance (hooks should be fast)": "",
+  "// 6. Test concurrent executions": "",
+
+  "// === Performance Considerations ===": "",
+  "// - Keep validation fast (<100ms typical)": "",
+  "// - Use timeouts to prevent hanging": "",
+  "// - Cache validation results when appropriate": "",
+  "// - Avoid expensive operations (network, large file reads)": "",
+  "// - Run multiple validations in parallel if independent": ""
+}
