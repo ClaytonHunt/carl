@@ -79,7 +79,12 @@ describe('CascadeManager - Foundation', () => {
       expect(registry).toHaveProperty('version', '1.0.0');
       expect(registry).toHaveProperty('last_updated');
       expect(registry).toHaveProperty('work_items');
-      expect(registry).toHaveProperty('global_id_counter', 0);
+      expect(registry).toHaveProperty('id_counters'); // Per-type ID counters
+      expect(registry.id_counters).toHaveProperty('P', 0);
+      expect(registry.id_counters).toHaveProperty('E', 0);
+      expect(registry.id_counters).toHaveProperty('F', 0);
+      expect(registry.id_counters).toHaveProperty('S', 0);
+      expect(registry.id_counters).toHaveProperty('T', 0);
       expect(registry.work_items).toEqual({});
     });
   });
@@ -92,7 +97,8 @@ describe('CascadeManager - Foundation', () => {
 
       expect(registry).toBeDefined();
       expect(registry.version).toBe('1.0.0');
-      expect(typeof registry.global_id_counter).toBe('number');
+      expect(registry.id_counters).toBeDefined();
+      expect(typeof registry.id_counters.P).toBe('number');
     });
 
     it('should create empty registry if file does not exist', async () => {
@@ -101,7 +107,8 @@ describe('CascadeManager - Foundation', () => {
 
       expect(registry).toBeDefined();
       expect(registry.version).toBe('1.0.0');
-      expect(registry.global_id_counter).toBe(0);
+      expect(registry.id_counters).toBeDefined();
+      expect(registry.id_counters.P).toBe(0);
       expect(registry.work_items).toEqual({});
     });
 
@@ -111,7 +118,7 @@ describe('CascadeManager - Foundation', () => {
       expect(registry).toHaveProperty('version');
       expect(registry).toHaveProperty('last_updated');
       expect(registry).toHaveProperty('work_items');
-      expect(registry).toHaveProperty('global_id_counter');
+      expect(registry).toHaveProperty('id_counters'); // Per-type counters instead of global
     });
   });
 
@@ -162,7 +169,7 @@ describe('CascadeManager - Foundation', () => {
         version: '1.0.0',
         last_updated: new Date().toISOString(),
         work_items: {},
-        global_id_counter: 0
+        id_counters: { P: 0, E: 0, F: 0, S: 0, B: 0, PH: 0, T: 0 }
       };
 
       const result = await manager.saveRegistry(registry);

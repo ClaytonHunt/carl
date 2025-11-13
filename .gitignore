@@ -29,4 +29,4 @@ coverage/
 
 # Cascade work items (real work items should be in a separate location)
 # Tests should use tests/.test-artifacts/ instead
-/.cascade/
+.cascade/

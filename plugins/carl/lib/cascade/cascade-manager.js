@@ -124,7 +124,7 @@ class CascadeManager {
             completed: 0,
             in_progress: 0,
             planned: 0,
-            blocked: 0
+            percentage: 0
           },
           children: {},
           updated: now
@@ -133,18 +133,43 @@ class CascadeManager {
       }
 
       // 7. Update registry with ID and path
+      // Convert type code to full name (P → Project, E → Epic, etc.)
+      const typeName = this.workItemTypes[type].name;
+
+      // Calculate relative path to markdown file (Cascade expects paths relative to .cascade dir)
+      // Project: "P0001.md" (just filename in root)
+      // Others: "E0003-slug/E0003.md" (relative path from .cascade)
+      let relativePath;
+      if (type === 'P') {
+        relativePath = `${id}.md`;
+      } else if (type === 'T') {
+        // Tasks: parent directory + filename (e.g., "S0014-slug/T0023.md")
+        const relativeDir = dirPath.replace(this.cascadeDir + path.sep, '').replace(this.cascadeDir, '');
+        relativePath = path.join(relativeDir, `${id}.md`);
+      } else {
+        // Epic/Feature/Story/Bug/Phase: directory + filename
+        const relativeDir = dirPath.replace(this.cascadeDir + path.sep, '').replace(this.cascadeDir, '');
+        relativePath = path.join(relativeDir, `${id}.md`);
+      }
+
       const metadata = {
-        type,
-        path: dirPath,
+        id: id,
+        type: typeName,
+        path: relativePath,
         title: data.title,
         status: data.status || 'planned',
-        ...(data.parent && { parent: data.parent }),
+        parent: data.parent || null,
         created: now,
         updated: now
       };
       await this.addToRegistry(id, metadata);
 
-      // 8. Return created work item with ID and full path
+      // 8. Update parent's state.json to include this child
+      if (data.parent) {
+        await this.addChildToParentState(data.parent, id, data.status || 'planned');
+      }
+
+      // 9. Return created work item with ID and full path
       return {
         id,
         type,
@@ -238,8 +263,8 @@ class CascadeManager {
       }
 
       // 3. Read markdown file
-      const fileName = `${id}.md`;
-      const filePath = path.join(metadata.path, fileName);
+      // metadata.path is relative to cascadeDir and includes the filename
+      const filePath = path.join(this.cascadeDir, metadata.path);
       const markdownContent = await fs.readFile(filePath, 'utf-8');
 
       // 4. Parse frontmatter and content
@@ -249,7 +274,9 @@ class CascadeManager {
       let state = null;
       const { type } = this.parseId(id);
       if (type !== 'T') {
-        const statePath = path.join(metadata.path, 'state.json');
+        // Get directory containing the work item file
+        const workItemDir = path.dirname(filePath);
+        const statePath = path.join(workItemDir, 'state.json');
         try {
           const stateContent = await fs.readFile(statePath, 'utf-8');
           state = JSON.parse(stateContent);
@@ -260,13 +287,14 @@ class CascadeManager {
       }
 
       // 6. Return combined object with markdown data + state
+      // Note: frontmatter spreads last so it overwrites registry metadata (e.g., type code wins over type name)
       return {
         id,
+        ...metadata,
         ...parsed.frontmatter,
         content: parsed.content,
         state,
-        filePath,
-        ...metadata
+        filePath
       };
     } catch (error) {
       throw new Error(`Failed to get work item: ${error.message}`);
@@ -400,7 +428,10 @@ class CascadeManager {
         // Write updated state
         const registry = await this.loadRegistry();
         const metadata = registry.work_items[id];
-        const statePath = path.join(metadata.path, 'state.json');
+        // metadata.path includes filename, get directory and join with state.json
+        const filePath = path.join(this.cascadeDir, metadata.path);
+        const dirPath = path.dirname(filePath);
+        const statePath = path.join(dirPath, 'state.json');
 
         await fs.writeFile(statePath, JSON.stringify(state, null, 2), 'utf-8');
       }
@@ -417,6 +448,62 @@ class CascadeManager {
       return true;
     } catch (error) {
       throw new Error(`Failed to update status: ${error.message}`);
+    }
+  }
+
+  /**
+   * Add child to parent's state.json children map
+   * Required by Cascade v0.2.0 validation
+   * @param {string} parentId - Parent work item ID
+   * @param {string} childId - Child work item ID
+   * @param {string} childStatus - Child's initial status
+   * @returns {Promise<void>}
+   */
+  async addChildToParentState(parentId, childId, childStatus) {
+    try {
+      const { type: parentType } = this.parseId(parentId);
+
+      // Projects and non-Task items have state.json
+      if (parentType !== 'T') {
+        // Get parent's state.json path
+        const registry = await this.loadRegistry();
+        const parentEntry = registry.work_items[parentId];
+
+        if (!parentEntry) {
+          throw new Error(`Parent work item not found: ${parentId}`);
+        }
+
+        // Construct state.json path for parent
+        let parentStatePath;
+        if (parentType === 'P') {
+          parentStatePath = path.join(this.cascadeDir, 'state.json');
+        } else {
+          const parentDir = path.dirname(parentEntry.path);
+          parentStatePath = path.join(this.cascadeDir, parentDir, 'state.json');
+        }
+
+        // Load parent's state
+        const stateContent = await fs.readFile(parentStatePath, 'utf-8');
+        const parentState = JSON.parse(stateContent);
+
+        // Add child to children map
+        if (!parentState.children) {
+          parentState.children = {};
+        }
+
+        parentState.children[childId] = {
+          status: childStatus,
+          progress: 0  // Initial progress is 0
+        };
+
+        // Update timestamp
+        parentState.updated = new Date().toISOString();
+
+        // Write updated state
+        await fs.writeFile(parentStatePath, JSON.stringify(parentState, null, 2), 'utf-8');
+      }
+    } catch (error) {
+      throw new Error(`Failed to add child to parent state: ${error.message}`);
     }
   }
 
@@ -442,7 +529,9 @@ class CascadeManager {
       // 2. Remove directory (if has directory) or file (if Task)
       if (this.hasDirectory(type)) {
         // Remove entire directory
-        await fs.rm(workItem.path, { recursive: true, force: true });
+        // workItem.filePath points to the markdown file, get its directory
+        const dirPath = path.dirname(workItem.filePath);
+        await fs.rm(dirPath, { recursive: true, force: true });
       } else {
         // Remove just the file (Task)
         await fs.unlink(workItem.filePath);
@@ -480,11 +569,15 @@ class CascadeManager {
         return []; // Parent not found - return empty array
       }
 
-      const parentPath = parentMetadata.path;
+      // parentMetadata.path is the file path (e.g., "S0004-story/S0004.md")
+      // For directories with children, we need the directory path
+      // For Projects (P####.md), the directory is the cascade root
+      const parentFilePath = path.join(this.cascadeDir, parentMetadata.path);
+      const parentDirPath = path.dirname(parentFilePath);
       const children = [];
 
       // 2. List items in parent directory
-      const items = await fs.readdir(parentPath, { withFileTypes: true });
+      const items = await fs.readdir(parentDirPath, { withFileTypes: true });
 
       // 3. Process subdirectories (Epics/Features/Stories/Bugs/Phases)
       for (const item of items) {
@@ -642,7 +735,10 @@ class CascadeManager {
       }
 
       // 2. Read state.json from work item directory
-      const statePath = path.join(metadata.path, 'state.json');
+      // metadata.path includes filename, get directory and join with state.json
+      const filePath = path.join(this.cascadeDir, metadata.path);
+      const dirPath = path.dirname(filePath);
+      const statePath = path.join(dirPath, 'state.json');
       const stateContent = await fs.readFile(statePath, 'utf-8');
 
       // 3. Return state object
@@ -717,9 +813,20 @@ class CascadeManager {
       // Load registry
       const registry = await this.loadRegistry();
 
-      // Increment global counter
-      registry.global_id_counter += 1;
-      const idNumber = registry.global_id_counter;
+      // Find the maximum ID across all types to maintain global uniqueness
+      let maxId = 0;
+      Object.values(registry.id_counters).forEach(count => {
+        if (count > maxId) maxId = count;
+      });
+
+      // Use next global number
+      const idNumber = maxId + 1;
+
+      // Update the specific type counter
+      if (!registry.id_counters[type]) {
+        registry.id_counters[type] = 0;
+      }
+      registry.id_counters[type] = idNumber;
 
       // Save registry with updated counter
       await this.saveRegistry(registry);
@@ -778,7 +885,15 @@ class CascadeManager {
           version: '1.0.0',
           last_updated: new Date().toISOString(),
           work_items: {},
-          global_id_counter: 0
+          id_counters: {
+            P: 0,
+            E: 0,
+            F: 0,
+            S: 0,
+            B: 0,
+            PH: 0,
+            T: 0
+          }
         };
         return emptyRegistry;
       }
@@ -797,7 +912,7 @@ class CascadeManager {
       registry.last_updated = new Date().toISOString();
 
       // Validate registry structure
-      if (!registry.version || !registry.work_items || typeof registry.global_id_counter !== 'number') {
+      if (!registry.version || !registry.work_items || !registry.id_counters) {
         throw new Error('Invalid registry structure');
       }
 
@@ -907,6 +1022,19 @@ class CascadeManager {
             continue;
           }
 
+          // Special handling for 'type' criterion - convert code to name
+          if (key === 'type') {
+            // If searching by type code (e.g., 'E'), convert to type name (e.g., 'Epic')
+            let searchValue = value;
+            if (this.workItemTypes[value]) {
+              searchValue = this.workItemTypes[value].name;
+            }
+            if (metadata.type !== searchValue) {
+              return false;
+            }
+            continue;
+          }
+
           // Check if metadata matches criterion
           if (metadata[key] !== value) {
             return false;
@@ -1004,19 +1132,31 @@ class CascadeManager {
         throw new Error(`Parent work item not found: ${parentId}`);
       }
 
-      // Get parent directory
-      const parentPath = parentEntry.path;
+      // Get parent directory from registry path (which is now a markdown file path)
+      // Registry now stores:
+      // - Project: "P0001.md" → directory is .cascade/
+      // - Epic: "E0002-slug/E0002.md" → directory is .cascade/E0002-slug/
+      let parentDir;
+      const { type: parentType } = this.parseId(parentId);
+      if (parentType === 'P') {
+        // Project markdown file is in cascade root, so children go in cascade root
+        parentDir = this.cascadeDir;
+      } else {
+        // Extract directory from markdown path (e.g., "E0002-slug/E0002.md" → "E0002-slug")
+        const parentRelativeDir = path.dirname(parentEntry.path);
+        parentDir = path.join(this.cascadeDir, parentRelativeDir);
+      }
 
       // Tasks don't have their own directory - they live in parent directory
       if (type === 'T') {
-        return parentPath;
+        return parentDir;
       }
 
       // Generate directory name for this work item
       const dirName = this.generateDirectoryName(id, title);
 
-      // Combine parent path + directory name
-      return path.join(parentPath, dirName);
+      // Combine parent directory + this item's directory name
+      return path.join(parentDir, dirName);
     } catch (error) {
       throw new Error(`Failed to get work item path: ${error.message}`);
     }
@@ -1040,7 +1180,15 @@ class CascadeManager {
         version: '1.0.0',
         last_updated: new Date().toISOString(),
         work_items: {},
-        global_id_counter: 0
+        id_counters: {
+          P: 0,
+          E: 0,
+          F: 0,
+          S: 0,
+          B: 0,
+          PH: 0,
+          T: 0
+        }
       };
       await this.saveRegistry(registry);
 

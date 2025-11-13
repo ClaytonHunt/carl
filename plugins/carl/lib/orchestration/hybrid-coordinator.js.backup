@@ -1,0 +1,783 @@
+/**
+ * Hybrid Execution Coordinator
+ *
+ * Intelligently orchestrates work items using a hybrid approach that combines:
+ * - Parallel execution for independent work items (using WorkerPool)
+ * - Sequential execution for dependent chains (using ChainExecutor)
+ * - Dynamic scheduling based on dependency analysis
+ * - Automatic optimization for maximum throughput
+ *
+ * Based on IndyDevDan's orchestration principles:
+ * - "Do more when possible, wait when needed"
+ * - Async-first execution with clean context separation
+ * - Observable by default with real-time progress tracking
+ * - Graceful degradation with partial failure handling
+ * - Event-driven coordination
+ *
+ * Architecture:
+ * 1. Analyze dependency graph to identify execution waves
+ * 2. Within each wave, execute independent items in parallel
+ * 3. Between waves, wait for all items to complete before proceeding
+ * 4. Handle failures gracefully and continue with unaffected work
+ * 5. Provide real-time progress updates and execution metrics
+ */
+
+const EventEmitter = require('events');
+const WorkerPool = require('./worker-pool');
+const ChainExecutor = require('./chain-executor');
+const { ParallelExecutionAnalyzer } = require('../cascade/parallel-execution-analyzer');
+const { DependencyGraph } = require('../cascade/dependency-graph');
+
+// Coordinator states
+const CoordinatorState = {
+  INITIALIZING: 'initializing',
+  READY: 'ready',
+  ANALYZING: 'analyzing',
+  EXECUTING: 'executing',
+  PAUSED: 'paused',
+  COMPLETED: 'completed',
+  FAILED: 'failed',
+  CANCELLED: 'cancelled',
+};
+
+// Execution strategies
+const ExecutionStrategy = {
+  PURE_PARALLEL: 'pure_parallel',      // All items in parallel (no dependencies)
+  PURE_SEQUENTIAL: 'pure_sequential',  // All items sequential (linear chain)
+  HYBRID: 'hybrid',                     // Mixed parallel and sequential
+};
+
+// Work item execution states
+const ItemState = {
+  PENDING: 'pending',
+  READY: 'ready',
+  EXECUTING: 'executing',
+  COMPLETED: 'completed',
+  FAILED: 'failed',
+  SKIPPED: 'skipped',
+};
+
+class HybridCoordinator extends EventEmitter {
+  constructor(config = {}) {
+    super();
+
+    this.config = {
+      maxConcurrency: config.maxConcurrency || 4,
+      enableOptimization: config.enableOptimization !== false,
+      enableFailureRecovery: config.enableFailureRecovery !== false,
+      continueOnFailure: config.continueOnFailure !== false,
+      timeout: config.timeout || 3600000, // 1 hour default
+      stepTimeout: config.stepTimeout || 300000, // 5 minutes per item
+      ...config,
+    };
+
+    this.state = CoordinatorState.INITIALIZING;
+    this.workItems = new Map(); // itemId -> item definition
+    this.itemStates = new Map(); // itemId -> ItemState
+    this.itemResults = new Map(); // itemId -> result
+    this.itemErrors = new Map(); // itemId -> error
+
+    this.dependencyGraph = null;
+    this.executionPlan = null;
+    this.strategy = null;
+
+    this.workerPool = null;
+    this.chainExecutor = null;
+
+    this.currentWave = -1;
+    this.startTime = null;
+    this.endTime = null;
+
+    this.metrics = {
+      totalItems: 0,
+      completedItems: 0,
+      failedItems: 0,
+      skippedItems: 0,
+      totalWaves: 0,
+      completedWaves: 0,
+    };
+  }
+
+  /**
+   * Add a work item to be executed
+   * @param {Object} item - Work item definition
+   * @param {string} item.id - Unique item identifier
+   * @param {string} item.name - Human-readable name
+   * @param {Function} item.execute - Async function (context) => result
+   * @param {string[]} [item.dependencies] - Array of item IDs this depends on
+   * @param {string} [item.priority] - Priority level (critical, high, medium, low)
+   * @param {string} [item.type] - Work item type for organization
+   * @param {Object} [item.metadata] - Additional metadata
+   * @returns {HybridCoordinator} This coordinator for chaining
+   */
+  addItem(item) {
+    if (!item.id) {
+      throw new Error('Work item must have an id');
+    }
+
+    if (!item.execute || typeof item.execute !== 'function') {
+      throw new Error('Work item must have an execute function');
+    }
+
+    if (this.workItems.has(item.id)) {
+      throw new Error(`Work item ${item.id} already exists`);
+    }
+
+    const itemDef = {
+      ...item,
+      dependencies: item.dependencies || [],
+      priority: item.priority || 'medium',
+      type: item.type || 'task',
+      metadata: item.metadata || {},
+    };
+
+    this.workItems.set(item.id, itemDef);
+    this.itemStates.set(item.id, ItemState.PENDING);
+    this.metrics.totalItems++;
+
+    return this;
+  }
+
+  /**
+   * Add multiple work items at once
+   * @param {Array<Object>} items - Array of work item definitions
+   * @returns {HybridCoordinator} This coordinator for chaining
+   */
+  addItems(items) {
+    for (const item of items) {
+      this.addItem(item);
+    }
+    return this;
+  }
+
+  /**
+   * Analyze dependencies and build execution plan
+   * @returns {Promise<HybridCoordinator>} This coordinator for chaining
+   */
+  async analyze() {
+    this._setState(CoordinatorState.ANALYZING);
+
+    this.emit('analysis:started', {
+      totalItems: this.workItems.size,
+      timestamp: Date.now(),
+    });
+
+    try {
+      // Build dependency graph
+      this.dependencyGraph = this._buildDependencyGraph();
+
+      // Analyze for parallel execution
+      const analyzer = new ParallelExecutionAnalyzer(this.dependencyGraph);
+      this.executionPlan = analyzer.analyze({
+        maxConcurrent: this.config.maxConcurrency,
+        respectPriority: true,
+      });
+
+      // Determine execution strategy
+      this.strategy = this._determineStrategy();
+
+      // Apply optimizations if enabled
+      if (this.config.enableOptimization) {
+        this._optimizeExecutionPlan();
+      }
+
+      this.metrics.totalWaves = this.executionPlan.waves.length;
+
+      this._setState(CoordinatorState.READY);
+
+      this.emit('analysis:completed', {
+        strategy: this.strategy,
+        totalWaves: this.executionPlan.waves.length,
+        metrics: this.executionPlan.metrics,
+        timestamp: Date.now(),
+      });
+
+      return this;
+    } catch (error) {
+      this.emit('analysis:failed', {
+        error: error.message,
+        timestamp: Date.now(),
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Execute all work items according to the execution plan
+   * @param {Object} initialContext - Initial context for execution
+   * @returns {Promise<Object>} Execution result
+   */
+  async execute(initialContext = {}) {
+    if (this.state !== CoordinatorState.READY) {
+      throw new Error(`Cannot execute in state: ${this.state}`);
+    }
+
+    this._setState(CoordinatorState.EXECUTING);
+    this.startTime = Date.now();
+    const context = { ...initialContext };
+
+    this.emit('execution:started', {
+      strategy: this.strategy,
+      totalWaves: this.executionPlan.waves.length,
+      totalItems: this.workItems.size,
+      startTime: this.startTime,
+    });
+
+    try {
+      let result;
+
+      // Execute based on strategy
+      switch (this.strategy) {
+        case ExecutionStrategy.PURE_PARALLEL:
+          result = await this._executePureParallel(context);
+          break;
+
+        case ExecutionStrategy.PURE_SEQUENTIAL:
+          result = await this._executePureSequential(context);
+          break;
+
+        case ExecutionStrategy.HYBRID:
+          result = await this._executeHybrid(context);
+          break;
+
+        default:
+          throw new Error(`Unknown strategy: ${this.strategy}`);
+      }
+
+      this._setState(CoordinatorState.COMPLETED);
+      this.endTime = Date.now();
+
+      const finalResult = {
+        success: true,
+        strategy: this.strategy,
+        totalItems: this.metrics.totalItems,
+        completedItems: this.metrics.completedItems,
+        failedItems: this.metrics.failedItems,
+        skippedItems: this.metrics.skippedItems,
+        duration: this.endTime - this.startTime,
+        context: result.context || context,
+        results: Object.fromEntries(this.itemResults),
+        metrics: this.executionPlan.metrics,
+      };
+
+      this.emit('execution:completed', finalResult);
+      return finalResult;
+    } catch (error) {
+      return this._handleExecutionFailure(error, context);
+    }
+  }
+
+  /**
+   * Build dependency graph from work items
+   * @private
+   */
+  _buildDependencyGraph() {
+    const graph = new DependencyGraph();
+
+    // Add all work items as nodes
+    for (const [itemId, item] of this.workItems) {
+      graph.addNode(itemId, {
+        type: item.type,
+        title: item.name,
+        priority: item.priority,
+        status: 'planned',
+      });
+    }
+
+    // Add dependency edges
+    for (const [itemId, item] of this.workItems) {
+      for (const depId of item.dependencies) {
+        if (!this.workItems.has(depId)) {
+          throw new Error(`Item ${itemId} depends on unknown item ${depId}`);
+        }
+        graph.addEdge(itemId, depId, { type: 'explicit' });
+      }
+    }
+
+    return graph;
+  }
+
+  /**
+   * Determine optimal execution strategy
+   * @private
+   */
+  _determineStrategy() {
+    const { waves } = this.executionPlan;
+
+    // Pure parallel: single wave
+    if (waves.length === 1) {
+      return ExecutionStrategy.PURE_PARALLEL;
+    }
+
+    // Pure sequential: all waves have single item
+    const allSingleItem = waves.every(wave => wave.length === 1);
+    if (allSingleItem) {
+      return ExecutionStrategy.PURE_SEQUENTIAL;
+    }
+
+    // Hybrid: mix of parallel and sequential
+    return ExecutionStrategy.HYBRID;
+  }
+
+  /**
+   * Optimize execution plan
+   * @private
+   */
+  _optimizeExecutionPlan() {
+    // Future optimization strategies:
+    // 1. Critical path prioritization
+    // 2. Resource-aware scheduling
+    // 3. Adaptive wave sizing based on historical performance
+    // 4. Load balancing across workers
+
+    // For now, plan is already optimized by ParallelExecutionAnalyzer
+  }
+
+  /**
+   * Execute all items in parallel (no dependencies)
+   * @private
+   */
+  async _executePureParallel(context) {
+    this.emit('strategy:parallel', {
+      itemCount: this.workItems.size,
+      timestamp: Date.now(),
+    });
+
+    // Initialize worker pool
+    this.workerPool = new WorkerPool({
+      maxConcurrency: this.config.maxConcurrency,
+      mode: 'fixed',
+    });
+
+    await this.workerPool.initialize();
+    await this.workerPool.start();
+
+    // Listen to worker pool events
+    this._attachWorkerPoolListeners();
+
+    // Submit all items
+    const tasks = Array.from(this.workItems.values()).map(item => ({
+      id: item.id,
+      name: item.name,
+      execute: async () => {
+        const result = await item.execute(context);
+        return result;
+      },
+      maxRetries: this.config.enableFailureRecovery ? 3 : 0,
+      retryCount: 0,
+    }));
+
+    try {
+      const results = await this.workerPool.submitBatch(tasks);
+
+      // Store results
+      results.forEach((result, index) => {
+        const item = tasks[index];
+        this.itemResults.set(item.id, result);
+        this.itemStates.set(item.id, ItemState.COMPLETED);
+        this.metrics.completedItems++;
+      });
+
+      return { context };
+    } finally {
+      await this.workerPool.terminate();
+    }
+  }
+
+  /**
+   * Execute all items sequentially (linear chain)
+   * @private
+   */
+  async _executePureSequential(context) {
+    this.emit('strategy:sequential', {
+      itemCount: this.workItems.size,
+      timestamp: Date.now(),
+    });
+
+    // Initialize chain executor
+    this.chainExecutor = new ChainExecutor({
+      enableRollback: false, // Items don't support rollback
+      rollbackOnFailure: false,
+      continueOnNonCriticalFailure: this.config.continueOnFailure,
+      stepTimeout: this.config.stepTimeout,
+    });
+
+    // Add all items as steps
+    const sortedItems = this.executionPlan.waves.flat();
+    for (const itemId of sortedItems) {
+      const item = this.workItems.get(itemId);
+      this.chainExecutor.addStep({
+        id: item.id,
+        name: item.name,
+        execute: item.execute,
+        dependencies: item.dependencies,
+        priority: item.priority,
+      });
+    }
+
+    // Listen to chain events
+    this._attachChainExecutorListeners();
+
+    // Build and execute
+    await this.chainExecutor.build();
+    const result = await this.chainExecutor.execute(context);
+
+    // Update states and metrics
+    for (const [itemId, state] of this.chainExecutor.stepStates) {
+      this.itemStates.set(itemId, state);
+      if (state === 'completed') {
+        this.metrics.completedItems++;
+        this.itemResults.set(itemId, this.chainExecutor.stepResults.get(itemId));
+      } else if (state === 'failed') {
+        this.metrics.failedItems++;
+        this.itemErrors.set(itemId, this.chainExecutor.stepErrors.get(itemId));
+      } else if (state === 'skipped') {
+        this.metrics.skippedItems++;
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * Execute items using hybrid approach (waves of parallel execution)
+   * @private
+   */
+  async _executeHybrid(context) {
+    this.emit('strategy:hybrid', {
+      totalWaves: this.executionPlan.waves.length,
+      timestamp: Date.now(),
+    });
+
+    // Initialize worker pool
+    this.workerPool = new WorkerPool({
+      maxConcurrency: this.config.maxConcurrency,
+      mode: 'fixed',
+    });
+
+    await this.workerPool.initialize();
+    await this.workerPool.start();
+
+    // Listen to worker pool events
+    this._attachWorkerPoolListeners();
+
+    const sharedContext = { ...context };
+
+    try {
+      // Execute waves sequentially
+      for (let waveIndex = 0; waveIndex < this.executionPlan.waves.length; waveIndex++) {
+        this.currentWave = waveIndex;
+        const wave = this.executionPlan.waves[waveIndex];
+
+        this.emit('wave:started', {
+          waveIndex,
+          totalWaves: this.executionPlan.waves.length,
+          itemsInWave: wave.length,
+          items: wave,
+          timestamp: Date.now(),
+        });
+
+        // Execute all items in this wave in parallel
+        const tasks = wave.map(itemId => {
+          const item = this.workItems.get(itemId);
+          this.itemStates.set(itemId, ItemState.READY);
+
+          return {
+            id: item.id,
+            name: item.name,
+            execute: async () => {
+              this.itemStates.set(item.id, ItemState.EXECUTING);
+              const result = await item.execute(sharedContext);
+
+              // Merge result into shared context if it's an object
+              if (result && typeof result === 'object' && !Array.isArray(result)) {
+                Object.assign(sharedContext, result);
+              }
+
+              return result;
+            },
+            maxRetries: this.config.enableFailureRecovery ? 3 : 0,
+            retryCount: 0,
+          };
+        });
+
+        // Submit wave and wait for completion
+        const waveResults = await Promise.allSettled(
+          tasks.map(task => this.workerPool.submit(task))
+        );
+
+        // Process wave results
+        for (let i = 0; i < waveResults.length; i++) {
+          const itemId = wave[i];
+          const result = waveResults[i];
+
+          if (result.status === 'fulfilled') {
+            this.itemResults.set(itemId, result.value);
+            this.itemStates.set(itemId, ItemState.COMPLETED);
+            this.metrics.completedItems++;
+          } else {
+            this.itemErrors.set(itemId, result.reason);
+            this.itemStates.set(itemId, ItemState.FAILED);
+            this.metrics.failedItems++;
+
+            // Check if we should continue or fail
+            if (!this.config.continueOnFailure) {
+              throw result.reason;
+            }
+          }
+        }
+
+        this.metrics.completedWaves++;
+
+        this.emit('wave:completed', {
+          waveIndex,
+          totalWaves: this.executionPlan.waves.length,
+          completedItems: wave.filter(id => this.itemStates.get(id) === ItemState.COMPLETED).length,
+          failedItems: wave.filter(id => this.itemStates.get(id) === ItemState.FAILED).length,
+          timestamp: Date.now(),
+        });
+      }
+
+      return { context: sharedContext };
+    } finally {
+      await this.workerPool.terminate();
+    }
+  }
+
+  /**
+   * Attach worker pool event listeners
+   * @private
+   */
+  _attachWorkerPoolListeners() {
+    if (!this.workerPool) return;
+
+    this.workerPool.on('task:queued', data => {
+      this.emit('item:queued', data);
+    });
+
+    this.workerPool.on('task:completed', data => {
+      this.emit('item:completed', data);
+    });
+
+    this.workerPool.on('task:failed', data => {
+      this.emit('item:failed', data);
+    });
+
+    this.workerPool.on('task:retry', data => {
+      this.emit('item:retry', data);
+    });
+  }
+
+  /**
+   * Attach chain executor event listeners
+   * @private
+   */
+  _attachChainExecutorListeners() {
+    if (!this.chainExecutor) return;
+
+    this.chainExecutor.on('step:started', data => {
+      this.emit('item:started', data);
+    });
+
+    this.chainExecutor.on('step:completed', data => {
+      this.emit('item:completed', data);
+    });
+
+    this.chainExecutor.on('step:failed', data => {
+      this.emit('item:failed', data);
+    });
+
+    this.chainExecutor.on('step:skipped', data => {
+      this.emit('item:skipped', data);
+    });
+  }
+
+  /**
+   * Handle execution failure
+   * @private
+   */
+  async _handleExecutionFailure(error, context) {
+    this._setState(CoordinatorState.FAILED);
+    this.endTime = Date.now();
+
+    const failureResult = {
+      success: false,
+      error: error.message,
+      strategy: this.strategy,
+      totalItems: this.metrics.totalItems,
+      completedItems: this.metrics.completedItems,
+      failedItems: this.metrics.failedItems,
+      skippedItems: this.metrics.skippedItems,
+      completedWaves: this.metrics.completedWaves,
+      totalWaves: this.metrics.totalWaves,
+      duration: this.endTime - this.startTime,
+      context,
+      results: Object.fromEntries(this.itemResults),
+      errors: Object.fromEntries(this.itemErrors),
+    };
+
+    this.emit('execution:failed', failureResult);
+
+    // Cleanup
+    if (this.workerPool) {
+      await this.workerPool.terminate().catch(() => {});
+    }
+
+    return failureResult;
+  }
+
+  /**
+   * Pause execution
+   */
+  async pause() {
+    if (this.state !== CoordinatorState.EXECUTING) {
+      throw new Error(`Cannot pause in state: ${this.state}`);
+    }
+
+    this._setState(CoordinatorState.PAUSED);
+
+    if (this.workerPool) {
+      await this.workerPool.pause();
+    }
+
+    if (this.chainExecutor) {
+      await this.chainExecutor.pause();
+    }
+
+    this.emit('paused', { timestamp: Date.now() });
+  }
+
+  /**
+   * Resume execution
+   */
+  async resume() {
+    if (this.state !== CoordinatorState.PAUSED) {
+      throw new Error(`Cannot resume in state: ${this.state}`);
+    }
+
+    this._setState(CoordinatorState.EXECUTING);
+
+    if (this.workerPool) {
+      await this.workerPool.resume();
+    }
+
+    if (this.chainExecutor) {
+      await this.chainExecutor.resume();
+    }
+
+    this.emit('resumed', { timestamp: Date.now() });
+  }
+
+  /**
+   * Cancel execution
+   */
+  async cancel() {
+    if (this.state !== CoordinatorState.EXECUTING && this.state !== CoordinatorState.PAUSED) {
+      throw new Error(`Cannot cancel in state: ${this.state}`);
+    }
+
+    this._setState(CoordinatorState.CANCELLED);
+    this.endTime = Date.now();
+
+    // Terminate worker pool
+    if (this.workerPool) {
+      await this.workerPool.terminate();
+    }
+
+    // Cancel chain executor
+    if (this.chainExecutor) {
+      await this.chainExecutor.cancel();
+    }
+
+    this.emit('cancelled', {
+      completedItems: this.metrics.completedItems,
+      totalItems: this.metrics.totalItems,
+      timestamp: Date.now(),
+    });
+  }
+
+  /**
+   * Get coordinator status
+   * @returns {Object} Status object
+   */
+  getStatus() {
+    const progress =
+      this.metrics.totalItems > 0 ? (this.metrics.completedItems / this.metrics.totalItems) * 100 : 0;
+
+    return {
+      state: this.state,
+      strategy: this.strategy,
+      totalItems: this.metrics.totalItems,
+      completedItems: this.metrics.completedItems,
+      failedItems: this.metrics.failedItems,
+      skippedItems: this.metrics.skippedItems,
+      totalWaves: this.metrics.totalWaves,
+      completedWaves: this.metrics.completedWaves,
+      currentWave: this.currentWave,
+      progress,
+      duration: this.endTime
+        ? this.endTime - this.startTime
+        : this.startTime
+          ? Date.now() - this.startTime
+          : 0,
+    };
+  }
+
+  /**
+   * Get detailed execution report
+   * @returns {string} Formatted report
+   */
+  getReport() {
+    const lines = [];
+
+    lines.push('=== Hybrid Execution Coordinator Report ===');
+    lines.push('');
+    lines.push(`State: ${this.state}`);
+    lines.push(`Strategy: ${this.strategy}`);
+    lines.push('');
+
+    if (this.executionPlan) {
+      lines.push('Execution Plan:');
+      lines.push(`  Total Waves: ${this.executionPlan.waves.length}`);
+      lines.push(`  Max Concurrency: ${this.executionPlan.metrics.maxConcurrency}`);
+      lines.push(`  Critical Path Length: ${this.executionPlan.metrics.criticalPathLength}`);
+      lines.push(`  Parallelism Factor: ${this.executionPlan.metrics.parallelismFactor}x`);
+      lines.push('');
+    }
+
+    lines.push('Execution Metrics:');
+    lines.push(`  Total Items: ${this.metrics.totalItems}`);
+    lines.push(`  Completed: ${this.metrics.completedItems}`);
+    lines.push(`  Failed: ${this.metrics.failedItems}`);
+    lines.push(`  Skipped: ${this.metrics.skippedItems}`);
+    lines.push(`  Progress: ${this.getStatus().progress.toFixed(1)}%`);
+    lines.push('');
+
+    if (this.startTime) {
+      const duration = (this.endTime || Date.now()) - this.startTime;
+      lines.push(`Duration: ${(duration / 1000).toFixed(2)}s`);
+    }
+
+    return lines.join('\n');
+  }
+
+  /**
+   * Set coordinator state
+   * @private
+   */
+  _setState(state) {
+    const oldState = this.state;
+    this.state = state;
+    this.emit('stateChange', {
+      oldState,
+      newState: state,
+      timestamp: Date.now(),
+    });
+  }
+}
+
+// Export class and constants
+module.exports = HybridCoordinator;
+module.exports.CoordinatorState = CoordinatorState;
+module.exports.ExecutionStrategy = ExecutionStrategy;
+module.exports.ItemState = ItemState;

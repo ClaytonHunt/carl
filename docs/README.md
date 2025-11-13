@@ -46,6 +46,16 @@ This directory contains cached local versions of external documentation for AI R
 - **Local Copy**: [agentic-orchestration-patterns.md](./indydevdan/agentic-orchestration-patterns.md)
 - **Description**: Comprehensive guide to orchestrator patterns, multi-agent coordination, HOP/LOP architecture, async execution strategies, and tactical agentic coding principles from IndyDevDan's work on autonomous agent systems.
 
+## CARL Architecture & Implementation
+
+### Planning Orchestrator
+- **Local Copy**: [PLANNING-ORCHESTRATOR.md](./PLANNING-ORCHESTRATOR.md)
+- **Description**: Complete architecture and implementation details for CARL's Planning Orchestrator. Covers design philosophy (agent-first approach), component architecture, workflow, testing (198 passing tests), IndyDevDan alignment, and API reference.
+
+### Workflow State Management
+- **Local Copy**: [WORKFLOW-STATE-DECISION.md](./WORKFLOW-STATE-DECISION.md)
+- **Description**: Architecture decision record for workflow session state management. Explains rationale, implementation location, state file structure, usage patterns, when to use, and IndyDevDan alignment (session-based correlation, event-sourced coordination).
+
 ## CARL Templates
 
 ### Feature Templates

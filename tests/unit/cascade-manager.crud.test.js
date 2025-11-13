@@ -210,7 +210,7 @@ describe('CascadeManager - CRUD Operations', () => {
 
       expect(registry.work_items).toHaveProperty(project.id);
       expect(registry.work_items[project.id].title).toBe('Project');
-      expect(registry.work_items[project.id].type).toBe('P');
+      expect(registry.work_items[project.id].type).toBe('Project'); // Registry stores full type name
       expect(registry.work_items[project.id].status).toBe('planned');
     });
 

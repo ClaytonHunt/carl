@@ -1,101 +1,80 @@
 ---
 description: Plan and break down work items using structured Cascade format
-allowed-tools: Task, Read, Write, Grep, Glob
+allowed-tools: Task, Bash
 argument-hint: [work-item-id|description]
 ---
 
-# CARL Planning Command
+# Plan Work Item
 
-Orchestrates the planning and breakdown of work items into structured Cascade format.
+You are delegating to the Planning Orchestrator agent. Initialize a workflow session, then pass the user's input to the agent.
 
-## Purpose
+## Input
 
-This command acts as the **Higher Order Prompt (HOP)** that delegates planning work to the specialized `planning-orchestrator` agent. It follows IndyDevDan's orchestration patterns for clean separation of concerns.
+The user provided: `$ARGUMENTS`
 
-## Variables
+## Your Task
 
-- `${WORK_ITEM_INPUT}` - Either a work item ID (e.g., `E1234`) or a description for a new work item
+### 1. Initialize Session
 
-## Workflow
+First, create a workflow session to track state:
 
-### 1. Context Gathering
-Analyze the input to determine:
-- Is this an existing work item ID or a new item description?
-- What level is this work item? (Project/Epic/Feature/Story/Task)
-- What context is needed from the Cascade system?
+```javascript
+const SessionState = require('./plugins/carl/lib/workflow/session-state');
 
-### 2. Delegation Strategy
-Delegate to the `planning-orchestrator` agent via the Task tool with:
-- The work item ID or description
-- Current Cascade registry state
-- Any relevant parent/child work item context
-- Instructions to use IndyDevDan's async-first patterns
+const session = new SessionState();
+await session.initialize();
 
-### 3. Agent Invocation
-
-Use the Task tool to invoke the planning orchestrator agent:
-
-```
-Task(
-  subagent_type: "planning-orchestrator",
-  description: "Plan work item: ${WORK_ITEM_INPUT}",
-  prompt: "Plan the following work item using Cascade format:
-
-  Input: ${WORK_ITEM_INPUT}
-
-  Please:
-  1. Determine if this is an existing item or new item
-  2. Load context from .cascade/ if existing
-  3. Break down into appropriate sub-items following the hierarchy:
-     P (Project) → E (Epic) → F (Feature) → S (Story)/B (Bug) → PH (Phase) → T (Task)
-  4. Estimate complexity and resources for each item
-  5. Determine optimal execution strategy (parallel vs sequential)
-  6. Generate structured Cascade format documents
-  7. Update .cascade/work-item-registry.json with new IDs
-
-  Follow IndyDevDan's planning principles:
-  - 'Success is Planned' - create detailed, actionable plans
-  - Break into atomic tasks with clear boundaries
-  - Identify dependencies explicitly
-  - Estimate resources realistically
-  "
-)
+// Log workflow start
+await session.logEvent('workflow_started', {
+  command: 'carl:plan',
+  input: '$ARGUMENTS'
+});
 ```
 
-### 4. Result Handling
+### 2. Invoke Planning Orchestrator
 
-The planning-orchestrator agent will:
-- Create/update Cascade work item files in `.cascade/`
-- Update the work item registry
-- Return a summary of created/updated items
+Pass the input and session ID to the agent:
 
-Display the results to the user with:
-- List of created/updated work items
-- File locations
-- Next steps (e.g., "Run `/carl:work E1234` to implement this epic")
+```javascript
+await Task({
+  subagent_type: "carl:planning-orchestrator",
+  description: `Plan work item: ${session.sessionId.substring(0, 8)}...`,
+  prompt: `You are the Planning Orchestrator. Plan the following work item:
 
-## Example Usage
+Input: $ARGUMENTS
 
-```bash
-# Plan a new epic
-/carl:plan "Implement user authentication system"
+Session ID: ${session.sessionId}
 
-# Break down an existing epic
-/carl:plan E1234
+To access session state:
+  const SessionState = require('./plugins/carl/lib/workflow/session-state');
+  const session = await SessionState.resume('${session.sessionId}');
 
-# Plan a specific feature
-/carl:plan F5678
+Follow your instructions to:
+1. Resume the session and initialize your state
+2. Determine if this is an existing work item ID or new description
+3. Load context using planning-helpers
+4. Analyze and break down the work (YOU do this with reasoning)
+5. Create work items using planning-helpers
+6. Update session state as you progress
+7. Present results to the user
+
+Remember:
+- Helpers handle data, you handle reasoning
+- Update session.setState() as you work
+- Log events with session.logEvent()
+
+Go!`
+});
 ```
 
-## Notes
+### 3. Log Completion
 
-- This command is thin by design - all logic lives in the `planning-orchestrator` agent
-- The agent has its own context window for efficient operation
-- Multiple planning operations can run concurrently if needed
-- The Cascade format is the local source of truth; external adapters (ADO, GitHub) are extensions
+After the agent completes:
 
-## Related
+```javascript
+await session.logEvent('workflow_completed', {
+  command: 'carl:plan'
+});
+```
 
-- Agent: `planning-orchestrator` - Handles the actual planning logic
-- Command: `/carl:work` - Executes planned work items
-- Directory: `.cascade/` - Where all work items are stored
+That's it. The agent will handle the planning and track state in the session.
