@@ -115,7 +115,7 @@ await fs.writeFile(
 
 ## Integration with Planning Orchestrator
 
-### Command Level (carl-plan.md)
+### Command Level (plan.md)
 
 ```markdown
 Initialize session and pass to agent:

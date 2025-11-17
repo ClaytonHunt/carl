@@ -196,12 +196,61 @@ TODO: Implement result aggregation
 
 ### Step 8: Status Updates
 
-TODO: Implement Cascade status updates
-- Update work item markdown frontmatter (status, updated fields)
-- Update local `state.json` (status, updated fields)
-- Update `.cascade/work-item-registry.json` if needed
-- **Do NOT update parent states** - Cascade VSCode extension handles this automatically
-- If external adapters enabled: sync to ADO, GitHub, etc. via adapter interface
+After completing work items, update both markdown frontmatter and state.json files:
+
+**Implementation Steps**:
+1. Import and initialize StateSync module from `plugins/carl/lib/cascade/state-sync.js`
+2. For each completed work item:
+   a. Update markdown frontmatter using `CascadeManager.updateWorkItem(itemId, { status, updated })`
+   b. Update local state.json using `StateSync.writeCascadeState(itemId, { status, progress })`
+   c. Calculate progress metrics (completed count, percentage, child statuses)
+   d. Use `StateSync.propagateToParent(itemId)` to cascade state changes upward
+3. **Do NOT manually update parent states** - StateSync.propagateToParent() handles this automatically
+4. Update `.cascade/work-item-registry.json` only if paths or IDs change (rare)
+5. If external adapters enabled: sync to ADO, GitHub, etc. via adapter interface
+
+**Example Usage**:
+```javascript
+const StateSync = require('./plugins/carl/lib/cascade/state-sync');
+const CascadeManager = require('./plugins/carl/lib/cascade/cascade-manager');
+
+const cascadeManager = new CascadeManager('.cascade');
+const stateSync = new StateSync(cascadeManager);
+
+// After completing a work item
+await cascadeManager.updateWorkItem('T0125', {
+  status: 'completed',
+  updated: new Date().toISOString()
+});
+
+// Update state.json with progress
+await stateSync.writeCascadeState('S0106', {
+  status: 'in-progress',
+  progress: {
+    total_items: 3,
+    completed: 1,
+    in_progress: 2,
+    planned: 0,
+    blocked: 0,
+    percentage: 33
+  }
+});
+
+// Propagate state changes to parent automatically
+await stateSync.propagateToParent('S0106');
+```
+
+**State Synchronization Notes**:
+- StateSync.writeCascadeState() performs atomic writes with file locking
+- Progress calculation is automatic in propagateToParent()
+- Parent status determination follows these rules:
+  - All children completed → parent completed
+  - Any child in-progress → parent in-progress
+  - Some completed, none in-progress → parent in-progress
+  - Any blocked, none active → parent blocked
+  - All planned → parent planned
+- Tasks (T####) don't have state.json files (leaf nodes)
+- StateSync.writeCascadeStateWithLock() provides additional concurrency protection if needed
 
 ### Step 9: Result Reporting
 

@@ -76,7 +76,7 @@ The agent uses LLM reasoning for:
 - ❌ Generating creative, meaningful titles/descriptions
 - ❌ Determining appropriate hierarchy levels
 
-### Command: carl-plan.md
+### Command: plan.md
 
 **Higher Order Prompt (HOP) that:**
 - Receives user input
@@ -216,7 +216,7 @@ npm test -- planning-helpers.test.js
 ### Core Implementation
 - **Helper module**: `plugins/carl/lib/planning/planning-helpers.js`
 - **Agent instructions**: `plugins/carl/agents/planning-orchestrator.md`
-- **Command**: `plugins/carl/commands/carl-plan.md`
+- **Command**: `plugins/carl/commands/plan.md`
 
 ### Documentation
 - **Architecture**: `plugins/carl/lib/planning/ARCHITECTURE.md`
